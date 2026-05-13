@@ -85,7 +85,7 @@ async function readDirTree(rootPath) {
     } catch (e) {
         throw new Error(`Path not found: ${absRoot}`);
     }
-
+    
     return walk(absRoot);
 }
 
