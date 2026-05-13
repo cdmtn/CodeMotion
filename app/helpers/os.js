@@ -37,8 +37,10 @@ async function readDirTree(rootPath) {
 
     async function walk(dir) {
         let entries = [];
+
         try {
             const dirents = await fsPromise.readdir(dir, { withFileTypes: true });
+
             for (const d of dirents) {
                 const full = path.join(dir, d.name);
                 const item = { name: d.name, path: full };
@@ -52,6 +54,16 @@ async function readDirTree(rootPath) {
                     entries.push({ ...item, type: 'file' });
                 }
             }
+
+            entries.sort((a, b) => {
+                if (a.type === b.type) {
+                    return a.name.localeCompare(b.name);
+                }
+                if (a.type === 'dir') return -1;
+                if (b.type === 'dir') return 1;
+                return 0;
+            });
+
         } catch (err) {
             entries.push({
                 name: path.basename(dir),
@@ -60,12 +72,13 @@ async function readDirTree(rootPath) {
                 error: String(err),
             });
         }
+
         return entries;
     }
 
     try {
         const st = await fsPromise.lstat(absRoot);
-        console.log(`[${absRoot}]`)
+
         if (st.isFile()) {
             return [{ name: path.basename(absRoot), path: absRoot, type: 'file' }];
         }
