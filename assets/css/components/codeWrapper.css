@@ -100,6 +100,14 @@ body.bottom-window-resizing {
     cursor: ns-resize;
     user-select: none;
 }
+.bottom-window__resize-preview {
+    position: fixed;
+    height: 2px;
+    border-top: 2px solid rgba(255, 255, 255, .9);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, .45);
+    pointer-events: none;
+    z-index: 9999;
+}
 .code-wrapper .bottom-window .bottom-window__content p,
 .code-wrapper .bottom-window .bottom-window__content h1,
 .code-wrapper .bottom-window .bottom-window__content h2,

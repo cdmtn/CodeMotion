@@ -1,5 +1,6 @@
 export class BottomWindow {
     static windows = new Map()
+    static settings = { app: { reduceMotion: false } }
 
     constructor(id, { title } = {}) {
         if (BottomWindow.windows.has(id)) {
@@ -15,11 +16,23 @@ export class BottomWindow {
         this.resizeState = null
         this.resizeFrame = null
         this.nextResizeHeight = null
+        this.resizePreview = null
         this.handleResizeMove = this.#handleResizeMove.bind(this)
         this.handleResizeEnd = this.#handleResizeEnd.bind(this)
 
+        this.#loadSettings()
         this.#init()
         BottomWindow.windows.set(id, this)
+    }
+
+    async #loadSettings() {
+        if (!window.electron?.readSettings) return
+
+        try {
+            BottomWindow.settings = await window.electron.readSettings()
+        } catch (error) {
+            console.warn("[BottomWindow] Could not read settings", error)
+        }
     }
 
     #init() {
@@ -59,10 +72,12 @@ export class BottomWindow {
         const wrapper = this.win.closest(".code-wrapper")
         const wrapperRect = wrapper?.getBoundingClientRect()
         const winRect = this.win.getBoundingClientRect()
+        const reduceMotion = BottomWindow.settings?.app?.reduceMotion === true
 
         this.resizeState = {
             bottom: winRect.bottom,
-            maxHeight: Math.max(180, (wrapperRect?.height || window.innerHeight) - 120)
+            maxHeight: Math.max(180, (wrapperRect?.height || window.innerHeight) - 120),
+            reduceMotion
         }
 
         document.body.classList.add("bottom-window-resizing")
@@ -71,6 +86,10 @@ export class BottomWindow {
         this.win.style.maxHeight = "none"
 
         this.win.dispatchEvent(new CustomEvent("bottom-window-resize-start"))
+
+        if (reduceMotion) {
+            this.#showResizePreview(winRect)
+        }
 
         document.addEventListener("pointermove", this.handleResizeMove)
         document.addEventListener("pointerup", this.handleResizeEnd, { once: true })
@@ -93,22 +112,30 @@ export class BottomWindow {
         this.resizeFrame = requestAnimationFrame(() => {
             this.resizeFrame = null
             if (this.nextResizeHeight == null) return
-            this.win.style.height = `${this.nextResizeHeight}px`
+
+            if (this.resizeState?.reduceMotion) {
+                this.#moveResizePreview(this.resizeState.bottom - this.nextResizeHeight)
+                return
+            }
+
+            this.#setHeight(this.nextResizeHeight)
         })
     }
 
     #handleResizeEnd() {
         const wasResizing = Boolean(this.resizeState)
+        const applyHeight = this.nextResizeHeight
 
         if (this.resizeFrame) {
             cancelAnimationFrame(this.resizeFrame)
             this.resizeFrame = null
         }
 
-        if (this.nextResizeHeight != null && this.win) {
-            this.win.style.height = `${this.nextResizeHeight}px`
+        if (applyHeight != null && this.win) {
+            this.#setHeight(applyHeight)
         }
 
+        this.#hideResizePreview()
         this.resizeState = null
         this.nextResizeHeight = null
         document.body.classList.remove("bottom-window-resizing")
@@ -122,6 +149,34 @@ export class BottomWindow {
         if (wasResizing) {
             this.win?.dispatchEvent(new CustomEvent("bottom-window-resize-end"))
         }
+    }
+
+    #setHeight(height) {
+        this.win.style.height = `${height}px`
+    }
+
+    #showResizePreview(winRect) {
+        this.#hideResizePreview()
+
+        const preview = document.createElement("div")
+        preview.className = "bottom-window__resize-preview"
+        preview.style.left = `${winRect.left}px`
+        preview.style.top = `${winRect.top}px`
+        preview.style.width = `${winRect.width}px`
+
+        document.body.appendChild(preview)
+        this.resizePreview = preview
+    }
+
+    #moveResizePreview(top) {
+        if (!this.resizePreview) return
+
+        this.resizePreview.style.top = `${top}px`
+    }
+
+    #hideResizePreview() {
+        this.resizePreview?.remove()
+        this.resizePreview = null
     }
 
     removeClose() {

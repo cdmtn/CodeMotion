@@ -6,6 +6,7 @@ import { getDirname, readSettings } from "../../assets/js/global.js"
 import { capitilize } from "./lib.js"
 
 import { bus } from "./bus.js"
+import { BottomWindow } from "./handlers/BottomWindowHandler.js"
 
 const themeSelect = new Options("themeSelect")
 themeSelect.add("default", "Default").default()
@@ -60,6 +61,12 @@ export async function handleSettings(settingsObject) {
                                 title: "Splash window",
                                 description: "Should the initial window be hidden at startup?",
                                 id: "setting_splash"
+                            },
+                            {
+                                type: "switch",
+                                title: "Reduce motion",
+                                description: "Shows a resize outline while dragging panels, then resizes after release",
+                                id: "setting_reduceMotion"
                             },
                             {
                                 type: "switch",
@@ -142,6 +149,7 @@ export async function handleSettings(settingsObject) {
             boldFont: document.querySelector("#setting_boldFont"),
             devMode: document.querySelector("#setting_devMode"),
             splash: document.querySelector("#setting_splash"),
+            reduceMotion: document.querySelector("#setting_reduceMotion"),
         }
     )
 
@@ -210,6 +218,11 @@ export async function handleSettings(settingsObject) {
         Setting.splash(t.checked)
     })
 
+    settingsSelectors.reduceMotion.addEventListener("click", (e) => {
+        let t = e.target
+        Setting.reduceMotion(t.checked)
+    })
+
     // handler for options button theme cause it need to be updated. Another one in custom theme handler
     optionsThemeButtonHandler(themeSelect)
 
@@ -253,6 +266,7 @@ export async function handleSettings(settingsObject) {
     if(settingsObject.app) {
         if("devMode" in settingsObject.app) Setting.devMode(settingsObject.app.devMode, false)
         if("splashScreen" in settingsObject.app) Setting.splash(settingsObject.app.splashScreen, false)
+        if("reduceMotion" in settingsObject.app) Setting.reduceMotion(settingsObject.app.reduceMotion, false)
     }
 }
 
@@ -350,6 +364,20 @@ export class Setting {
         
         if(set) {
             await window.electron.setSettings({ app: { splashScreen: value }})
+        }
+    }
+    static async reduceMotion(value, set = true) {
+        settingsSelectors.reduceMotion.checked = value
+        BottomWindow.settings = {
+            ...BottomWindow.settings,
+            app: {
+                ...BottomWindow.settings?.app,
+                reduceMotion: value
+            }
+        }
+        
+        if(set) {
+            await window.electron.setSettings({ app: { reduceMotion: value }})
         }
     }
     static async pythonRunnerMethod(value, set = true) {
