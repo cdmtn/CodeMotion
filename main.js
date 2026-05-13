@@ -68,7 +68,7 @@ const {
     readDirTree
 } = require("./app/helpers/os.js");
 
-const { APP_PATH } = require('../Yurba Desktop/app/helpers/paths.js');
+const { APP_PATH } = require('./app/helpers/paths.js');
 const { checkFields } = require('./app/sandbox/tools.js');
 
 console.log(`App started on ${process.arch} system`)
