@@ -1,0 +1,9 @@
+.auth-visibility__change {
+    position: absolute;
+    z-index: 9999;
+    right: -40px;
+    top: 15px;
+    color: var(--text-color);
+    opacity: .2;
+    cursor: pointer;
+}

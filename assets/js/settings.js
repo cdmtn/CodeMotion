@@ -65,7 +65,7 @@ export async function handleSettings(settingsObject) {
                             {
                                 type: "switch",
                                 title: "Reduce motion",
-                                description: "Shows a resize outline while dragging panels, then resizes after release",
+                                description: "Reduces visual effects throughout the app: fewer animations, optimized animations",
                                 id: "setting_reduceMotion"
                             },
                             {

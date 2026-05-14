@@ -2,7 +2,7 @@ import { Setting } from "../settings.js"
 
 export function optionsThemeButtonHandler(themeSelect) {
     themeSelect.on("click", (item) => {
-        let id = item.id
+        const id = item.id;
 
         document.querySelector("#themeSwitchTransition")?.remove()
 

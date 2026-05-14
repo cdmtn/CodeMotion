@@ -5,6 +5,9 @@
 <h1 align="center">CodeMotion IDE<br>
 (Beta test)</h1>
 
+> [!IMPORTANT]
+> This project is in active early development. Architecture and APIs are unstable.
+> 
 CodeMotion is a web-focused, advanced 
 open-source code editor (IDE) 
 with native tools for web developers

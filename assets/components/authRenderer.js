@@ -14,6 +14,40 @@ let loadingHTML = `
 ></l-line-spinner>
 `
 
+// Add a visibility toggle to password inputs
+
+inputs.forEach(i => {
+    if (i.type === "password") {
+        function handleEye({ isVisible, eyeIcon }) {
+            if (isVisible) {
+                i.type = "text"
+                eyeIcon.textContent = "visibility_off"
+            } else {
+                i.type = "password"
+                eyeIcon.textContent = "visibility"
+            }
+        }
+
+        const wrapper = document.createElement("div")
+        let isVisible = false
+
+        const eyeIcon = document.createElement("span")
+        eyeIcon.classList.add("material-symbols-rounded", "auth-visibility__change")
+
+        handleEye({ isVisible, eyeIcon })
+
+        eyeIcon.addEventListener("click", () => {
+            isVisible = !isVisible
+            handleEye({ isVisible, eyeIcon })
+        })
+
+        wrapper.appendChild(eyeIcon)
+        i.parentElement.appendChild(wrapper)
+    }
+})
+
+// 
+
 export function showLoading() {
     submitBtn.innerHTML = loadingHTML
     

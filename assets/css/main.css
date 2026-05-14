@@ -1,6 +1,7 @@
 @import url('modals.css');
 @import url("./window/topWindowList.css");
 @import url("components/codeWrapper.css");
+@import url("auth.css");
 
 :root {
     --body-color: #141414;
@@ -217,8 +218,6 @@ p, a, input, textarea, button {
 
 .form-element {
     width: 100%;
-    border-radius: 10px;
-    overflow: hidden;
     position: relative;
     transition: .4s;
 }
@@ -239,11 +238,7 @@ input {
     color: var(--text-color);
     position: relative;
     outline: none;
-}
-
-input:focus {
-    border-color: #0070c9;
-    box-shadow: 0 0 0 3px rgba(0, 112, 201, 0.25);
+    border-radius: 10px;
 }
 
 input.focused~.form-label,
@@ -613,7 +608,6 @@ body.explorer-resizing {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    height: 100%;
     overflow: scroll;
     transition: .2s;
     padding-top: 55px;
