@@ -470,7 +470,11 @@ export async function openTab(path, content, extension, name, pathContext, isNew
                 editorValue: editor.getValue(),
                 editorMode: editor.session.$modeId,
                 editorLanguage: language.mode,
-                editorLanguageExtension: extension
+                editorLanguageExtension: extension,
+                cursor: {
+                    line: editor.getCursorPosition().row + 1,
+                    column: editor.getCursorPosition().column + 1
+                }
             }
         )
 

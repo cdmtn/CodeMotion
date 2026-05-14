@@ -23,6 +23,13 @@
     font-size: 15px;
     font-weight: var(--bold-font-weight);
     max-width: 90%;
+    color: var(--text-color);
+}
+.modal-extension__item .modal-extension__item-subtitle {
+    font-size: 12px;
+    font-weight: var(--slim-font-weight);
+    opacity: .5;
+    max-width: 90%;
 }
 .modal-extension__item .modal-extension__item-desc {
     font-size: 14px;

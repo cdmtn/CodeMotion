@@ -32,6 +32,10 @@ let mainSender = null;
 
 const rendererBus = require("../../assets/js/bus.js")
 
+function parsePackageJson(raw) {
+    return JSON.parse(raw.replace(/^\uFEFF/, ""))
+}
+
 bus.on("debugger-ready", (sender) => {
     debuggerSender = sender;
     console.log("ExtensionManager: debugger connected");
@@ -88,7 +92,7 @@ ipcMain.handle("request-extension", async (event, name) => {
 
         let json
         try {
-            json = JSON.parse(raw)
+            json = parsePackageJson(raw)
         } catch {
             return fail("Invalid JSON in package.json")
         }
@@ -142,7 +146,7 @@ ipcMain.handle("load-module", async (event, name, version) => {
 
         let json
         try {
-            json = JSON.parse(raw)
+            json = parsePackageJson(raw)
         } catch {
             return fail("Invalid JSON in package.json")
         }
@@ -181,7 +185,7 @@ ipcMain.handle("run-extension", async (event, code, permissions, meta) => {
                     debuggerSender = debuggerSender ?? mainSender
 
                     APP[appPermissionName] = (...args) => {
-                        callback(
+                        return callback(
                             {
                                 debuggerSender: debuggerSender,
                                 mainSender: mainSender,
@@ -222,21 +226,26 @@ ipcMain.handle("run-extension", async (event, code, permissions, meta) => {
 
         return { success: true };
     } catch (err) {
-        const parsedError = ErrorStackParser.parse(err)[0]
+        const stack = err?.stack || String(err)
+        const evalLocation = stack.match(/evalmachine\.<anonymous>:(\d+):(\d+)/)
 
-        let stack = err.stack
-        const lineNumber = stack.split("evalmachine.<anonymous>:")[1].split("\n")[0]
+        if (!evalLocation) {
+            return {
+                success: false,
+                error: `\n${err?.message || stack}`
+            };
+        }
 
-        stack = stack.replaceAll(`evalmachine.<anonymous>:${lineNumber}`, "")
-        stack = stack.split("at")[0]
-        stack = stack.trim()
+        const lineNumber = Number(evalLocation[1])
+        const columnNumber = Number(evalLocation[2])
+        let message = stack.replaceAll(evalLocation[0], "").split("at")[0].trim()
 
-        stack += `\n\tat line: ${lineNumber - 3}`
-        stack += `\n\tat column: ${parsedError.columnNumber}`
+        message += `\n\tat line: ${lineNumber - 3}`
+        message += `\n\tat column: ${columnNumber}`
 
         return { 
             success: false,
-            error: `\n${stack}`
+            error: `\n${message}`
         };
     }
 });

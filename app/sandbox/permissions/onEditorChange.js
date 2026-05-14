@@ -15,6 +15,10 @@ function callback(data) {
                         name: data.editorLanguage,
                         extension: data.editorLanguageExtension
                     },
+                    cursor: data.cursor || {
+                        line: 1,
+                        column: 1
+                    },
                     hl: {
                         addRule: addRule,
                         removeRule: removeRule

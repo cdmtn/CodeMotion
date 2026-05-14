@@ -59,7 +59,11 @@ export async function initExtensions() {
     for (const name of names) {
         const extensionRequest = await window.electron.requestExtension(name)
 
-        if (!extensionRequest.success) continue
+        if (!extensionRequest.success) {
+            notifyError({ name: name, content: extensionRequest.result })
+            sendDebugError(`(Extension) ${name}: load error. ${extensionRequest.result}`)
+            continue
+        }
 
         let extensionFinalContent = ""
         let allPermissions = new Set()
@@ -164,6 +168,20 @@ export async function initExtensions() {
             isDev = settings.app.devMode
         }
 
+        // add extension to the list
+
+        installedExtensionModalData.push(
+            createInstalledExtensionsModalTemplate({
+                title: displayName,
+                subtitle: `${name} (${version})`,
+                description: description,
+                image: icon ? `${normalizePath(extensionPath)}/${icon}` : name,
+                dependencies: dependencies,
+                permissions: allPermissions,
+                path: extensionPath
+            })
+        )
+
         const runResult = await window.electron.runExtension(
             extensionFinalContent,
             permissionsArray,
@@ -179,19 +197,6 @@ export async function initExtensions() {
         sendDebugMarking()
 
         sendDebugWarn(`Currently, the "${name}" extension and all modules connected to it use special permissions: <b>${permissionsArray.join(", ")}</b>`)
-
-        // add extension to the list
-
-        installedExtensionModalData.push(
-            createInstalledExtensionsModalTemplate({
-                name: `${name} (${version})`,
-                description: description,
-                image: icon ? `${normalizePath(extensionPath)}/${icon}` : name,
-                dependencies: dependencies,
-                permissions: allPermissions,
-                path: extensionPath
-            })
-        )
 
         if (!runResult.success) {
             sendDebugError(`(Extension) ${name}: runtime error: ${runResult.error}`)
@@ -216,7 +221,7 @@ export async function initExtensions() {
     installedExtensionsModal.bind(document.querySelector("#extensionsAll"))
 }
 
-function createInstalledExtensionsModalTemplate({ name, description, image, dependencies, permissions, path }) {
+function createInstalledExtensionsModalTemplate({ title, subtitle, description, image, dependencies, permissions, path }) {
     const tags = []
 
     Object.keys(dependencies).forEach(d => {
@@ -237,7 +242,8 @@ function createInstalledExtensionsModalTemplate({ name, description, image, depe
 
     const template = {
         type: "extensionItem",
-        title: name,
+        title: title,
+        subtitle: subtitle,
         description: description,
         image: image,
         tags: tags,

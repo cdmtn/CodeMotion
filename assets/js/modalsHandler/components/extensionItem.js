@@ -3,6 +3,7 @@ import { valid } from "../engine.js"
 
 export function renderExtensionItem(properties = {}) {
     const title = properties.title
+    const subtitle = properties.subtitle
     const description = properties.description
     const image = properties.image
     const tags = properties.tags
@@ -36,6 +37,10 @@ export function renderExtensionItem(properties = {}) {
     const contentTitleEl = document.createElement("div")
     contentTitleEl.classList.add("modal-extension__item-title")
     contentTitleEl.textContent = title
+
+    const contentSubtitleEl = document.createElement("div")
+    contentSubtitleEl.classList.add("modal-extension__item-subtitle")
+    contentSubtitleEl.textContent = subtitle
 
     const contentDescEl = document.createElement("div")
     contentDescEl.classList.add("modal-extension__item-desc")
@@ -96,6 +101,7 @@ export function renderExtensionItem(properties = {}) {
     }
 
     contentEl.appendChild(contentTitleEl)
+    if (subtitle) contentEl.appendChild(contentSubtitleEl)
     contentEl.appendChild(contentDescEl)
     contentEl.appendChild(tagWrapper)
     contentEl.appendChild(btnWrapper)

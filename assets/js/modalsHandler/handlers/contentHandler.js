@@ -157,6 +157,7 @@ function contentItemsHandler(element, itemsData) {
         }
         if (type == "extensionItem") {
             const title = valid(item.title) ?? false
+            const subtitle = valid(item.subtitle) ?? false
             const description = valid(item.description) ?? false
             const image = valid(item.image) ?? false
             const tags = validArray(item.tags) ?? []
@@ -165,6 +166,7 @@ function contentItemsHandler(element, itemsData) {
             const extensionItemElement = renderExtensionItem(
                 {
                     title: title,
+                    subtitle: subtitle,
                     description: description,
                     image: image,
                     tags: tags,
