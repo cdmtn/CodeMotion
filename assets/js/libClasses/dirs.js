@@ -8,7 +8,15 @@ export class _Dirs {
             icon: "js",
             iconExt: "svg"
         },
+        javascript: {
+            icon: "js",
+            iconExt: "svg"
+        },
         fonts: {
+            icon: "fonts",
+            iconExt: "svg"
+        },
+        font: {
             icon: "fonts",
             iconExt: "svg"
         },
@@ -20,12 +28,44 @@ export class _Dirs {
             icon: "css",
             iconExt: "svg"
         },
+        styles: {
+            icon: "css",
+            iconExt: "svg"
+        },
+        style: {
+            icon: "css",
+            iconExt: "svg"
+        },
         plugins: {
             icon: "plugins",
             iconExt: "svg"
         },
         extensions: {
             icon: "plugins",
+            iconExt: "svg"
+        },
+        assets: {
+            icon: "assets",
+            iconExt: "svg"
+        },
+        media: {
+            icon: "assets",
+            iconExt: "svg"
+        },
+        static: {
+            icon: "assets",
+            iconExt: "svg"
+        },
+        public: {
+            icon: "assets",
+            iconExt: "svg"
+        },
+        svg: {
+            icon: "svg",
+            iconExt: "svg"
+        },
+        icons: {
+            icon: "svg",
             iconExt: "svg"
         }
     }

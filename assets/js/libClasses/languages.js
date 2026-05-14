@@ -26,6 +26,12 @@ export class _Languages {
             iconExt: "svg",
             mode: "css"
         },
+        scss: {
+            name: "SCSS",
+            icon: "scss",
+            iconExt: "svg",
+            mode: "scss"
+        },
         php: {
             name: "PHP",
             icon: "php",
@@ -97,6 +103,158 @@ export class _Languages {
             icon: "rust",
             iconExt: "svg",
             mode: "rust"
+        },
+        mjs: {
+            name: "JavaScript Module",
+            icon: "js",
+            iconExt: "svg",
+            mode: "javascript"
+        },
+        mts: {
+            name: "TypeScript Module",
+            icon: "ts",
+            iconExt: "svg",
+            mode: "typescript"
+        },
+        tsbuildinfo: {
+            name: "TS Build Info",
+            icon: "json",
+            iconExt: "svg",
+            mode: "json"
+        },
+        example: {
+            name: "Environment Example",
+            icon: "env",
+            iconExt: "svg",
+            mode: "text"
+        },
+        yml: {
+            name: "YAML",
+            icon: "yml",
+            iconExt: "svg",
+            mode: "yaml"
+        },
+        yaml: {
+            name: "YAML",
+            icon: "yml",
+            iconExt: "svg",
+            mode: "yaml"
+        },
+        jsx: {
+            name: "React JavaScript",
+            icon: "react",
+            iconExt: "svg",
+            mode: "javascript"
+        },
+        tsx: {
+            name: "React TypeScript",
+            icon: "react",
+            iconExt: "svg",
+            mode: "typescript"
+        },
+        cjs: {
+            name: "JavaScript (CommonJS)",
+            icon: "js",
+            iconExt: "svg",
+            mode: "javascript"
+        },
+        cts: {
+            name: "TypeScript (CommonJS)",
+            icon: "ts",
+            iconExt: "svg",
+            mode: "typescript"
+        },
+        svg: {
+            name: "SVG",
+            icon: "svg",
+            iconExt: "svg",
+            mode: "xml"
+        },
+        env: {
+            name: "Environment",
+            icon: "env",
+            iconExt: "svg",
+            mode: "text"
+        },
+        ps1: {
+            name: "PowerShell",
+            icon: "ps",
+            iconExt: "svg",
+            mode: "powershell"
+        },
+        // Image formats
+        png: {
+            name: "Image",
+            icon: "image",
+            iconExt: "svg",
+            mode: "text"
+        },
+        jpg: {
+            name: "Image",
+            icon: "image",
+            iconExt: "svg",
+            mode: "text"
+        },
+        jpeg: {
+            name: "Image",
+            icon: "image",
+            iconExt: "svg",
+            mode: "text"
+        },
+        gif: {
+            name: "Image",
+            icon: "image",
+            iconExt: "svg",
+            mode: "text"
+        },
+        webp: {
+            name: "Image",
+            icon: "image",
+            iconExt: "svg",
+            mode: "text"
+        },
+        ico: {
+            name: "Image",
+            icon: "image",
+            iconExt: "svg",
+            mode: "text"
+        },
+        bmp: {
+            name: "Image",
+            icon: "image",
+            iconExt: "svg",
+            mode: "text"
+        },
+        // Font formats
+        ttf: {
+            name: "Font",
+            icon: "font",
+            iconExt: "svg",
+            mode: "text"
+        },
+        woff: {
+            name: "Font",
+            icon: "font",
+            iconExt: "svg",
+            mode: "text"
+        },
+        woff2: {
+            name: "Font",
+            icon: "font",
+            iconExt: "svg",
+            mode: "text"
+        },
+        otf: {
+            name: "Font",
+            icon: "font",
+            iconExt: "svg",
+            mode: "text"
+        },
+        eot: {
+            name: "Font",
+            icon: "font",
+            iconExt: "svg",
+            mode: "text"
         }
     }
 
