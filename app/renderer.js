@@ -4,7 +4,6 @@ import {
     addToHistory, 
     showIndicator, 
     handlePopups,
-    SmoothScroll,
     Loader,
     capitilize,
     handleOnWheelScrollX,
@@ -117,7 +116,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     })
     // 
     
-    document.body.addEventListener("wheel", () => { handleOnWheelScrollX() })
+    handleOnWheelScrollX()
 
     const settings = userSettings
     const appIcon = await window.electron.getAppIcon()
@@ -138,7 +137,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
         window.addEventListener("resize", updatePillPosition);
 
-        new SmoothScroll(document, 120, 12)
     }
 
     function updatePillPosition() {
@@ -313,7 +311,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
 
     if (topbar && mainWrapper) {
-        mainWrapper.style.cssText = `height: calc(100% - ${topbar.offsetHeight + 5}px)`;
+        mainWrapper.style.cssText = `height: calc(100% - ${topbar.offsetHeight}px)`;
     }
 
     new SidebarResizeHandler({

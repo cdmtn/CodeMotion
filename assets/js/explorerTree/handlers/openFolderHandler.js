@@ -75,32 +75,37 @@ export function initializeFolderToggle(container, context = {}) {
         
         if (!dirElement) return;
 
-        if (dirElement.dataset.loaded === "false" && dirElement.dataset.loading !== "true") {
-            dirElement.dataset.loading = "true";
-            const content = dirElement.querySelector(":scope > .dir-content");
+        const isExpanding = !dirElement.classList.contains("expanded");
+        dirElement.classList.toggle("expanded", isExpanding);
 
-            try {
-                const children = await window.electron.readDirTree(dirElement.dataset.path, { maxDepth: 0 });
-                content.innerHTML = await renderNodes(children);
-                dirElement.dataset.loaded = "true";
-
-                bindFileClicks(
-                    {
-                        scopeEl: content,
-                        tabsByPath: tabsByPath,
-                        recentlyClosed: recentlyClosed,
-                        pathContext: context.pathContext,
-                        settings: context.settings
-                    }
-                );
-            } catch (error) {
-                console.error("Error loading folder:", error);
-            } finally {
-                delete dirElement.dataset.loading;
-            }
+        if (!isExpanding || dirElement.dataset.loaded !== "false" || dirElement.dataset.loading === "true") {
+            return;
         }
 
-        dirElement.classList.toggle("expanded");
+        dirElement.dataset.loading = "true";
+        const content = Array.from(dirElement.children).find(child => child.classList.contains("dir-content"));
+
+        try {
+            if (!content) return;
+
+            const children = await window.electron.readDirTree(dirElement.dataset.path, { maxDepth: 0 });
+            content.innerHTML = await renderNodes(children);
+            dirElement.dataset.loaded = "true";
+
+            bindFileClicks(
+                {
+                    scopeEl: content,
+                    tabsByPath: tabsByPath,
+                    recentlyClosed: recentlyClosed,
+                    pathContext: context.pathContext,
+                    settings: context.settings
+                }
+            );
+        } catch (error) {
+            console.error("Error loading folder:", error);
+        } finally {
+            delete dirElement.dataset.loading;
+        }
     };
 
     container._toggleHandler = toggleHandler;

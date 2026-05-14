@@ -52,7 +52,7 @@ function normalizeNode(node) {
     };
 }
 
-export async function buildTreeHtml(rootPath, options = {}) {
+export async function buildTreeHtml(rootPath) {
     const nodes = await window.electron.readDirTree(rootPath, { maxDepth: 0 });
     return renderNodes(nodes);
 }
