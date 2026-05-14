@@ -54,6 +54,24 @@ const globalButtonsInitialized = new Map();
 let isLiveServerActive = false;
 const codeContextMenuPerTab = new Map();
 
+export function updateTabPath(oldPath, newPath, newName) {
+    const rec = tabsByPath.get(oldPath);
+    if (!rec) return;
+
+    tabsByPath.delete(oldPath);
+    tabsByPath.set(newPath, rec);
+    rec.tabEl.setAttribute("data-path", newPath);
+
+    const nameEl = rec.tabEl.querySelector(".file-name");
+    if (nameEl && newName) {
+        nameEl.textContent = newName;
+    }
+
+    if (currentPath === oldPath) {
+        currentPath = newPath;
+    }
+}
+
 export class themeEditors {
     static themes = {
         default: "github_dark",

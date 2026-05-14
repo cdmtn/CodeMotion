@@ -35,6 +35,10 @@ contextBridge.exposeInMainWorld('electron', {
     goOffline: () => ipcRenderer.send("goOffline"),
 
     openInBrowser: (url) => ipcRenderer.invoke("open-in-browser", url),
+    revealInFileExplorer: (path) => ipcRenderer.invoke("reveal-in-file-explorer", path),
+    createFile: (path) => ipcRenderer.invoke("create-file", path),
+    createFolder: (path) => ipcRenderer.invoke("create-folder", path),
+    renamePath: (oldPath, newPath) => ipcRenderer.invoke("rename-path", oldPath, newPath),
     getAppIcons: () => ipcRenderer.invoke("get-app-icons"),
     getAppIcon: () => ipcRenderer.invoke("get-app-icon"),
 

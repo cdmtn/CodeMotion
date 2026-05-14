@@ -2,6 +2,7 @@ import { closeAllTabs } from "../../../components/tabHandler.js";
 import { buildTreeHtml, renderNodes } from "../render.js";
 import { bindFileClicks } from "./bindFileClicksHandler.js";
 import { tabsByPath, recentlyClosed } from "../../../components/tabHandler.js";
+import { initializeExplorerContextMenu } from "./contextMenuHandler.js";
 
 export async function openFolder({ pathRoot, filesPanel, addToHistory, pathContext, settings }) {
     closeAllTabs();
@@ -39,6 +40,7 @@ export async function openFolder({ pathRoot, filesPanel, addToHistory, pathConte
         );
 
         initializeFolderToggle(filesPanel, { pathContext, settings });
+        initializeExplorerContextMenu(filesPanel, { tabsByPath, recentlyClosed, pathContext, settings });
 
     } catch (error) {
         console.error("Error opening folder:", error);
@@ -88,7 +90,7 @@ export function initializeFolderToggle(container, context = {}) {
         try {
             if (!content) return;
 
-            const children = await window.electron.readDirTree(dirElement.dataset.path, { maxDepth: 0 });
+            const children = await window.electron.readDirTree(dirElement.dataset.path, { maxDepth: 0, ignoreRoot: context.pathContext?.rootPath });
             content.innerHTML = await renderNodes(children);
             dirElement.dataset.loaded = "true";
 

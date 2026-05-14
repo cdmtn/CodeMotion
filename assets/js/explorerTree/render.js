@@ -17,18 +17,18 @@ function getDirIcon(name) {
 
 function createFileElement(node, ext, fileIcon) {
     return `
-        <div class="file" data-path="${node.escapedPath}" data-extension="${ext}" data-name="${node.escapedName}">
+        <div class="file${node.ignored ? " ignored" : ""}" data-path="${node.escapedPath}" data-extension="${ext}" data-name="${node.escapedName}" data-ignored="${node.ignored ? "true" : "false"}">
             <img class="file-icon" src="${fileIcon}" alt="${ext} icon">
-            ${node.escapedName}
+            <span class="explorer-name">${node.escapedName}</span>
         </div>`;
 }
 
 function createDirElement(node, icon, childrenHtml, loaded) {
     return `
-        <div class="dir" data-path="${node.escapedPath}" data-loaded="${loaded ? "true" : "false"}">
+        <div class="dir${node.ignored ? " ignored" : ""}" data-path="${node.escapedPath}" data-loaded="${loaded ? "true" : "false"}" data-ignored="${node.ignored ? "true" : "false"}">
             <div class="dir-title">
                 <img class="folder-icon" src="${icon}" alt="folder icon">
-                <div class="file">${node.escapedName}</div>
+                <div class="file"><span class="explorer-name">${node.escapedName}</span></div>
             </div>
             <div class="dir-content">
                 ${childrenHtml}
@@ -38,9 +38,9 @@ function createDirElement(node, icon, childrenHtml, loaded) {
 
 function createSymlinkElement(node, icon) {
     return `
-        <div class="file symlink" data-path="${node.escapedPath}">
+        <div class="file symlink${node.ignored ? " ignored" : ""}" data-path="${node.escapedPath}" data-ignored="${node.ignored ? "true" : "false"}">
             <img class="folder-icon" src="${icon}" alt="symlink icon">
-            ${node.escapedName}
+            <span class="explorer-name">${node.escapedName}</span>
         </div>`;
 }
 
@@ -53,7 +53,7 @@ function normalizeNode(node) {
 }
 
 export async function buildTreeHtml(rootPath) {
-    const nodes = await window.electron.readDirTree(rootPath, { maxDepth: 0 });
+    const nodes = await window.electron.readDirTree(rootPath, { maxDepth: 0, ignoreRoot: rootPath });
     return renderNodes(nodes);
 }
 

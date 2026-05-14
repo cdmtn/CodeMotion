@@ -27,7 +27,7 @@
     width: fit-content;
     height: fit-content;
     min-width: 250px;
-    z-index: 9;
+    z-index: 10000;
     background: var(--context-body);
     backdrop-filter: blur(5px);
     border: 1px solid var(--context-border);
@@ -58,6 +58,13 @@
 .context-menu .context-menu__item:hover {
     cursor: pointer;
     background: var(--context-border);
+}
+.context-menu .context-menu__item.disabled {
+    opacity: .45;
+}
+.context-menu .context-menu__item.disabled:hover {
+    cursor: default;
+    background: transparent;
 }
 
 .context-menu .context-menu__item .context-menu__item-block {
@@ -92,4 +99,17 @@
     width: 95%;
     height: 100%;
     background: var(--context-border);
+}
+
+.explorer-rename-input {
+    width: 100%;
+    min-width: 40px;
+    height: 20px;
+    padding: 0 4px;
+    color: var(--text-color);
+    background: var(--body-color);
+    border: 1px solid var(--context-border);
+    border-radius: 4px;
+    font: inherit;
+    outline: none;
 }

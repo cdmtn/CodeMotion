@@ -1,4 +1,4 @@
-import { openTab } from "../../../components/tabHandler.js";
+import { openTab, activateTab } from "../../../components/tabHandler.js";
 
 export function bindFileClicks({ scopeEl, tabsByPath, recentlyClosed, pathContext, settings }) {
     scopeEl.querySelectorAll(".file[data-path]").forEach(fileEl => {

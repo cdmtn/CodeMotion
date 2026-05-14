@@ -307,6 +307,65 @@ ipcMain.handle("set-settings", (event, data) => {
 ipcMain.handle("open-in-browser", (event, url) => {
     shell.openExternal(url);
 });
+ipcMain.handle("reveal-in-file-explorer", async (event, targetPath) => {
+    if (!targetPath || typeof targetPath !== "string") {
+        return { success: false, error: "Invalid path" }
+    }
+
+    shell.showItemInFolder(path.resolve(targetPath))
+    return { success: true }
+})
+ipcMain.handle("create-file", async (event, targetPath) => {
+    try {
+        const resolvedPath = path.resolve(targetPath)
+        const handle = await fs.promises.open(resolvedPath, "wx")
+        await handle.close()
+        return { success: true, path: resolvedPath }
+    } catch (err) {
+        return { success: false, error: err.message }
+    }
+})
+ipcMain.handle("create-folder", async (event, targetPath) => {
+    try {
+        const resolvedPath = path.resolve(targetPath)
+        await fs.promises.mkdir(resolvedPath)
+        return { success: true, path: resolvedPath }
+    } catch (err) {
+        return { success: false, error: err.message }
+    }
+})
+async function copyRecursive(src, dest) {
+    const stat = await fs.promises.stat(src);
+    if (stat.isDirectory()) {
+        await fs.promises.mkdir(dest, { recursive: true });
+        const entries = await fs.promises.readdir(src);
+        for (const entry of entries) {
+            await copyRecursive(path.join(src, entry), path.join(dest, entry));
+        }
+    } else {
+        await fs.promises.copyFile(src, dest);
+    }
+}
+
+ipcMain.handle("rename-path", async (event, oldPath, newPath) => {
+    const resolvedOldPath = path.resolve(oldPath);
+    const resolvedNewPath = path.resolve(newPath);
+    try {
+        await fs.promises.rename(resolvedOldPath, resolvedNewPath);
+        return { success: true, path: resolvedNewPath };
+    } catch (err) {
+        if ((err.code === "EPERM" || err.code === "EACCES") && process.platform === "win32") {
+            try {
+                await copyRecursive(resolvedOldPath, resolvedNewPath);
+                await fs.promises.rm(resolvedOldPath, { recursive: true, force: true });
+                return { success: true, path: resolvedNewPath };
+            } catch (fallbackErr) {
+                return { success: false, error: fallbackErr.message };
+            }
+        }
+        return { success: false, error: err.message };
+    }
+})
 ipcMain.handle("get-app-icons", async () => {
     try {
         const dir = path.join(ASSETS_PATH, "media", "app-icons")

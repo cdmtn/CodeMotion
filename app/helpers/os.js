@@ -35,6 +35,8 @@ async function saveFile(fullPath, content) {
 async function readDirTree(rootPath, options = {}) {
     const absRoot = path.resolve(rootPath);
     const maxDepth = Number.isInteger(options.maxDepth) ? options.maxDepth : Infinity;
+    const ignoreRoot = path.resolve(options.ignoreRoot || absRoot);
+    const ignoreRules = await readIgnoreRules(ignoreRoot);
 
     async function walk(dir, depth = 0) {
         let entries = [];
@@ -44,7 +46,7 @@ async function readDirTree(rootPath, options = {}) {
 
             for (const d of dirents) {
                 const full = path.join(dir, d.name);
-                const item = { name: d.name, path: full };
+                const item = { name: d.name, path: full, ignored: isIgnored(full, d.isDirectory(), ignoreRoot, ignoreRules) };
 
                 if (d.isDirectory()) {
                     if (depth < maxDepth) {
@@ -99,4 +101,45 @@ module.exports = {
     selectFolder,
     saveFile,
     readDirTree
+}
+
+async function readIgnoreRules(rootPath) {
+    try {
+        const content = await fsPromise.readFile(path.join(rootPath, ".gitignore"), "utf8");
+        return content
+            .split(/\r?\n/)
+            .map(line => line.trim())
+            .filter(line => line && !line.startsWith("#"))
+            .map(line => line.replace(/\\/g, "/"));
+    } catch (_) {
+        return [];
+    }
+}
+
+function isIgnored(targetPath, isDir, rootPath, rules) {
+    const relative = path.relative(rootPath, targetPath).replace(/\\/g, "/");
+    if (!relative || relative.startsWith("..")) return false;
+
+    const name = path.basename(targetPath);
+
+    return rules.some(rule => {
+        let pattern = rule;
+        let dirOnly = pattern.endsWith("/");
+
+        if (pattern.startsWith("!")) return false;
+        pattern = pattern.replace(/^\/+/, "").replace(/\/+$/, "");
+        if (!pattern) return false;
+
+        const target = pattern.includes("/") ? relative : name;
+
+        if (dirOnly && !isDir) return false;
+        if (target === pattern || relative === pattern || relative.startsWith(`${pattern}/`)) return true;
+
+        if (pattern.includes("*")) {
+            const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*");
+            return new RegExp(`^${escaped}$`).test(target);
+        }
+
+        return false;
+    });
 }

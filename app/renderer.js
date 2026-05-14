@@ -19,7 +19,7 @@ import { getCurrentUserDataFromAPI, setUserPcInfo } from "../assets/js/user.js"
 
 import * as object from "../assets/js/objects.js"
 
-import { openTab, reopenLastClosed, activateTab, recentlyClosed, tabsByPath, currentPath, currentContent } from "../assets/components/tabHandler.js"
+import { openTab, reopenLastClosed, activateTab, recentlyClosed, tabsByPath, currentPath, updateTabPath } from "../assets/components/tabHandler.js"
 import { handlePopovers } from "../assets/js/handlers/handlePopovers.js"
 import { initExtensions } from "../assets/js/extensionsHandler/extensionsHandler.js"
 import { sendDebugMsg } from "../assets/js/handlers/debuggerSignalHandlers.js"
@@ -270,31 +270,43 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     });
 
+    async function saveActiveTab() {
+        if (!currentPath || !tabsByPath.has(currentPath) || !isSaveAviable) return;
+
+        const rec = tabsByPath.get(currentPath);
+
+        if (rec.new) {
+            const saveNewFileRes = await window.electron.askToSaveNewFile(currentPath, rec.editor.getValue());
+
+            if (saveNewFileRes.success) {
+                const newPath = saveNewFileRes.path;
+                const newName = newPath.split(/[\\/]/).pop();
+                rec.new = false;
+                rec.tabEl.classList.remove("not-saved");
+                updateTabPath(currentPath, newPath, newName);
+            }
+
+            return;
+        }
+
+        const saveStatus = await window.electron.saveFile(currentPath, rec.editor.getValue());
+        if (saveStatus.success) {
+            rec.tabEl.classList.remove("not-saved");
+            addToHistory("file-saved", currentPath.split(/[\\/]/).pop(), currentPath);
+        }
+    }
+
+    window.addEventListener("keydown", (event) => {
+        if ((event.ctrlKey || event.metaKey) && event.code === "KeyS") {
+            event.preventDefault();
+            saveActiveTab();
+        }
+    });
+
     // Save active tab
     window.electron.keyboardAction(async (data) => {
-        const type = data.type
-
-        if (type === "saved") {
-            if(currentPath && tabsByPath.has(currentPath) && isSaveAviable) {
-                const rec = tabsByPath.get(currentPath);
-
-                if(rec.new) {
-                    const saveNewFileRes = await window.electron.askToSaveNewFile(currentPath, currentContent)
-                    
-                    if(saveNewFileRes.success) {
-                        rec.tabEl.classList.remove("not-saved")
-                        currentPath = saveNewFileRes.path
-                    }
-
-                    return
-                }
-
-                const saveStatus = await window.electron.saveFile(currentPath, rec.editor.getValue());
-                if (saveStatus.success) {
-                    rec.tabEl.classList.remove("not-saved");
-                    addToHistory("file-saved", currentPath.split(/[\\/]/).pop(), currentPath);
-                }
-            }
+        if (data.type === "saved") {
+            await saveActiveTab();
         }
     })
 

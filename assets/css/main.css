@@ -829,8 +829,10 @@ body.explorer-resizing {
     background: #ffffff12;
     cursor: pointer;
 }
-.explorer-elements .file span {
-    font-size: 15px;
+.explorer-elements .file .explorer-name {
+    font-size: 12px;
+    opacity: 1;
+    margin-top: 0;
 }
 
 .explorer-elements .dir-title {
@@ -839,10 +841,14 @@ body.explorer-resizing {
     gap: 5px;
     min-height: 28px;
 }
-.explorer-elements .dir-title span {
-    font-size: 15px;
+.explorer-elements .dir-title > span {
+    font-size: 12px;
     opacity: .2;
     margin-top: 2px;
+}
+.explorer-elements .file.ignored,
+.explorer-elements .dir.ignored > .dir-title {
+    opacity: .45;
 }
 .explorer-elements .dir-content {
     margin-left: 5px;
