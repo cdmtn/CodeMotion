@@ -126,8 +126,10 @@ async function createWindow() {
 
     checkStatus({ updateSplash: updateSplash })
         .then(async () => {
-            console.log(true)
-            if (!localData.token) {
+            if(localData.nonAccountMode) {
+                await mainWindow.loadFile(path.join(HTML_PATH, "index.html"));
+            }
+            else if (!localData.token) {
                 await mainWindow.loadFile(path.join(HTML_PATH, "login.html"));
             } else {
                 let userCheckLogin = await verifyToken(localData.token);

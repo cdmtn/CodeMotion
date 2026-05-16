@@ -4,6 +4,7 @@ import { Modal } from "./modalsHandler/engine.js";
 
 export async function getCurrentUserDataFromAPI() {
     const user = await window.electron.getCurrentUserDataFromAPI();
+    const greeting = document.querySelector("#greeting")
 
     if (!user.success) return user;
 
@@ -92,6 +93,7 @@ export async function getCurrentUserDataFromAPI() {
     // 
 
     document.querySelectorAll("#username").forEach(e => e.textContent = userJSON.name);
+    document.querySelectorAll("#greeting").forEach(e => e.textContent = `How do you feel today, ${userJSON.name}?`);
     document.querySelectorAll("#bug_counter").forEach(e => e.textContent = bugs.length);
     document.querySelector("#userAvatar").innerHTML = generateAvatar(userJSON.name)
 

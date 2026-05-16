@@ -59,13 +59,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     addBugModal.bind(document.querySelector("#add_local_bug"))
     
     let __dirname = await getDirname()
-    let userSettings = await readSettings()
+    const settings = await readSettings()
+    const appIcon = await window.electron.getAppIcon()
+    const localData = await window.electron.getLocal()
 
-    await handleSettings(userSettings)
+    await handleSettings(settings)
 
-    if("app" in userSettings) {
-        if("devMode" in userSettings.app) {
-            if(userSettings.app.devMode) {
+    if("app" in settings) {
+        if("devMode" in settings.app) {
+            if(settings.app.devMode) {
                 window.electron.createDebuggerWindow()
                 await window.electron.onDebuggerReady()
 
@@ -125,9 +127,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     
     handleOnWheelScrollX()
 
-    const settings = userSettings
-    const appIcon = await window.electron.getAppIcon()
-
     const pathContext = {}
 
     document.querySelector(".code-start__main-logo").src = appIcon
@@ -151,20 +150,36 @@ document.addEventListener("DOMContentLoaded", async () => {
     const explorer = document.querySelector(".explorer");
     const filesPanel = document.querySelector('.explorer-elements[data-tab="files"]');
 
-    // Main
-    setUserPcInfo();
+    const yourOrganizationsPopupItem = document.querySelector(".popup-content__item#yourOrganizations")
+    const logoutPopupItem = document.querySelector(".popup-content__item#logout")
+    const topbarCenterUserData = document.querySelector(".topbar-center#userData")
+    const topbarCenterBugsData = document.querySelector(".topbar-center#bugsData")
 
-    getCurrentUserDataFromAPI().then((e) => {
-        if (!e.success) {
-            const errEl = loader?.querySelector(".loader-msg");
-            if (errEl) {
-                errEl.classList.remove("hidden");
-                errEl.textContent = `Error: ${e.result.result}`;
+    // Main
+
+    if(localData.nonAccountMode) {
+        loader?.classList.add("hidden");
+
+        yourOrganizationsPopupItem.classList.add("disabled")
+        logoutPopupItem.classList.add("disabled")
+
+        topbarCenterUserData.querySelector("#username").textContent = `Not authorized`
+        topbarCenterUserData.querySelector("#current_hours").classList.add("v-hidden")
+        topbarCenterBugsData.classList.add("v-hidden")
+    }
+    else {
+        getCurrentUserDataFromAPI().then((e) => {
+            if (!e.success) {
+                const errEl = loader?.querySelector(".loader-msg");
+                if (errEl) {
+                    errEl.classList.remove("hidden");
+                    errEl.textContent = `Error: ${e.result.result}`;
+                }
+            } else {
+                loader?.classList.add("hidden");
             }
-        } else {
-            loader?.classList.add("hidden");
-        }
-    });
+        });
+    }
 
     // Explorer tabs
 

@@ -98,3 +98,8 @@ window.electron.onAuthMsg((data) => {
         showErrBlock(content)
     }
 })
+
+document.querySelector("#skipAccountCreation").addEventListener("click", () => {
+    window.electron.setNonAccountMode()
+    window.electron.reload()
+})

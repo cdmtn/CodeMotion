@@ -173,13 +173,13 @@
 					</div>
 				</div>
 				<div class="popup" popup="file">
-					<div class="popup-title" id="username"></div>
+					<div class="popup-title" id="username">Me</div>
 
 					<div class="popup-content hidden">
 						<div class="popup-content__item" id="extensionsAll">Installed extensions</div>
                         <div class="popup-content__item" id="yourOrganizations">Your organizations</div>
                         <div class="popup-content__divider"></div>
-                        <div class="popup-content__item danger" modal="logout">Logout</div>
+                        <div class="popup-content__item danger" id="logout">Logout</div>
 					</div>
 				</div>
             </div>
@@ -188,13 +188,13 @@
             <div class="topbar-center transparent">
                 <div id="userAvatar"></div>
             </div>
-            <div class="topbar-center">
+            <div class="topbar-center" id="userData">
                 <div class="topbar-center__row">
                     <span id="username" class="bold"></span>
                     <span id="current_hours" class="translucent"></span>
                 </div>
             </div>
-            <div class="topbar-center">
+            <div class="topbar-center" id="bugsData">
                 <div class="topbar-center__row">
                     <span class="material-symbols-rounded outline">bug_report</span>
                     <span id="bug_counter"></span>
@@ -287,7 +287,7 @@
                         <div class="code-start__main">
                             <img class="code-start__main-logo">
                             <h1 class="monospace">$cdmtn<span class="cursor-animation">_</span></h1>
-                            <p>How do you feel today, <span id="username"></span>?</p>
+                            <p id="greeting">How do you feel today?</p>
                         </div>
                     </div>
                 </div>

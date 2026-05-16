@@ -8,7 +8,12 @@ contextBridge.exposeInMainWorld('electron', {
     getUserPcInfo: () => ipcRenderer.invoke("get-user-pc-info"),
     getPackageData: () => ipcRenderer.invoke("get-package-data"),
     getLocalBugsData: () => ipcRenderer.invoke("get-local-bugs-data"),
+    getAppIcons: () => ipcRenderer.invoke("get-app-icons"),
+    getAppIcon: () => ipcRenderer.invoke("get-app-icon"),
+    
     saveFile: (path, content) => ipcRenderer.invoke("save-file", path, content),
+
+    setNonAccountMode: () => ipcRenderer.invoke("set-non-account-mode"),
 
     askToSaveNewFile: (name, content) => ipcRenderer.invoke("ask-to-save-content", name, content),
 
@@ -38,8 +43,6 @@ contextBridge.exposeInMainWorld('electron', {
     createFile: (path) => ipcRenderer.invoke("create-file", path),
     createFolder: (path) => ipcRenderer.invoke("create-folder", path),
     renamePath: (oldPath, newPath) => ipcRenderer.invoke("rename-path", oldPath, newPath),
-    getAppIcons: () => ipcRenderer.invoke("get-app-icons"),
-    getAppIcon: () => ipcRenderer.invoke("get-app-icon"),
 
     getLocal: () => ipcRenderer.invoke("get-app-local"),
 

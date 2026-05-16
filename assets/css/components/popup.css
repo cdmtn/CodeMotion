@@ -61,6 +61,11 @@
     width: 100%;
     white-space: nowrap;
 }
+.popup-content__item.disabled {
+    opacity: .5;
+    pointer-events: none;
+    user-select: none;
+}
 .popup-content__item.danger {
     color: rgb(255, 59, 50);
 }

@@ -87,6 +87,7 @@
     text-decoration: none;
     color: var(--text-color-muted);
     position: relative;
+    cursor: pointer;
     transition: .2s;
 }
 .user-form__links a::after {

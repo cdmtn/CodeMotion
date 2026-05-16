@@ -74,6 +74,10 @@ textarea {
     animation: bounce 2s infinite;
 }
 
+.v-hidden {
+    display: none!important;
+}
+
 .ace_gutter-cell.ace_warning,
 .ace_icon.ace_warning,
 .ace_icon.ace_warning_fold {

@@ -273,4 +273,27 @@ ipcMain.handle('is-logged-in', async () => {
     return true;
 });
 
+ipcMain.handle("set-non-account-mode", async () => {
+    let data = {}
+
+    try {
+        if (fs.existsSync(LOCAL_FILE_PATH)) {
+            const raw = fs.readFileSync(LOCAL_FILE_PATH, "utf-8")
+            data = JSON.parse(raw || "{}")
+        }
+    } catch (e) {
+        data = {}
+    }
+
+    data.nonAccountMode = true
+
+    try {
+        fs.writeFileSync(LOCAL_FILE_PATH, JSON.stringify(data, null, 4), "utf-8")
+        return { ok: true }
+    } catch (e) {
+        return { ok: false }
+    }
+
+})
+
 module.exports = { API, login, verifyToken }
