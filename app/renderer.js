@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         e.removeAttribute("gls")
     })
 
-    const addBugModal = getAddBugModal()
+    const addBugModal = await getAddBugModal()
     addBugModal.bind(document.querySelector("#add_local_bug"))
     
     let __dirname = await getDirname()
@@ -160,6 +160,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const yourOrganizationsPopupItem = document.querySelector(".popup-content__item#yourOrganizations")
     const logoutPopupItem = document.querySelector(".popup-content__item#logout")
+    const createOrgPopupItem = document.querySelector(".popup-content__item#createOrganization")
     const topbarCenterUserData = document.querySelector(".topbar-center#userData")
     const topbarCenterBugsData = document.querySelector(".topbar-center#bugsData")
 
@@ -170,6 +171,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         yourOrganizationsPopupItem.classList.add("disabled")
         logoutPopupItem.classList.add("disabled")
+        createOrgPopupItem.classList.add("disabled")
 
         topbarCenterUserData.querySelector("#username").textContent = gls.get("notAuth")
         topbarCenterUserData.querySelector("#current_hours").classList.add("v-hidden")

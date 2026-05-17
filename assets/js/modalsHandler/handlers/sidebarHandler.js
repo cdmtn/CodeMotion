@@ -53,6 +53,8 @@ export function sideBarHandler(pagesArray = [], properties = {}) {
         item.addEventListener("click", (e) => {
             const thisPageID = e.currentTarget.id
 
+            console.log(thisPageID)
+
             const allPages = body.querySelectorAll(".modal-body__sidebar-content")
             const thisPage = body.querySelector(`.modal-body__sidebar-content[id="${thisPageID}_content"]`)
 

@@ -1,13 +1,20 @@
 import { Modal } from "../modalsHandler/engine.js"
 import { addToBug, createNotify, escapeHtml } from "../lib.js"
+import { GLS } from "../lib.js"
 
-export function getAddBugModal() {
+export async function getAddBugModal() {
+    const gls = await GLS.init()
+
+    function lgls(string) {
+        return gls.get(`modals.addBug.${string}`)
+    }
+
     const addBugModal = Modal.create({
         id: "addBug",
         name: "addBug",
         modalClassList: ["window"],
         size: "sm",
-        title: "Add bug",
+        title: lgls("title"),
 
         content: [
             {
@@ -17,17 +24,17 @@ export function getAddBugModal() {
                 items: [
                     {
                         type: "placeholder",
-                        title: "Add bug information",
-                        description: "Please fill in all fields before submitting a bug report"
+                        title: lgls("header.title"),
+                        description: lgls("header.description")
                     },
                     {
                         type: "input",
-                        placeholder: "Name",
+                        placeholder: lgls("inputs.name"),
                         id: "addBugName",
                     },
                     {
                         type: "input",
-                        placeholder: "Description",
+                        placeholder: lgls("inputs.description"),
                         id: "addBugContent",
                     },
                     {
@@ -35,8 +42,8 @@ export function getAddBugModal() {
                         id: "isLocal",
                         checked: true,
                         disabled: true,
-                        title: "Add as local bug",
-                        description: "If that's the case, no one but you will see this bug. It will be stored entirely locally."
+                        title: lgls("localBugSwitch.title"),
+                        description: lgls("localBugSwitch.description")
                     },
                     {
                         type: "container",
@@ -45,7 +52,7 @@ export function getAddBugModal() {
                     {
                         type: "button",
                         id: "addBugConfirm",
-                        title: "Confirm and add local bug",
+                        title: lgls("confirmBtnLocal"),
                         container: "#buttonsContainer"
                     }
                 ]
@@ -59,7 +66,7 @@ export function getAddBugModal() {
     element.querySelector("#isLocal").addEventListener("change", (event) => {
         const checked = event.target.checked
 
-        addBtn.textContent = checked ? "Confirm and add local bug" : "Confirm and add global bug"
+        addBtn.textContent = checked ? lgls("confirmBtnLocal") : lgls("confirmBtn")
     })
 
     addBtn.addEventListener("click", async () => {

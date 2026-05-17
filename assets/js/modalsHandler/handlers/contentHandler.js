@@ -29,8 +29,10 @@ const types = {
         const classList = validArray(data.classList) ?? []
         const gap = valid(data.gap) ?? 0
 
+        wrapper.classList.add("modal-row")
+
         if (classList != 0) {
-            wrapper.classList.add("modal-row", ...classList)
+            wrapper.classList.add(...classList)
         }
         if (gap != 0) {
             wrapper.style.cssText += `gap: ${gap}px`

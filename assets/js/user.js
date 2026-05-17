@@ -83,13 +83,19 @@ export async function getCurrentUserDataFromAPI(gls) {
         modalClassList: ["window"],
         title: gls.get("modals.organizations.title"),
 
-        content: [
+        pages: [
             {
-                type: "columns",
-                cols: 2,
-                gap: 10,
-                items: organizationsModalData
-            },
+                name: "Your organizations",
+                icon: "group",
+
+                content: [
+                    {
+                        type: "row",
+                        gap: 10,
+                        items: organizationsModalData
+                    }
+                ]
+            }
         ]
     })
 
