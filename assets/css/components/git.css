@@ -117,30 +117,38 @@
     background: transparent;
     display: grid;
     flex: 0 0 auto;
-    gap: 4px;
+    gap: 6px;
     grid-template-columns: repeat(auto-fit, minmax(76px, 1fr));
     margin-bottom: 0;
     overflow: visible;
-    padding: 0;
+    padding: 0 6px;
+    box-sizing: border-box;
+    width: 100%;
 }
 
 .git-view-switch>label {
     background: var(--block-divider-border-color);
-    border: 1px solid transparent;
+    border: 1px solid var(--topbar-menu-item-hover-bg);
     border-radius: 6px;
     box-sizing: border-box;
+    height: 42px;
+    justify-content: center;
     min-width: 0;
-    padding: 8px 6px;
+    overflow: hidden;
+    padding: 0 6px;
     transition: .16s;
 }
 
+.git-view-switch>label::before,
 .git-view-switch>label:last-of-type::before {
     display: none;
+    content: none;
 }
 
 .git-view-switch>input:checked + label {
     background: var(--segment-label);
-    border-color: var(--topbar-menu-item-hover-bg);
+    border-color: rgba(255, 255, 255, .26);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .04);
 }
 
 .git-view-switch label span {
@@ -149,6 +157,10 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.git-view-switch>label:hover {
+    background: var(--topbar-menu-item-hover-bg);
 }
 
 .git-view {
