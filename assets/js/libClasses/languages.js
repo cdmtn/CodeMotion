@@ -255,6 +255,18 @@ export class _Languages {
             icon: "font",
             iconExt: "svg",
             mode: "text"
+        },
+        lua: {
+            name: "Lua",
+            icon: "lua",
+            iconExt: "svg",
+            mode: "lua"
+        },
+        luau: {
+            name: "Luau",
+            icon: "lua",
+            iconExt: "svg",
+            mode: "lua"
         }
     }
 
