@@ -41,6 +41,7 @@ import { bindFileClicks } from "../assets/js/explorerTree/handlers/bindFileClick
 import { setupSegmentedControl } from "../assets/js/handlers/segmentedControlHandler.js"
 
 import { getAddBugModal } from "../assets/js/modals/addBugModal.js"
+import { initGitPanel } from "../assets/js/git/GitPanel.js"
 
 let isSaveAviable = true
 
@@ -136,6 +137,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     handleOnWheelScrollX()
 
     const pathContext = {}
+    const gitPanel = initGitPanel({ pathContext })
 
     document.querySelector(".code-start__main-logo").src = appIcon
 
@@ -297,6 +299,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 rec.new = false;
                 rec.tabEl.classList.remove("not-saved");
                 updateTabPath(currentPath, newPath, newName);
+                gitPanel.refresh()
             }
 
             return;
@@ -306,6 +309,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (saveStatus.success) {
             rec.tabEl.classList.remove("not-saved");
             addToHistory("file-saved", currentPath.split(/[\\/]/).pop(), currentPath);
+            gitPanel.refresh()
         }
     }
 
@@ -366,7 +370,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             l.remove()
 
-            openFolder(
+            await openFolder(
                 {
                     pathRoot: openedFile,
                     filesPanel: filesPanel,
@@ -375,6 +379,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                     settings: settings
                 }
             )
+
+            gitPanel.refresh()
         })
     })
 })

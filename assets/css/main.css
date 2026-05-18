@@ -1,6 +1,7 @@
 @import url('modals.css');
 @import url("./window/topWindowList.css");
 @import url("components/codeWrapper.css");
+@import url("components/git.css");
 @import url("auth.css");
 
 :root {
@@ -458,8 +459,8 @@ input~span {
 .explorer__resize-handle {
     position: absolute;
     top: 0;
-    right: -10px;
-    width: 8px;
+    right: 0;
+    width: 10px;
     height: 100%;
     cursor: ew-resize;
     z-index: 20;
@@ -468,7 +469,7 @@ input~span {
     content: "";
     position: absolute;
     top: 50%;
-    right: 3px;
+    right: 4px;
     width: 2px;
     height: 42px;
     transform: translateY(-50%);
