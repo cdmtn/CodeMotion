@@ -1,0 +1,208 @@
+{
+    "name": "Українська",
+
+    "greeting": {
+        "default": "Як ви почуваєтеся сьогодні, %{name}?",
+        "withoutUsername": "Як ви почуваєтеся сьогодні?"
+    },
+
+    "platformNotSupported": "Ваша платформа (%{platform}) не підтримується",
+
+    "notAuth": "Не авторизовано",
+    "devModeEnabled": "Режим розробника",
+
+    "cancel": "Скасувати",
+
+    "popups": {
+        "file": {
+            "title": "Файл"
+        },
+        "tools": {
+            "title": "Інструменти",
+            "appearance": "Налаштування зовнішнього вигляду"
+        },
+        "actions": {
+            "title": "Дії",
+            "maximize": "Розгорнути застосунок",
+            "minimize": "Згорнути застосунок",
+            "reload": "Перезавантажити застосунок",
+            "close": "Закрити застосунок"
+        },
+        "account": {
+            "title": "Я",
+            "installedExtensions": "Встановлені розширення",
+            "yourOrganizations": "Організації",
+            "createOrganization": "Створити організацію",
+            "login": "Увійти",
+            "logout": "Вийти"
+        }
+    },
+
+    "tooltips": {
+        "files": "Файли",
+        "history": "Історія",
+        "bugs": "Помилки",
+        "pythonEmulator": "Емулятор Python",
+        "mdPreview": "Попередній перегляд Markdown",
+        "htmlLiveServer": "Live Server",
+        "errors": "Помилки",
+
+        "codeSnippet": "Зробити знімок екрана",
+        "copy": "Копіювати",
+        "terminal": "Термінал",
+        "jsMinify": "Мініфікувати JS",
+        "cssMinify": "Мініфікувати CSS",
+        "organizations": "Організації"
+    },
+
+    "editor": {
+        "nocontext": "Контекст недоступний"
+    },
+
+    "explorer": {
+        "emptyBeforeIcon": "Натисніть",
+        "emptyAfterIcon": "щоб відкрити папку"
+    },
+
+    "modals": {
+        "needToReloadNote": "Перезапустіть застосунок після зміни цього налаштування",
+        "appReloadNote": "Зміна цього налаштування перезапустить застосунок",
+
+        "organizations": {
+            "title": "Організації",
+            "membersLabel": "Учасники",
+            "roleLabel": "Роль",
+            "ownerLabel": "Ви є засновником цієї організації",
+            "secondRoleLabel": "Ваша додаткова роль: %{role}",
+            "ownerRoleLabel": "Засновник"
+        },
+
+        "appearance": {
+            "title": "{{popups.tools.appearance}}",
+            "generalCategory": "Загальні",
+            "sideBarCategory": "Бічна панель",
+            "terminalCategory": "Термінал",
+            "fileWindowCategory": "Вікно файлів",
+            "editorCategory": "Редактор",
+
+            "application": {
+                "applicationLabel": "Застосунок",
+
+                "uiScale": {
+                    "title": "Масштаб інтерфейсу",
+                    "description": "Змінює загальний масштаб інтерфейсу"
+                },
+
+                "language": {
+                    "title": "Мова",
+                    "description": "Оберіть мову застосунку за замовчуванням"
+                },
+
+                "useSystemFonts": {
+                    "title": "Використовувати системні шрифти",
+                    "description": "Використовує system-ui для інтерфейсу та monospace для редактора"
+                },
+
+                "splashWindow": {
+                    "title": "Заставка",
+                    "description": "Приховувати заставку під час запуску?"
+                },
+
+                "reduceMotion": {
+                    "title": "Зменшити анімацію",
+                    "description": "Зменшує візуальні ефекти в усьому застосунку, менше анімацій та оптимізовані переходи"
+                },
+
+                "boldFont": {
+                    "title": "Жирний шрифт",
+                    "description": "Збільшує товщину шрифту в усьому застосунку"
+                },
+
+                "theme": {
+                    "title": "Тема",
+                    "description": "Змінити тему застосунку"
+                },
+
+                "developerMode": {
+                    "title": "Режим розробника",
+                    "description": "Увімкнути інструменти розробника та функції налагодження"
+                },
+
+                "appIcons": {
+                    "title": "Іконки застосунку",
+                    "description": "Змінює іконки в усьому застосунку"
+                }
+            },
+
+            "editor": {
+                "editorLabel": "Редактор",
+
+                "builtInPythonCausePlatformNote": "{{platformNotSupported}}. Буде використано вбудоване середовище Python",
+
+                "textSize": {
+                    "title": "Розмір шрифту",
+                    "description": "Дозволяє збільшити розмір тексту в редакторі до 200%"
+                },
+
+                "smoothScroll": {
+                    "title": "Плавне прокручування",
+                    "description": "Вимкнути плавне прокручування в редакторі?"
+                },
+
+                "pythonRunner": {
+                    "title": "Емулятор Python",
+                    "description": "Оберіть версію Python для використання",
+
+                    "select": {
+                        "builtIn": "Вбудований в IDE",
+                        "userDefined": "Встановлений користувачем"
+                    }
+                }
+            }
+        },
+
+        "addBug": {
+            "title": "Додати помилку",
+
+            "header": {
+                "title": "Додати інформацію про помилку",
+                "description": "Заповніть усі поля перед надсиланням звіту"
+            },
+
+            "inputs": {
+                "name": "Назва",
+                "description": "Опис"
+            },
+
+            "privateBugSwitch": {
+                "title": "Додати як приватну помилку",
+                "description": "У цьому випадку помилку бачитимете лише ви"
+            },
+
+            "confirmBtn": "Підтвердити та додати глобально",
+            "confirmBtnPrivate": "Підтвердити та додати приватно"
+        },
+
+        "logout": {
+            "title": "Ви впевнені?",
+            "header": {
+                "title": "Вихід",
+                "description": "Цю дію неможливо скасувати. Якщо вийти зараз, знадобиться повторний вхід"
+            },
+            "buttonConfirm": "Вийти"
+        }
+    },
+
+    "bug": {
+        "noDesc": "Опис відсутній",
+        "orgMore": "і ще %{count}",
+        "createdBy": "Створено %{name}",
+        "assignedTo": "Призначено %{name}",
+        "private": "Приватна",
+        "priority": {
+            "common": "Звичайний пріоритет",
+            "medium": "Середній пріоритет",
+            "high": "Високий пріоритет"
+        }
+    }
+}

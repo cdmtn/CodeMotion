@@ -2,6 +2,13 @@ import { generateAvatar, truncateString, GLOBAL } from "./lib.js";
 import { ExistingModal, modalVerifiedBadgeHTML, modalOwnerBadgeHTML } from "../components/modalHandler.js";
 import { Modal } from "./modalsHandler/engine.js";
 
+import { spawnSideBarOrganizationsButton } from "./userHandlers/spawn.js"
+import { createUserOrgsModalStructure } from "./userHandlers/orgModal.js";
+import { appendBugs } from "./userHandlers/appendBugs.js"
+import { createUserOrgModal } from "./userHandlers/orgModal.js";
+
+import { setUserPcInfo } from "./userHandlers/userPC.js";
+
 export async function getCurrentUserDataFromAPI(gls) {
     const user = await window.electron.getCurrentUserDataFromAPI();
     const greeting = document.querySelector("#greeting")
@@ -19,87 +26,15 @@ export async function getCurrentUserDataFromAPI(gls) {
 
     // organizations
 
-    if (userOrgs.length > 0) {
-        // if user at least in 1 org, then creating a sidebar btn
-        const orgSideBarBtn = document.createElement("div")
-        orgSideBarBtn.className = "sidebar-item"
-        orgSideBarBtn.id = "yourOrganizations"
-        orgSideBarBtn.setAttribute("tooltip", gls.get("tooltips.organizations"))
-        orgSideBarBtn.setAttribute("nondefault", null)
+    spawnSideBarOrganizationsButton({ gls: gls, userOrgs: userOrgs })
 
-        orgSideBarBtn.innerHTML = `
-            <span class="badge default">${userOrgs.length}</span>
-            <span class="material-symbols-rounded">group</span>
-        `
-        document.querySelector(".sidebar").appendChild(orgSideBarBtn)
-    }
-
-    const organizationsModalData = []
-
-    for (const org in userOrgs) {
-        const organization = userOrgs[org]
-        const organizationReq = await window.electron.getOrgDataFromAPI(organization.id)
-
-        if (!organizationReq.success) throw new Error(`Error getting organizations data:`, organizationReq.result)
-
-        const organizationMembersCount = organizationReq.result.data.members_count
-        const organizationData = organizationReq.result.data
-
-        let organizationRole = organization.role
-
-        if(organizationRole.length == 0) organizationRole = "No role"
-
-        const organizationPreparedData = {
-            type: "organization",
-            name: organizationData.name,
-            description: organizationData.description,
-            website: organizationData.website,
-            columns: [
-                {
-                    name: gls.get("modals.organizations.membersLabel"),
-                    value: organizationMembersCount
-                },
-                {
-                    name: gls.get("modals.organizations.roleLabel"),
-                    value: userJSON.id == organizationData.ownerID ? gls.get("modals.organizations.ownerRoleLabel") : organizationRole
-                }
-            ],
-            badgeOwner: userJSON.id == organizationData.ownerID,
-            badgeVerified: organizationData.verified == 1
+    const organizationsModal = await createUserOrgModal(
+        { 
+            gls: gls,
+            userOrgs: userOrgs,
+            userJSON: userJSON
         }
-
-        if(userJSON.id == organizationData.ownerID) {
-            organizationPreparedData["note"] = 
-            `${gls.get("modals.organizations.ownerLabel")}.
-            ${organization.role.length != 0 ? gls.get("modals.organizations.ownerLabel", { role: organization.role }) : ""}
-            `
-        }
-
-        organizationsModalData.push(organizationPreparedData)
-    }
-
-    const organizationsModal = Modal.create({
-        id: "organizations",
-        name: "Organizations",
-        modalClassList: ["window"],
-        title: gls.get("modals.organizations.title"),
-
-        pages: [
-            {
-                name: "Your organizations",
-                icon: "group",
-
-                content: [
-                    {
-                        type: "row",
-                        gap: 10,
-                        items: organizationsModalData
-                    }
-                ]
-            }
-        ]
-    })
-
+    )
     organizationsModal.bind(document.querySelectorAll("#yourOrganizations"))
 
     // 
@@ -109,52 +44,8 @@ export async function getCurrentUserDataFromAPI(gls) {
     document.querySelectorAll("#bug_counter").forEach(e => e.textContent = bugs.length);
     document.querySelector("#userAvatar").innerHTML = generateAvatar(userJSON.name)
 
-    function appendBugs(bugs, type) {
-        Object.keys(bugs).forEach((bugID, index) => {
-            const bug = bugs[bugID]
-
-            const date = new Date(parseInt(bug.date) * 1000);
-            const hours = date.format("d.m, H:i");
-            const day = date.format("l jS");
-
-            const object = {
-                id: bug.id,
-                priority: parseInt(bug.priority),
-                value: bug.title,
-                desc: bug.description ?? "No description provided",
-                today: hours,
-                isSelf: bug.private == 1,
-                org: bug.by.organization,
-                resolved: bug.resolved,
-                author: bug.by.name,
-                assignedTo: bug.assigned_to,
-                type: type
-            }
-
-            addToBug(object)
-        })
-    }
-
     appendBugs(bugsCreated, "created")
     appendBugs(bugsAssigned, "assigned")
 
     return user;
-}
-export async function setUserPcInfo() {
-    const info = await window.electron.getUserPcInfo();
-    document.querySelectorAll("#username").forEach(e => { e.textContent = info.name; });
-
-    function updateTime() {
-        const now = new Date().format("F j, H:i");
-        document.querySelectorAll("#current_hours").forEach(el => { el.textContent = now; });
-    }
-    updateTime();
-
-    const now = new Date();
-    const msToNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
-
-    setTimeout(function tick() {
-        updateTime();
-        setInterval(updateTime, 60 * 1000);
-    }, msToNextMinute);
 }

@@ -255,13 +255,15 @@ function contentItemsHandler(element, itemsData) {
             const id = valid(item.id) ?? false
             const title = valid(item.title) ?? false
             const container = valid(item.container) ?? false
+            const btnClass = valid(item.class) ?? "default"
 
             const buttonElement = renderButton(
                 {
                     id: id,
                     title: title,
                     container: container,
-                    element: element
+                    element: element,
+                    class: btnClass
                 }
             )
 

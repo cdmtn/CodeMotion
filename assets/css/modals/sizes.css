@@ -14,12 +14,9 @@
     height: fit-content!important;
 }
 .modal-wrapper .modal.mini {
-    width: 400px!important;
-    min-height: 150px!important;
+    min-height: 0px!important;
+    width: 30%!important;
     height: fit-content!important;
-}
-.modal-wrapper .modal.mini .modal-body {
-    padding: 10px!important;
 }
 .modal-wrapper .modal.full {
     width: 80%;

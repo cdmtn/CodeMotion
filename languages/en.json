@@ -11,6 +11,8 @@
     "notAuth": "Not authenticated",
     "devModeEnabled": "Developer mode",
 
+    "cancel": "Cancel",
+
     "popups": {
         "file": {
             "title": "File"
@@ -179,10 +181,20 @@
 
             "confirmBtn": "Confirm and add globally",
             "confirmBtnPrivate": "Confirm and add privately"
+        },
+
+        "logout": {
+            "title": "Are you sure?",
+            "header": {
+                "title": "Logout",
+                "description": "This action cannot be undone. If you do this now, you will have to log in again"
+            },
+            "buttonConfirm": "Logout"
         }
     },
 
     "bug": {
+        "noDesc": "No description provided",
         "orgMore": "and %{count} more",
         "createdBy": "Created by %{name}",
         "assignedTo": "Assigned to %{name}",

@@ -7,7 +7,14 @@ function addPopover(el, gls) {
     const tooltip = document.createElement("div")
     tooltip.role = "tooltip"
     tooltip.id = idify(el.id)
-    tooltip.textContent = gls.get(el.getAttribute("tooltip"))
+
+    if(typeof gls != "object") {
+        tooltip.textContent = el.getAttribute("tooltip")
+    }
+    else {
+        tooltip.textContent = gls.get(el.getAttribute("tooltip"))
+    }
+
     tooltip.className = "tooltip"
     tooltip.style.zIndex = "9999"
 

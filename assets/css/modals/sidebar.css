@@ -17,18 +17,17 @@
     display: flex;
     align-items: center;
     gap: 5px;
-    background: var(--body-color);
     padding: 5px 10px;
     border-radius: 5px;
     font-size: 14px;
     transition: .2s;
 }
 .modal-wrapper .modal.window .modal-body.modal-body-sidebar .modal-sidebar .modal-sidebar__item:hover {
-    background: var(--notificator-body-border);
+    background: var(--body-color);
     cursor: pointer;
 }
 .modal-wrapper .modal.window .modal-body.modal-body-sidebar .modal-sidebar .modal-sidebar__item.active {
-    background: var(--notificator-body-border);
+    background: var(--body-color);
 }
 .modal-wrapper .modal.window .modal-body.modal-body-sidebar .modal-sidebar .modal-sidebar__item.active span[class^="material-symbols"] {
     opacity: 1;

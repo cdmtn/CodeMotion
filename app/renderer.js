@@ -16,7 +16,7 @@ import {
     DragDrop,
     GLS
 } from "../assets/js/lib.js"
-import { getCurrentUserDataFromAPI, setUserPcInfo } from "../assets/js/user.js"
+import { getCurrentUserDataFromAPI } from "../assets/js/user.js"
 
 import * as object from "../assets/js/objects.js"
 
@@ -41,6 +41,7 @@ import { bindFileClicks } from "../assets/js/explorerTree/handlers/bindFileClick
 import { setupSegmentedControl } from "../assets/js/handlers/segmentedControlHandler.js"
 
 import { getAddBugModal } from "../assets/js/modals/addBugModal.js"
+import { getLogoutModal } from "../assets/js/modals/logoutModal.js"
 
 let isSaveAviable = true
 
@@ -65,6 +66,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const addBugModal = await getAddBugModal()
     addBugModal.bind(document.querySelector("#add_local_bug"))
+
+    const logoutModal = await getLogoutModal()
+    logoutModal.bind(document.querySelector("#logout"))
     
     let __dirname = await getDirname()
     const settings = await readSettings()

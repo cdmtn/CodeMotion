@@ -12,3 +12,10 @@
     background: var(--topbar-menu-item-hover-bg);
     cursor: pointer;
 }
+
+.modal-button.danger {
+    background: #ff5b5b14;
+    color: #ff5b5b;
+    font-weight: 400;
+    border: 1px solid #ff5b5b14;
+}
