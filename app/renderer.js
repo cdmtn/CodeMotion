@@ -1,8 +1,8 @@
 import {
     escapeHtml,
-    addToBug, 
-    addToHistory, 
-    showIndicator, 
+    addToBug,
+    addToHistory,
+    showIndicator,
     handlePopups,
     Loader,
     capitilize,
@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const logoutModal = await getLogoutModal()
     logoutModal.bind(document.querySelector("#logout"))
-    
+
     let __dirname = await getDirname()
     const settings = await readSettings()
     const appIcon = await window.electron.getAppIcon()
@@ -77,9 +77,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     await handleSettings(settings)
 
-    if("app" in settings) {
-        if("devMode" in settings.app) {
-            if(settings.app.devMode) {
+    if ("app" in settings) {
+        if ("devMode" in settings.app) {
+            if (settings.app.devMode) {
                 window.electron.createDebuggerWindow()
                 await window.electron.onDebuggerReady()
 
@@ -112,7 +112,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const fileDragDrop = new DragDrop(document.querySelector(".code-wrapper"))
     fileDragDrop.onDrop(({ content, name, extension }) => {
         openTab(name, content, extension, name, undefined, true)
-    }) 
+    })
 
     // 
 
@@ -120,7 +120,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // update language "Python" and set version in name
     const pythonInfo = await window.electron.getPython()
-    if(pythonInfo) {
+    if (pythonInfo) {
         Languages.update("py", {
             name: `Python (${pythonInfo.version})`,
             icon: "py",
@@ -136,7 +136,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         loader.setAttribute("color", textColor)
     })
     // 
-    
+
     handleOnWheelScrollX()
 
     const pathContext = {}
@@ -170,7 +170,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Main
 
-    if(localData.nonAccountMode) {
+    if (localData.nonAccountMode) {
         loader?.classList.add("hidden");
 
         yourOrganizationsPopupItem.classList.add("disabled")
@@ -216,8 +216,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                 const tabID = tab.id
                 const visibleID = el.getAttribute("visibleOn")
 
-                if(visibleID.startsWith("tab:")) {
-                    if(tabID == visibleID.split("tab:")[1]) {
+                if (visibleID.startsWith("tab:")) {
+                    if (tabID == visibleID.split("tab:")[1]) {
                         el.classList.remove("hidden")
                     }
                     else {
@@ -226,7 +226,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 }
             })
 
-            if(tab.getAttribute("nondefault") != null) return
+            if (tab.getAttribute("nondefault") != null) return
 
             document.querySelectorAll(".sidebar-item").forEach(t => t.classList.remove("active"));
             tab.classList.add("active");
@@ -240,9 +240,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
             setTabNameCounter(false);
 
-            if(id == "files") {
-                if(Object.keys(pathContext).length > 0) {
-                    if("root" in pathContext) {
+            if (id == "files") {
+                if (Object.keys(pathContext).length > 0) {
+                    if ("root" in pathContext) {
                         setTabName(pathContext.root)
                     }
                 }
@@ -250,7 +250,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             if (id === "history") {
                 const root = document.querySelector(`.explorer-elements[data-tab="${id}"] .elements`);
-                
+
                 handleHistoryTab(
                     {
                         root: root,
@@ -334,6 +334,38 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     })
 
+    window.addEventListener("blur", () => {
+        const modifiers = [
+            { key: "Control", code: "ControlLeft" },
+            { key: "Alt", code: "AltLeft" },
+            { key: "Shift", code: "ShiftLeft" },
+            { key: "Meta", code: "MetaLeft" }
+        ];
+        const targets = [window, document];
+        if (document.activeElement) {
+            targets.push(document.activeElement);
+        }
+        targets.forEach(target => {
+            modifiers.forEach(({ key, code }) => {
+                try {
+                    const event = new KeyboardEvent("keyup", {
+                        key: key,
+                        code: code,
+                        ctrlKey: false,
+                        altKey: false,
+                        shiftKey: false,
+                        metaKey: false,
+                        bubbles: true,
+                        cancelable: true
+                    });
+                    target.dispatchEvent(event);
+                } catch (e) {
+                    console.error("Failed to dispatch keyup event on blur reset:", e);
+                }
+            });
+        });
+    });
+
     // File clicks (explorer)
 
     if (filesPanel) bindFileClicks(
@@ -364,11 +396,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.querySelectorAll("#open_folder").forEach(btn => {
         btn.addEventListener("click", async () => {
             const l = new Loader(document.querySelector(".explorer-elements[data-tab='files']"),
-                { 
-                    size: "20px", 
-                    stroke: "1px", 
-                    pos: "absolute-center", 
-                    method: "inner" 
+                {
+                    size: "20px",
+                    stroke: "1px",
+                    pos: "absolute-center",
+                    method: "inner"
                 }
             )
             l.render()

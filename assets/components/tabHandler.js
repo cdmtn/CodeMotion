@@ -1,12 +1,12 @@
-import { 
-    toBase64, 
-    getCodeByName, 
-    capitilize, 
-    escapeHtml, 
-    runCode, 
-    runSandbox, 
-    addRuntimeError, 
-    isFloat, 
+import {
+    toBase64,
+    getCodeByName,
+    capitilize,
+    escapeHtml,
+    runCode,
+    runSandbox,
+    addRuntimeError,
+    isFloat,
     isStringifiedObject,
     createNotify,
     getTheme,
@@ -146,7 +146,7 @@ function initializeGlobalButtons(settings = {}) {
         if (!currentPath) return;
         const rec = tabsByPath.get(currentPath);
         if (!rec) return;
-        
+
         const MDPreviewWindow = new BottomWindow("MDPreview", { title: `Preview · ${rec.tabEl.querySelector(".file-name").textContent}` })
         MDPreviewWindow.fullscreen()
         MDPreviewWindow.show()
@@ -209,10 +209,10 @@ function initializeGlobalButtons(settings = {}) {
         e.preventDefault()
         if (!currentPath) return;
 
-        if(isLiveServerActive == false) {
+        if (isLiveServerActive == false) {
             let server = await window.electron.startLiveServer(currentPath)
-            
-            if(server.success) {
+
+            if (server.success) {
                 isLiveServerActive = true
                 SideBarLiveServerIcon.set("active")
                 SideBarLiveServerIcon.blink()
@@ -225,7 +225,7 @@ function initializeGlobalButtons(settings = {}) {
         else {
             let server = await window.electron.stopLiveServer()
 
-            if(server.success) {
+            if (server.success) {
                 isLiveServerActive = false
                 SideBarLiveServerIcon.set("unactive")
                 SideBarLiveServerIcon.blink(false)
@@ -257,17 +257,17 @@ function initializeGlobalButtons(settings = {}) {
 
         let pythonRunMethod = "installed"
 
-        if("editor" in settings && "pythonRunnerMethod" in settings.editor) {
+        if ("editor" in settings && "pythonRunnerMethod" in settings.editor) {
             pythonRunMethod = settings.editor.pythonRunnerMethod
         }
 
         console.log("RUNPY:", pythonRunMethod)
         const pythonResult = await window.electron.runPython({ filePath: currentPath, useEmbed: pythonRunMethod == "builtin" })
 
-        if(pythonResult.type == "success") {
+        if (pythonResult.type == "success") {
             renderPyMsgSuccess({ RuntimeHistoryWindow: RuntimeHistoryWindow, pythonResult: pythonResult, method: pythonRunMethod })
         }
-        if(pythonResult.type == "error") {
+        if (pythonResult.type == "error") {
             renderPyMsgErr({ RuntimeHistoryWindow: RuntimeHistoryWindow, pythonResult: pythonResult, method: pythonRunMethod })
         }
     }
@@ -287,8 +287,8 @@ function initializeGlobalButtons(settings = {}) {
         RuntimeHistoryWindow.clear()
 
         const evaluatedCode = runSandbox(rec.editor.getValue())
-        
-        if(typeof evaluatedCode == "object") {
+
+        if (typeof evaluatedCode == "object") {
             evaluatedCode.forEach(e => {
                 const type = e.type
                 let args = e.args
@@ -307,42 +307,42 @@ function initializeGlobalButtons(settings = {}) {
                 }
 
                 let argType = null
-                if(args.length == 1) {
+                if (args.length == 1) {
                     argType = typeof args[0]
 
-                    if(isStringifiedObject(args[0]) == "object") {
+                    if (isStringifiedObject(args[0]) == "object") {
                         argType = "object:dict"
                     }
-                    if(isStringifiedObject(args[0]) == "array") {
+                    if (isStringifiedObject(args[0]) == "array") {
                         argType = "object:array"
                     }
 
-                    if(argType == "number") {
+                    if (argType == "number") {
                         argType = isFloat(args[0]) ? argType += ":float" : argType += ":int"
                     }
                 }
 
                 const runtimeOutputEl = document.createElement("div")
                 runtimeOutputEl.classList.add(`log-${types[type]} bottom-window__item`)
-                
+
                 const transluentSpan = document.createElement("span")
                 transluentSpan.className = "translucent bottom-window__item"
                 transluentSpan.textContent = `${line}:${col}`
                 runtimeOutputEl.appendChild(transluentSpan)
-                
-                if(argType != null) {
+
+                if (argType != null) {
                     const typeSpan = document.createElement("span")
                     typeSpan.className = `runtime-typeof ${argType.split(":")[0]}`
                     typeSpan.textContent = argType.toUpperCase()
                     runtimeOutputEl.appendChild(typeSpan)
                 }
-                
+
                 const iconSpan = document.createElement("span")
                 iconSpan.className = "material-symbols-rounded"
                 iconSpan.textContent = icons[type]
                 runtimeOutputEl.appendChild(iconSpan)
-                
-                if(args.join(", ").length == 0) {
+
+                if (args.join(", ").length == 0) {
                     const emptySpan = document.createElement("span")
                     emptySpan.className = "translucent"
                     emptySpan.textContent = "Empty"
@@ -390,22 +390,22 @@ function updateVisibleOnElements(extension, language) {
     document.querySelectorAll("[visibleOn]").forEach(element => {
         let val = element.getAttribute("visibleOn")
 
-        if(val.includes("language:")) {
+        if (val.includes("language:")) {
             let lang = val.split("language:")[1].trim()
 
-            if(extension == lang) {
+            if (extension == lang) {
                 element.classList.remove("hidden")
-            } 
+            }
             else {
                 element.classList.add("hidden")
             }
         }
-        if(val.includes("mode:")) {
+        if (val.includes("mode:")) {
             let mode = val.split("mode:")[1].trim()
 
-            if(language.mode == mode) {
+            if (language.mode == mode) {
                 element.classList.remove("hidden")
-            } 
+            }
             else {
                 element.classList.add("hidden")
             }
@@ -449,7 +449,7 @@ export async function openTab(path, content, extension, name, pathContext, isNew
     const imagePreviewWindow = new BottomWindow("imagePreview", { title: "Preview" })
     imagePreviewWindow.removeClose()
 
-    if(language.name == "Image") {
+    if (language.name == "Image") {
         disableSave()
         const escapedPath = escapeHtml(path);
         imagePreviewWindow.set(`<div class="image-preview"><img src="${escapedPath}"></div>`)
@@ -475,7 +475,8 @@ export async function openTab(path, content, extension, name, pathContext, isNew
         enableSnippets: true,
         enableLiveAutocompletion: true,
         animatedScroll: true,
-        cursorStyle: "smooth"
+        cursorStyle: "smooth",
+        fixedWidthGutter: true
     });
 
     // trigger first ace mode changed
@@ -511,9 +512,9 @@ export async function openTab(path, content, extension, name, pathContext, isNew
     }
 
     // 
-    
-    if("editor" in settings && "smoothScroll" in settings.editor) {
-        if(settings.editor.smoothScroll) {
+
+    if ("editor" in settings && "smoothScroll" in settings.editor) {
+        if (settings.editor.smoothScroll) {
             enableSmoothScroll(editor)
         }
     }
@@ -559,7 +560,7 @@ export async function openTab(path, content, extension, name, pathContext, isNew
             try {
                 ast = parse(editor.getValue());
                 addRuntimeError(
-                    { 
+                    {
                         isNull: true,
                         time: Math.floor(Date.now() / 1000)
                     }
@@ -655,7 +656,7 @@ export async function openTab(path, content, extension, name, pathContext, isNew
 
     // if tab - a new file (from dragNdrop or smth)
 
-    if(isNew) {
+    if (isNew) {
         showCodeWindowVisuals()
         tab.classList.add("not-saved")
     }
@@ -748,13 +749,13 @@ export function activateTab(tabEl) {
     destroyCodeContextMenu();
 
     tabsBar.querySelectorAll(".code-tab").forEach(t => t.classList.remove("active"));
-    editorWrapper.querySelectorAll(".code").forEach(c => c.classList.remove("ace_focus"));
+    editorWrapper.querySelectorAll(".code").forEach(c => c.classList.remove("active-pane"));
 
     tabEl.classList.add("active");
     const pane = document.getElementById(id);
     if (!pane) return;
-    
-    pane.classList.add("ace_focus");
+
+    pane.classList.add("active-pane");
     currentPath = realPath;
 
     const rec = tabsByPath.get(realPath);

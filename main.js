@@ -151,7 +151,7 @@ async function createWindow() {
             }
 
             v.addListener(function (e, down) {
-                if (e.state == "DOWN" && e.name == "S" && down["LEFT CTRL"]) {
+                if (mainWindow && mainWindow.isFocused() && e.state == "DOWN" && e.name == "S" && down["LEFT CTRL"]) {
                     mainWindow.webContents.send("keyboard_action", {
                         type: "saved"
                     });
