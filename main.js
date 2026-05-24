@@ -42,7 +42,7 @@ require("./app/runtime/runtimeHandler.js")
 const { terminalManager } = require("./app/helpers/terminal.js")
 
 const { createDebuggerWindow } = require("./helpers/debuggerWindow/debuggerWindow.js");
-const { createSplashWindow, updateSplash } = require('./app/splash.js');
+const { createSplashWindow, updateSplash } = require('./app/splash/splash.js');
 const { 
     readSettings, 
     deepMerge,
@@ -135,36 +135,40 @@ async function createWindow() {
 
     if(splash) updateSplash("Waiting for connect...")
 
-    checkStatus({ updateSplash: updateSplash })
-        .then(async () => {
-            if(localData.nonAccountMode) {
-                await mainWindow.loadFile(path.join(HTML_PATH, "index.html"));
-            }
-            else if (!localData.token) {
-                await mainWindow.loadFile(path.join(HTML_PATH, "login.html"));
-            } else {
-                let userCheckLogin = await verifyToken(localData.token);
-
-                if (userCheckLogin.success) {
-                    await mainWindow.loadFile(path.join(HTML_PATH, "index.html"));
+    // if offline mode (w/o account) then dont check status
+    if (localData.nonAccountMode) {
+        await mainWindow.loadFile(path.join(HTML_PATH, "index.html"));
+    }
+    else {
+        checkStatus({ updateSplash: updateSplash })
+            .then(async () => {
+                if (!localData.token) {
+                    await mainWindow.loadFile(path.join(HTML_PATH, "login.html"));
                 }
                 else {
-                    await mainWindow.loadFile(path.join(HTML_PATH, "login.html"));
-                    mainWindow.webContents.send("auth-msg", { type: "error", content: userCheckLogin.result })
-                }
-            }
+                    let userCheckLogin = await verifyToken(localData.token);
 
-            v.addListener(function (e, down) {
-                if (mainWindow && mainWindow.isFocused() && e.state == "DOWN" && e.name == "S" && down["LEFT CTRL"]) {
-                    mainWindow.webContents.send("keyboard_action", {
-                        type: "saved"
-                    });
+                    if (userCheckLogin.success) {
+                        await mainWindow.loadFile(path.join(HTML_PATH, "index.html"));
+                    }
+                    else {
+                        await mainWindow.loadFile(path.join(HTML_PATH, "login.html"));
+                        mainWindow.webContents.send("auth-msg", { type: "error", content: userCheckLogin.result })
+                    }
                 }
+
+                v.addListener(function (e, down) {
+                    if (mainWindow && mainWindow.isFocused() && e.state == "DOWN" && e.name == "S" && down["LEFT CTRL"]) {
+                        mainWindow.webContents.send("keyboard_action", {
+                            type: "saved"
+                        });
+                    }
+                });
+            })
+            .catch(err => {
+                updateSplash(`Error: ${err.message}. Please report this error to the developer and try again later`, true)
             });
-        })
-        .catch(err => {
-            updateSplash(`Error: ${err.message}. Please report this error to the developer and try again later`, true)
-        });
+    }
 
     ipcMain.handle("request-file-open", () => {
         return selectFile(mainWindow)

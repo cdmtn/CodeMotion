@@ -1,6 +1,6 @@
-const { BrowserWindow } = require("electron")
-const { PRELOAD_PATH, SPLASH_HTML_PATH } = require("./helpers/paths.js")
-const { getAppIcon } = require("./helpers/requests.js")
+const { BrowserWindow, app } = require("electron")
+const { PRELOAD_PATH, SPLASH_HTML_PATH } = require("../helpers/paths.js")
+const { getAppIcon } = require("../helpers/requests.js")
 
 let splash;
 

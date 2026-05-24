@@ -6,6 +6,13 @@
         "withoutUsername": "How are you feeling today?"
     },
 
+    "splash": {
+        "createdBy": "Created by %{name}",
+        "description": "Web development environment",
+        "closeBtn": "Close",
+        "offlineBtn": "Sign in without an account"
+    },
+
     "errorPlaceholder": {
         "title": "O-o-oops!",
         "description": "There seems to be an error with this request, so please try again later and be sure to let us know. We hope you'll bear with us"
