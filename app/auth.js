@@ -6,9 +6,9 @@ const { LOCAL_FILE_PATH } = require("./helpers/paths.js")
 const tokenFile = LOCAL_FILE_PATH
 const { API } = require("./helpers/paths.js");
 
-async function register(username, password, passwordConfirm) {
+async function register(username, email, password, passwordConfirm) {
     try {
-        const response = await fetch(`${API}/register.php`, {
+        const response = await fetch(`${API}/auth/register.php`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -16,11 +16,15 @@ async function register(username, password, passwordConfirm) {
             body: JSON.stringify({
                 username,
                 password,
+                email,
                 passwordConfirm
             })
         });
 
         const result = await response.json();
+        
+        console.log(`POST ${API}/auth/register.php:`)
+        console.log(`>`, result)
 
         if (!response.ok) {
             return {
@@ -41,15 +45,15 @@ async function register(username, password, passwordConfirm) {
     }
 }
 
-async function login(username, password) {
+async function login(email, password) {
     try {
-        const response = await fetch(`${API}/checkLogin.php`, {
+        const response = await fetch(`${API}/auth/checkLogin.php`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                username,
+                email,
                 password
             })
         });
@@ -77,7 +81,7 @@ async function login(username, password) {
 
 async function loginById(id, password) {
     try {
-        const response = await fetch(`${API}/checkLogin.php`, {
+        const response = await fetch(`${API}/auth/checkLogin.php`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -188,12 +192,12 @@ function decodeJWT(token) {
     }
 }
 
-ipcMain.handle('register', async (_e, username, password, passwordConfirm) => {
-    return await register(username, password, passwordConfirm);
+ipcMain.handle('register', async (_e, username, email, password, passwordConfirm) => {
+    return await register(username, email, password, passwordConfirm);
 });
 
-ipcMain.handle('login', async (_e, username, password) => {
-    const result = await login(username, password);
+ipcMain.handle('login', async (_e, email, password) => {
+    const result = await login(email, password);
 
     if (result.success && result.result.token) {
         saveToken({

@@ -6,11 +6,44 @@
         "withoutUsername": "Як ви себе почуваєте сьогодні?"
     },
 
+    "help": "Допомога",
+
     "splash": {
         "createdBy": "Створено %{name}",
         "description": "Середовище для переважно веб-розробки",
         "closeBtn": "Закрити",
         "offlineBtn": "Увійти без облікового запису"
+    },
+    
+    "auth": {
+        "register": {
+            "title": "Реєстрація",
+            "description": "Зареєструйтеся, вказавши свою адресу електронної пошти та пароль",
+            "inputs": {
+                "username": "Ім'я користувача",
+                "email": "Пошта",
+                "password": "Пароль",
+                "repeatPassword": "Повторіть пароль",
+                "submitBtn": "Зареєструватися"
+            },
+            "successNotification": {
+                "title": "Реєстрацію завершено",
+                "description": "Реєстрацію завершено. Тепер вам потрібно увійти до свого облікового запису"
+            }
+        },
+        "login": {
+            "title": "Вхід",
+            "description": "Увійдіть до свого облікового запису, вказавши адресу електронної пошти",
+            "inputs": {
+                "email": "Пошта",
+                "password": "Пароль",
+                "submitBtn": "Вхід"
+            }
+        },
+        "alreadyHaveAnAccount": "Вже маєте обліковий запис?",
+        "howToRegOrganization": "Як зареєструвати організацію",
+        "registerNewAccount": "Зареєструвати новий обліковий запис",
+        "skipAccountCreation": "Пропустити створення облікового запису"
     },
 
     "errorPlaceholder": {

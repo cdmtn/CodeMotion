@@ -16,14 +16,16 @@ export async function getAddBugModal() {
     const yourColleaguesRes = await window.electron.requestGetYourOrgColleagues()
     const yourColleaguesResMSG = yourColleaguesRes.msg
 
-    for(const item in yourColleaguesResMSG) {
-        const colleague = yourColleaguesResMSG[item]
+    if(yourColleaguesRes.success) {
+        for(const item in yourColleaguesResMSG) {
+            const colleague = yourColleaguesResMSG[item]
 
-        const colleagueItem = colleaguesSelect.add(colleague.id, colleague.name, { secondary: colleague.organization.name })
+            const colleagueItem = colleaguesSelect.add(colleague.id, colleague.name, { secondary: colleague.organization.name })
 
-        if(item == 0) {
-            assignID = colleague.id
-            colleagueItem.default()
+            if(item == 0) {
+                assignID = colleague.id
+                colleagueItem.default()
+            }
         }
     }
 

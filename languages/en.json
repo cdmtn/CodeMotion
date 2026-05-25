@@ -6,11 +6,48 @@
         "withoutUsername": "How are you feeling today?"
     },
 
+    "help": "Help",
+
     "splash": {
         "createdBy": "Created by %{name}",
         "description": "Web development environment",
         "closeBtn": "Close",
         "offlineBtn": "Sign in without an account"
+    },
+
+    "auth": {
+        "register": {
+            "title": "Register",
+            "description": "Sign up using your email address and password",
+
+            "inputs": {
+                "username": "Username",
+                "email": "EMail",
+                "password": "Password",
+                "repeatPassword": "Repeat password",
+                "submitBtn": "Register"
+            },
+
+            "successNotification": {
+                "title": "Registration complete",
+                "description": "Registration is complete. Now you need to log in to your account"
+            }
+        },
+        "login": {
+            "title": "Login",
+            "description": "Log in to your account using your email address",
+
+            "inputs": {
+                "email": "EMail",
+                "password": "Password",
+                "submitBtn": "Login"
+            }
+        },
+
+        "alreadyHaveAnAccount": "Already have an account?",
+        "howToRegOrganization": "How to register organization",
+        "registerNewAccount": "Register a new account",
+        "skipAccountCreation": "Skip account creation"
     },
 
     "errorPlaceholder": {

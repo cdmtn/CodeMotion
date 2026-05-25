@@ -6,11 +6,48 @@
         "withoutUsername": "Как вы себя чувствуете сегодня?"
     },
 
+    "help": "Помощь",
+
     "splash": {
         "createdBy": "Создано %{name}",
         "description": "Среда для преимущественно веб-разработки",
         "closeBtn": "Закрыть",
         "offlineBtn": "Войти без аккаунта"
+    },
+
+    "auth": {
+        "register": {
+            "title": "Регистрация",
+            "description": "Зарегистрируйтесь, указав свой адрес электронной почты и пароль",
+
+            "inputs": {
+                "username": "Имя пользователя",
+                "email": "Почта",
+                "password": "Пароль",
+                "repeatPassword": "Повторите пароль",
+                "submitBtn": "Зарегистрироваться"
+            },
+
+            "successNotification": {
+                "title": "Регистрация завершена",
+                "description": "Регистрация завершена. Теперь вам нужно войти в свою учетную запись"
+            }
+        },
+        "login": {
+            "title": "Вход",
+            "description": "Войдите в свою учетную запись, указав адрес электронной почты",
+
+            "inputs": {
+                "email": "Почта",
+                "password": "Пароль",
+                "submitBtn": "Вход"
+            }
+        },
+
+        "alreadyHaveAnAccount": "У вас уже есть аккаунт?",
+        "howToRegOrganization": "Как зарегистрировать организацию",
+        "registerNewAccount": "Зарегистрировать новую учетную запись",
+        "skipAccountCreation": "Пропустить создание учетной записи"
     },
 
     "errorPlaceholder": {

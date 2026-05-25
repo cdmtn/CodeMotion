@@ -2,49 +2,72 @@ import {
     inputs,
     submitBtn,
     usernameInput,
+    emailInput,
     passwordInput,
+    confirmPassword,
     errorBlock,
-    showLoading,
-    hideLoading,
     disableButtons,
     unDisableButtons,
-    showErrBlock
+    showErrBlock,
+    getFormLabel
 } from "../components/authRenderer.js"
 
-if (inputs.length > 0) {
-    inputs.forEach(input => {
-        input.addEventListener("input", (e) => {
-            if (e.target.value.length > 0) {
-                input.classList.add("focused")
-            }
-            else {
-                input.classList.remove("focused")
-            }
+import { createNotify, GLS } from "../js/lib.js"
+
+document.addEventListener("DOMContentLoaded", async () => {
+    const gls = await GLS.init()
+
+    getFormLabel(username).textContent = gls.get("auth.register.inputs.username")
+    getFormLabel(email).textContent = gls.get("auth.register.inputs.email")
+    getFormLabel(password).textContent = gls.get("auth.register.inputs.password")
+    getFormLabel(confirmPassword).textContent = gls.get("auth.register.inputs.repeatPassword")
+    
+    submitBtn.textContent = gls.get("auth.register.inputs.submitBtn")
+
+    document.querySelector(".user-logo__title").textContent = gls.get("auth.register.title")
+    document.querySelector(".user-logo__desc").textContent = gls.get("auth.register.description")
+
+    if (inputs.length > 0) {
+        inputs.forEach(input => {
+            input.addEventListener("input", (e) => {
+                if (e.target.value.length > 0) {
+                    input.classList.add("focused")
+                }
+                else {
+                    input.classList.remove("focused")
+                }
+            })
         })
+    }
+
+    submitBtn.addEventListener("click", async () => {
+        let confirmPasswordInput = document.querySelector("#confirm_password")
+
+        let username = usernameInput.value
+        let email = emailInput.value
+        let password = passwordInput.value
+        let confirmPassword = confirmPasswordInput.value
+
+        disableButtons()
+
+        let res = await window.electron.register(username, email, password, confirmPassword)
+
+        if(res.success) {
+            createNotify(
+                {
+                    type: "success",
+                    icon: "check",
+                    title: gls.get("auth.register.successNotification.title"),
+                    content: gls.get("auth.register.successNotification.description")
+                }
+            )
+            errorBlock.classList.add("hidden")
+            window.location.href = `login.html?email=${email}&password=${password}`
+        }
+        else {
+            showErrBlock(res.result)
+        }
+
+        unDisableButtons()
     })
-}
-
-submitBtn.addEventListener("click", async () => {
-    let confirmPasswordInput = document.querySelector("#confirm_password")
-
-    let username = usernameInput.value
-    let password = passwordInput.value
-    let confirmPassword = confirmPasswordInput.value
-
-    showLoading()
-    disableButtons()
-
-    let res = await window.electron.register(username, password, confirmPassword)
-    console.log(res)
-
-    if(res.success) {
-        errorBlock.classList.add("hidden")
-        window.location.href = `login.html?username=${username}&password=${password}`
-    }
-    else {
-        showErrBlock(res.result)
-    }
-
-    unDisableButtons()
-    hideLoading()
 })

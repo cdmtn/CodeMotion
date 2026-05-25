@@ -71,7 +71,8 @@
     opacity: .5;
     font-weight: 300;
     line-height: 20px;
-    white-space: pre;
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 
 .notification-info .notification-close {

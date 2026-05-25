@@ -81,7 +81,7 @@ textarea {
 .ace_gutter-cell.ace_warning,
 .ace_icon.ace_warning,
 .ace_icon.ace_warning_fold {
-    background-image: url("../media/markers/warn.png");
+    background-image: url("../media/markers/warn.svg");
     background-size: contain;
     background-repeat: no-repeat;
 }
@@ -92,7 +92,7 @@ textarea {
 .ace_gutter-cell.ace_security,
 .ace_icon.ace_security,
 .ace_icon.ace_security_fold {
-    background-image: url("../media/markers/error.png");
+    background-image: url("../media/markers/error.svg");
     background-size: contain;
     background-repeat: no-repeat;
 }
@@ -101,7 +101,7 @@ textarea {
 .ace_icon.ace_info,
 .ace_gutter-cell.ace_hint,
 .ace_icon.ace_hint {
-    background-image: url("../media/markers/info.png");
+    background-image: url("../media/markers/info.svg")!important;
     background-size: contain;
     background-repeat: no-repeat;
 }
