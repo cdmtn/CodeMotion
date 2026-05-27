@@ -628,7 +628,7 @@ body.explorer-resizing {
     justify-content: space-between;
     padding: var(--explorer-padding);
     height: 40px;
-    text-transform: uppercase;
+    text-transform: capitalize;
     transition: .2s;
     align-items: center;
     position: absolute;

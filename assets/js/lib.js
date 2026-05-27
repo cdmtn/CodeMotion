@@ -65,10 +65,12 @@ export const tabName = document.querySelector("#tab-name");
 export function setTabNameCounter(count) {
     if (!tabName) return;
     const old = tabName.querySelector(".counter");
+
     if (count === false) {
         if (old) old.remove();
         return;
     }
+    
     if (old) old.remove();
     tabName.insertAdjacentHTML("beforeend", `<span class="counter">${count}</span>`);
 }
