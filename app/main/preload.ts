@@ -22,6 +22,9 @@ contextBridge.exposeInMainWorld('electron', {
     requestGetYourOrgColleagues: () => ipcRenderer.invoke("request-get-your-org-colleagues"),
     createOrganization: (params: any) => ipcRenderer.invoke("create-organization", params),
     requestExploreOrganizations: () => ipcRenderer.invoke("get-explore-organizations"),
+    requestRecoveryCode: (email: string) => ipcRenderer.invoke("request-recovery-code", email),
+    verifyRecoveryCode: (email: string, code: string) => ipcRenderer.invoke("verify-recovery-code", email, code),
+    resetPassword: (recoveryToken: string, newPassword: string) => ipcRenderer.invoke("reset-password", recoveryToken, newPassword),
 
     createNotification: (data: any) => ipcRenderer.send("spawn-notification", data),
 

@@ -1,5 +1,4 @@
 import {
-    inputs,
     submitBtn,
     usernameInput,
     emailInput,
@@ -8,7 +7,8 @@ import {
     disableButtons,
     unDisableButtons,
     showErrBlock,
-    getFormLabel
+    getFormLabel,
+    initInputs
 } from "../components/authRenderer.js"
 
 import { GLS } from "./lib.js"
@@ -16,18 +16,7 @@ import { GLS } from "./lib.js"
 document.addEventListener("DOMContentLoaded", async () => {
     const gls = await GLS.init()
 
-    if (inputs.length > 0) {
-        inputs.forEach(input => {
-            input.addEventListener("input", (e) => {
-                if (e.target.value.length > 0) {
-                    input.classList.add("focused")
-                }
-                else {
-                    input.classList.remove("focused")
-                }
-            })
-        })
-    }
+    initInputs()
 
     const params = new URLSearchParams(window.location.search)
 

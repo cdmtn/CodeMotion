@@ -1,5 +1,4 @@
 import {
-    inputs,
     submitBtn,
     usernameInput,
     emailInput,
@@ -9,13 +8,16 @@ import {
     disableButtons,
     unDisableButtons,
     showErrBlock,
-    getFormLabel
+    getFormLabel,
+    initInputs
 } from "../components/authRenderer.js"
 
 import { createNotify, GLS } from "../js/lib.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
     const gls = await GLS.init()
+
+    initInputs()
 
     getFormLabel(username).textContent = gls.get("auth.register.inputs.username")
     getFormLabel(email).textContent = gls.get("auth.register.inputs.email")
@@ -26,19 +28,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     document.querySelector(".user-logo__title").textContent = gls.get("auth.register.title")
     document.querySelector(".user-logo__desc").textContent = gls.get("auth.register.description")
-
-    if (inputs.length > 0) {
-        inputs.forEach(input => {
-            input.addEventListener("input", (e) => {
-                if (e.target.value.length > 0) {
-                    input.classList.add("focused")
-                }
-                else {
-                    input.classList.remove("focused")
-                }
-            })
-        })
-    }
 
     submitBtn.addEventListener("click", async () => {
         let confirmPasswordInput = document.querySelector("#confirm_password")

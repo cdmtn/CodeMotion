@@ -43,6 +43,29 @@
                 "submitBtn": "Login"
             }
         },
+        "recovery": {
+            "title": "Recovery",
+            "description": "Recover access to your account by resetting your password. To get started, enter your email address",
+            "description_code": "Check your email inbox. If the email is there, you'll receive a 6-digit code",
+            "description_newpass": "Great! You now have exactly %{minutes} min. to reset your password. After this time, the request will expire.",
+            "description_newpass_success": "Your password has been successfully reset! Save it so you don't forget",
+
+            "inputs": {
+                "email": "EMail",
+                "code": "Generated code",
+                "newpass": "New password"
+            },
+
+            "submitBtn": "Send code",
+            "verifyCodeBtn": "Verify code",
+            "newPassBtn": "Setup new password",
+            "toLoginPageBtn": "Login with new password",
+
+            "successNotification": {
+                "title": "Recovery code sended to your email",
+                "description": "Check your inbox: %{email}"
+            }
+        },
 
         "alreadyHaveAnAccount": "Already have an account?",
         "howToRegOrganization": "How to register organization",

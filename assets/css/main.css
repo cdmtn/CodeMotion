@@ -1809,56 +1809,6 @@ body.explorer-resizing {
 .transparent-scrollbar::-webkit-scrollbar-button {
     display: none;
 }
-/*  */
-
-.modal-calendar__day-badge__wrapper .modal-calendar__day-badge {
-    font-size: 12px;
-    background: var(--calendar-day-bg);
-    padding: 2px 5px;
-    width: fit-content;
-    mask-image: paint(squircle);
-    --squircle-radius: 3px;
-    --squircle-smooth: 0.3;
-    transition: .4s;
-    user-select: none;
-}
-.modal-calendar__day-badge__wrapper .modal-calendar__day-badge.removed {
-    transform: scale(0);
-}
-/*  */
-
-.modal-calendar__day-context {
-    position: absolute;
-    width: 200px;
-    background: var(--body-color);
-    backdrop-filter: blur(5px);
-    z-index: 81;
-    mask-image: paint(squircle);
-    --squircle-radius: 8px;
-    --squircle-smooth: 0.3;
-}
-.modal-calendar__day-context input {
-    width: -webkit-fill-available;
-    height: 20px;
-    padding: 10px 15px;
-    font-size: 14px;
-}
-.modal-calendar__day-context input:focus {
-    outline: none;
-}
-.modal-calendar__day-context button {
-    width: 100%;
-    height: 35px;
-    border-radius: 0px;
-    background: transparent;
-    border: none;
-    color: var(--text-color);
-    transition: .2s;
-    border-top: 1px solid var(--block-divider-border-color);
-}
-.modal-calendar__day-context button:hover {
-    cursor: pointer;
-}
 
 .sidebar {
     width: var(--sidebar-width);

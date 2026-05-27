@@ -192,6 +192,74 @@ function decodeJWT(token) {
     }
 }
 
+async function recoveryCode(email) {
+    try {
+        const response = await fetch(`${API}/auth/requestRecovery.php`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email })
+        });
+
+        const data = await response.json()
+
+        if (data.success) {
+            return { success: true, result: data.result }
+        } else {
+            return { success: false, result: data.result }
+        }
+    } catch (error) {
+        return { success: false, result: error }
+    }
+}
+
+async function verifyRecoveryCode(email, code) {
+    try {
+        const response = await fetch(`${API}/auth/verifyRecoveryCode.php`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, code })
+        });
+
+        const data = await response.json()
+
+        console.log("VRC:", data)
+
+        if (data.success) {
+            return { success: true, result: data.result }
+        } else {
+            return { success: false, result: data.result }
+        }
+    } catch (error) {
+        return { success: false, result: error }
+    }
+}
+
+async function resetPassword(recoveryToken, newPassword) {
+    try {
+        const response = await fetch(`${API}/auth/resetPassword.php`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ recovery_token: recoveryToken, new_password: newPassword })
+        });
+
+        const data = await response.json()
+
+        if (data.success) {
+            return { success: true, result: data.result }
+        } else {
+            return { success: false, result: data.result }
+        }
+    } catch (error) {
+        return { success: false, result: error }
+    }
+}
+
 ipcMain.handle('register', async (_e, username, email, password, passwordConfirm) => {
     return await register(username, email, password, passwordConfirm);
 });
@@ -210,6 +278,18 @@ ipcMain.handle('login', async (_e, email, password) => {
 
     return result;
 });
+
+ipcMain.handle('request-recovery-code', async (_, email) => {
+    return await recoveryCode(email)
+})
+
+ipcMain.handle('verify-recovery-code', async (_, email, code) => {
+    return await verifyRecoveryCode(email, code)
+})
+
+ipcMain.handle('reset-password', async (_, recoveryToken, newPassword) => {
+    return await resetPassword(recoveryToken, newPassword)
+})
 
 ipcMain.handle('login-by-id', async (_e, id, password) => {
     const result = await loginById(id, password);

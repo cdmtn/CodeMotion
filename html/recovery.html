@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../assets/css/main.css">
-    <link rel="stylesheet" href="../assets/css/login.css">
     <link rel="stylesheet" href="../assets/css/auth.css">
-    <link rel="stylesheet" href="../assets/css/register.css">
+    <link rel="stylesheet" href="../assets/css/login.css">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,7 +18,7 @@
             https://unpkg.com 
             https://cdnjs.cloudflare.com 
             https://cdnjs.com
-            https://cdn.yurba.one 
+            https://cdn.yurba.one
             https://cdn.jsdelivr.net
             https://speedcf.cloudflareaccess.com
             https://www.unpkg.com
@@ -40,7 +39,7 @@
 
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
-    <script src="../assets/js/register.js" type="module"></script>
+    <script src="../assets/js/recovery.js" type="module"></script>
     <script src="../assets/js/global.js" type="module"></script>
 </head>
 <body>
@@ -49,43 +48,29 @@
             <div class="user-form__title">
                 <div class="user-logo__section">
                     <div class="user-logo">
-                        <span class="material-symbols-rounded">account_box</span>
+                        <span class="material-symbols-rounded">password</span>
                     </div>
                     <div class="user-logo__title"></div>
                 </div>
                 <div class="user-logo__section">
-                    <div class="user-logo__desc">Signup with your PlusID with your account username and password</div>
+                    <div class="user-logo__desc"></div>
                 </div>
             </div>
 
             <div class="user-form__inputs">
                 <div class="form-element">
-                    <input type="text" spellcheck="false" id="username"/>
-                    <span class="form-label">
-                        Username
-                    </span>
-                </div>
-                <div class="form-element">
                     <input type="text" spellcheck="false" id="email"/>
-                    <span class="form-label">
-                        EMail
-                    </span>
+                    <span class="form-label"></span>
                 </div>
-                <div class="form-element">
-                    <input spellcheck="false" type="password" id="password"/>
-                    <span class="form-label">
-                        Password
-                    </span>
+                <div class="form-element hidden" disabled id="code_field">
+                    <input type="text" spellcheck="false" id="code" disabled/>
+                    <span class="form-label"></span>
                 </div>
-                <div class="form-element">
-                    <input spellcheck="false" type="password" id="confirm_password"/>
-                    <span class="form-label">
-                        Confirm password
-                    </span>
+                <div class="form-element hidden" disabled id="newpass_field">
+                    <input type="password" spellcheck="false" id="newpass" disabled/>
+                    <span class="form-label"></span>
                 </div>
-                <div class="form-submit">
-                    Register
-                </div>
+                <div class="form-submit" id="recoverySubmitBtn"></div>
             </div>
         </div>
 
@@ -94,9 +79,8 @@
         </div>
 
         <div class="user-form__links">
-            <a href="login.html" id="alreadyHaveAccount">Already have an account?</a>
-            <a href="#" id="howToRegisterOrg">How to register organization</a>
-            <a href="#" id="help">Help</a>
+            <a href="register.html" id="registerNewAccount">Register a new account</a>
+            <a id="skipAccountCreation">Skip account creation</a>
         </div>
     </div>
 </body>

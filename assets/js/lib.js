@@ -856,6 +856,10 @@ export function showNeedReloadTopBar() {
     needToReloadTopBar.on("unhover", (instance) => { instance.hide({ iconVisible: true }) })
 }
 
+export function secondsToMinutes(seconds) {
+    return seconds / 60;
+}
+
 window.Notificator = Notificator
 window.addToBug = addToBug
 window.addToHistory = addToHistory
