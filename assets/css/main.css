@@ -1623,6 +1623,10 @@ body.explorer-resizing {
     gap: 5px;
     font-weight: var(--default-font-weight);
 }
+.code-structure .separator {
+    opacity: 0.5;
+    font-size: 14px;
+}
 .code-structure .context-item span[class^="material-symbols"] {
     width: 15px;
     height: 15px;

@@ -1,3 +1,5 @@
+import { renderSeparator } from "./globals.js";
+
 export class JSONParser {
     showJSONContext(editor, contextPanel) {
         const code = editor.getValue();
@@ -87,9 +89,7 @@ export class JSONParser {
             contextPanel.appendChild(el);
 
             if (i < chain.length - 1) {
-                const sep = document.createElement("span");
-                sep.className = "context-separator";
-                sep.textContent = "→";
+                const sep = renderSeparator()
                 contextPanel.appendChild(sep);
             }
         });

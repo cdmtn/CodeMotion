@@ -1,3 +1,5 @@
+import { renderSeparator } from "./globals.js";
+
 export class HTMLParser {
     enableAutocomplete(editor) {
         editor.commands.addCommand({
@@ -218,9 +220,7 @@ export class HTMLParser {
             contextPanel.appendChild(el);
 
             if (i < stack.length - 1) {
-                const sep = document.createElement("span");
-                sep.textContent = "→";
-                sep.style.opacity = "0.5";
+                const sep = renderSeparator()
                 contextPanel.appendChild(sep);
             }
         });

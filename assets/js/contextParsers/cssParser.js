@@ -1,3 +1,5 @@
+import { renderSeparator } from "./globals.js";
+
 export class CSSParser {
     getContextChain(code, row) {
         const chain = [];
@@ -146,9 +148,7 @@ export class CSSParser {
             container.appendChild(el);
 
             if (i < chain.length - 1) {
-                const sep = document.createElement("span");
-                sep.textContent = "→";
-                sep.style.opacity = "0.5";
+                const sep = renderSeparator()
                 container.appendChild(sep);
             }
         });

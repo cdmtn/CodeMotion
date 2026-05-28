@@ -383,7 +383,7 @@ async function requestGetYourOrgColleagues() {
     const userToken = await getUserToken()
 
     try {
-        const response = await fetch(`${API}/getYourOrgColleagues.php`, {
+        const response = await fetch(`${API}/organizations/getYourOrgColleagues.php`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${userToken}`
@@ -412,7 +412,7 @@ async function requestCreateOrganization({ name, description, website }) {
     formData.append('website', website);
 
     try {
-        const response = await fetch(`${API}/createOrg.php`, {
+        const response = await fetch(`${API}/organizations/createOrg.php`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${userToken}`
@@ -436,7 +436,7 @@ async function requestExploreOrganizations() {
     const userToken = await getUserToken()
 
     try {
-        const response = await fetch(`${API}/getExploreOrgs.php`, {
+        const response = await fetch(`${API}/organizations/getExploreOrgs.php`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${userToken}`
