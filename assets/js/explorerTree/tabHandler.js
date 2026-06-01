@@ -160,7 +160,85 @@ function initializeGlobalButtons(settings = {}) {
         MDPreviewWindow.clear()
 
         const editor = rec.editor;
-        MDPreviewWindow.set(marked.parse(editor.getValue()))
+        const html = marked.parse(editor.getValue(), {
+            gfm: true,
+            breaks: false,
+            headerIds: true,
+            mangle: false
+        })
+
+        MDPreviewWindow.set(`
+            <div class="md-preview-content markdown-body">
+                ${html}
+            </div>
+        `)
+
+        // IMPORTANT: prevent renderer navigation on markdown links (it breaks IDE UI)
+        const previewRoot = MDPreviewWindow.winContent.querySelector(".md-preview-content")
+        if (previewRoot) {
+            previewRoot.addEventListener("click", async (event) => {
+                const link = event.target.closest("a")
+                if (!link) return
+
+                event.preventDefault()
+
+                const href = (link.getAttribute("href") || "").trim()
+                if (!href) return
+
+                if (/^(https?:)?\/\//i.test(href)) {
+                    window.electron.openInBrowser(href)
+                    return
+                }
+
+                if (href.startsWith("#")) {
+                    const id = decodeURIComponent(href.slice(1))
+                    const target = previewRoot.querySelector(`#${CSS.escape(id)}`)
+                    if (target) target.scrollIntoView({ behavior: "smooth", block: "start" })
+                    return
+                }
+
+                try {
+                    const base = String(currentPath || "").replace(/\\/g, "/")
+                    const baseDir = base.includes("/") ? base.slice(0, base.lastIndexOf("/")) : base
+                    const cleanHref = decodeURIComponent(href.split("#")[0].split("?")[0]).replace(/\\/g, "/")
+
+                    const combined = cleanHref.startsWith("/")
+                        ? cleanHref
+                        : `${baseDir}/${cleanHref}`
+
+                    const parts = []
+                    for (const part of combined.split("/")) {
+                        if (!part || part === ".") continue
+                        if (part === "..") {
+                            parts.pop()
+                            continue
+                        }
+                        parts.push(part)
+                    }
+
+                    const targetPath = parts.join("/")
+                    const targetName = targetPath.split("/").pop()
+                    const targetExt = (targetName.split(".").pop() || "").toLowerCase()
+                    const targetContent = await window.electron.readFileContent(targetPath, "utf8")
+
+                    await openTab(targetPath, targetContent, targetExt, targetName)
+
+                    if (["md", "markdown", "mdown"].includes(targetExt)) {
+                        setTimeout(() => {
+                            const btn = document.querySelector("#MDPreview")
+                            if (btn) btn.click()
+                        }, 0)
+                    }
+                } catch {
+                    createNotify({
+                        type: "danger",
+                        icon: "error",
+                        title: "Markdown link error",
+                        content: `Cannot open: ${href}`
+                    })
+                }
+            })
+        }
     }
     const mdPreviewBtn = document.querySelector("#MDPreview");
     if (mdPreviewBtn) {

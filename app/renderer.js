@@ -193,17 +193,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.querySelector(`[popup="account"] .popup-content`).prepend(loginPopupItem)
     }
     else {
-        getCurrentUserDataFromAPI(gls).then((e) => {
-            if (!e.success) {
-                const errEl = loader?.querySelector(".loader-msg");
-                if (errEl) {
-                    errEl.classList.remove("hidden");
-                    errEl.textContent = `Error: ${e.result.result}`;
+        loader?.classList.add("hidden");
+
+        getCurrentUserDataFromAPI(gls)
+            .then((e) => {
+                if (!e || !e.success) {
+                    const errEl = loader?.querySelector(".loader-msg");
+                    if (errEl) {
+                        errEl.classList.remove("hidden");
+                        errEl.textContent = "Offline mode: server unavailable";
+                    }
                 }
-            } else {
-                loader?.classList.add("hidden");
-            }
-        });
+            })
+            .catch(() => {
+            });
     }
 
     // Explorer tabs
