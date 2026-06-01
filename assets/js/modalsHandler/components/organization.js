@@ -3,6 +3,7 @@ import { valid } from "../engine.js"
 import { createDIV, createParagraph, createIcon, createLink, createBadge } from "../handlers/helpers.js"
 
 export function renderOrganization(properties = {}) {
+    let id = properties.id
     const name = properties.name
     const description = properties.description
     const website = properties.website
@@ -29,7 +30,9 @@ export function renderOrganization(properties = {}) {
         return sectionEl
     }
 
-    const id = idify(name)
+    if(!id) {
+        id = idify(name)
+    }
 
     const wrapper = document.createElement("div")
     wrapper.classList.add("modal-org")
@@ -49,13 +52,11 @@ export function renderOrganization(properties = {}) {
 
         const itemEl = createCounter()
         
-        const itemTitleEl = document.createElement("p")
+        const itemTitleEl = createParagraph(name)
         itemTitleEl.classList.add("title")
-        itemTitleEl.textContent = name
 
-        const itemValueEl = document.createElement("p")
+        const itemValueEl = createParagraph(value)
         itemValueEl.classList.add("value")
-        itemValueEl.textContent = value
 
         itemEl.appendChild(itemTitleEl)
         itemEl.appendChild(itemValueEl)
@@ -71,7 +72,7 @@ export function renderOrganization(properties = {}) {
 
     const secondSectionInfoComponent = createSectionComponent()
     
-    const secondSectionInfoComponentTitle = createParagraph(name)
+    const secondSectionInfoComponentTitle = createParagraph(name, true)
     secondSectionInfoComponentTitle.classList.add("modal-org__title")
 
     const secondSectionInfoComponentDesc = createParagraph(truncateString(description, 400))

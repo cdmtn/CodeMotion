@@ -1,14 +1,31 @@
-import { Languages, Dirs, escapeHtml } from "../lib.js";
+import { Languages, Dirs, escapeHtml, Filenames } from "../lib.js";
 
 const iconCache = new Map();
 
-async function getFileIcon(ext) {
-    if (iconCache.has(ext)) {
-        return iconCache.get(ext);
+async function getFileIcon({ ext, name }) {
+    const nameKey = `name:${name}`;
+    const extKey = `ext:${ext}`;
+
+    if (iconCache.has(nameKey)) {
+        return iconCache.get(nameKey);
     }
-    const icon = await Languages.getIconPath(ext);
-    iconCache.set(ext, icon);
-    return icon;
+
+    const fileNameIcon = await Filenames.getIconPath(name);
+
+    if (fileNameIcon) {
+        iconCache.set(nameKey, fileNameIcon);
+        return fileNameIcon;
+    }
+
+    if (iconCache.has(extKey)) {
+        return iconCache.get(extKey);
+    }
+
+    const fileIcon = await Languages.getIconPath(ext);
+
+    iconCache.set(extKey, fileIcon);
+
+    return fileIcon;
 }
 
 function getDirIcon(name) {
@@ -72,7 +89,8 @@ export async function renderNodes(nodes) {
             switch (node.type) {
                 case "file": {
                     const ext = normalized.escapedName.split(".").pop();
-                    const fileIcon = await getFileIcon(ext);
+                    const fileIcon = await getFileIcon({ ext: ext, name: normalized.escapedName });
+
                     html = createFileElement(normalized, ext, fileIcon);
                     break;
                 }
@@ -81,6 +99,7 @@ export async function renderNodes(nodes) {
                     const children = loaded && Array.isArray(node.children) ? node.children : [];
                     const icon = getDirIcon(normalized.escapedName);
                     const childrenHtml = await renderNodes(children);
+
                     html = createDirElement(normalized, icon, childrenHtml, loaded);
                     break;
                 }

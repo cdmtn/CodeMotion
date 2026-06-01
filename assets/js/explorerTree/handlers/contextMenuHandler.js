@@ -1,7 +1,7 @@
 import { BottomWindow } from "../../handlers/BottomWindowHandler.js";
 import { Console } from "../../handlers/terminalHandler.js";
 import { copyText, normalizePath } from "../../lib.js";
-import { closeTab, updateTabPath } from "../../../components/tabHandler.js";
+import { closeTab, updateTabPath } from "../tabHandler.js";
 import { renderNodes } from "../render.js";
 import { bindFileClicks } from "./bindFileClicksHandler.js";
 

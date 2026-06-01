@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/auth.css">
+    <link rel="stylesheet" href="../assets/css/login.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet"> 
+    <link rel="stylesheet" type='text/css' href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css" />
+
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self' 'unsafe-eval' 'unsafe-inline' https://unpkg.com ;
+        script-src 'self' 'unsafe-eval' 'unsafe-inline'
+            https://unpkg.com 
+            https://cdnjs.cloudflare.com 
+            https://cdnjs.com
+            https://cdn.yurba.one
+            https://cdn.jsdelivr.net
+            https://speedcf.cloudflareaccess.com
+            https://www.unpkg.com
+            https://html2canvas.hertzen.com;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net;
+        font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:;
+        img-src 'self' data: blob:;
+        worker-src 'self' blob:;
+    ">
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.43.2/ace.js" integrity="sha512-ZIa+FlPaGDSM+lTl9JaxnQvcfma7ETsOHd9Thbhp5u4RX1uYiDNW7XvUrXv4dJSPetXbiTzWilHEkSg4YpmltQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/JDMcKinstry/JavaScriptDateFormat@master/Date.format.min.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/lineSpinner.js"></script>
+
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+    <script src="../assets/js/auth/recovery.js" type="module"></script>
+    <script src="../assets/js/global.js" type="module"></script>
+</head>
+<body>
+    <div class="user-form__wrapper">
+        <div class="user-form">
+            <div class="user-form__title">
+                <div class="user-logo__section">
+                    <div class="user-logo">
+                        <span class="material-symbols-rounded">password</span>
+                    </div>
+                    <div class="user-logo__title"></div>
+                </div>
+                <div class="user-logo__section">
+                    <div class="user-logo__desc"></div>
+                </div>
+            </div>
+
+            <div class="user-form__inputs">
+                <div class="form-element">
+                    <input type="text" spellcheck="false" id="email"/>
+                    <span class="form-label"></span>
+                </div>
+                <div class="form-element hidden" disabled id="code_field">
+                    <input type="text" spellcheck="false" id="code" disabled/>
+                    <span class="form-label"></span>
+                </div>
+                <div class="form-element hidden" disabled id="newpass_field">
+                    <input type="password" spellcheck="false" id="newpass" disabled/>
+                    <span class="form-label"></span>
+                </div>
+                <div class="form-submit" id="recoverySubmitBtn"></div>
+            </div>
+        </div>
+
+        <div class="user-form__error hidden">
+            Some error
+        </div>
+
+        <div class="user-form__links">
+            <a href="register.html" id="registerNewAccount">Register a new account</a>
+            <a id="skipAccountCreation">Skip account creation</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -13,6 +13,7 @@ import { _Loader } from "./libClasses/loader.js"
 import { valid } from "./modalsHandler/engine.js"
 import { createDIV, createIcon } from "./modalsHandler/handlers/helpers.js"
 import { _GLS } from "./libClasses/gls.js"
+import { _Filenames } from "./libClasses/fillenames.js"
 
 let runtimeErrors = []
 let runtimeErrorsCount = 0
@@ -20,6 +21,7 @@ let runtimeErrorsCount = 0
 export const GLOBAL = {}
 
 export const Languages = _Languages
+export const Filenames = _Filenames
 export const Dirs = _Dirs
 export const DragDrop = _DragDrop
 export const Notificator = _Notificator
@@ -65,10 +67,12 @@ export const tabName = document.querySelector("#tab-name");
 export function setTabNameCounter(count) {
     if (!tabName) return;
     const old = tabName.querySelector(".counter");
+
     if (count === false) {
         if (old) old.remove();
         return;
     }
+    
     if (old) old.remove();
     tabName.insertAdjacentHTML("beforeend", `<span class="counter">${count}</span>`);
 }
@@ -487,6 +491,7 @@ export function addRuntimeError({ msg, line = null, col = null, time = null, isN
         e => e.msg === msg && e.line === line && e.col === col
     )
 
+    const wrapper = BottomWindow.get("errorsHistory")
     const badge = document.querySelector("#runtimeErrors .badge")
     const el = document.createElement("div")
     const items = document.querySelectorAll(".runtime-item#runTimeErrorItem")
@@ -537,12 +542,31 @@ export function addRuntimeError({ msg, line = null, col = null, time = null, isN
         runtimeErrorsCount = 0
     }
 
-    BottomWindow.get("errorsHistory").add(el)
+    wrapper.add(el)
+
+    wrapper.win.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
+}
+export function clearRuntimeErrors() {
+    runtimeErrors = []
+    runtimeErrorsCount = 0
+
+    const items = document.querySelectorAll(".runtime-item#runTimeErrorItem")
+    items.forEach(i => {
+        console.log(i)
+    })
+
+    addRuntimeError(
+        {
+            isNull: true,
+            time: Math.floor(Date.now() / 1000)
+        }
+    )
 }
 
-export function formatUnix(ts) {
+export function formatUnix(ts, format = "{dd}.{mm}.{yyyy}, {hh}:{ii}:{ss}") {
     const date = new Date(ts * 1000);
 
+    const yyyy = String(date.getFullYear());
     const dd = String(date.getDate()).padStart(2, "0");
     const mm = String(date.getMonth() + 1).padStart(2, "0");
 
@@ -550,7 +574,24 @@ export function formatUnix(ts) {
     const ii = String(date.getMinutes()).padStart(2, "0");
     const ss = String(date.getSeconds()).padStart(2, "0");
 
-    return `${dd}.${mm}, ${hh}:${ii}:${ss}`;
+    if(format) {
+        return format
+            .replaceAll("{dd}", dd)
+            .replaceAll("{mm}", mm)
+            .replaceAll("{hh}", hh)
+            .replaceAll("{ii}", ii)
+            .replaceAll("{ss}", ss)
+            .replaceAll("{yyyy}", yyyy)
+    }
+    else {
+        return `${dd}.${mm}, ${hh}:${ii}:${ss}`;
+    }
+}
+
+export function getInitials(name) {
+    if (!name) return 'A';
+    const words = name.trim().split(/\s+/);
+    return words.slice(0, 2).map(w => w[0].toUpperCase()).join('');
 }
 
 export function generateAvatar(name) {
@@ -581,11 +622,6 @@ export function generateAvatar(name) {
             background: hslToHex(hue, saturation, bgLightness),
             background_second: hslToHex(hue, saturation, bgLightness - 10)
         };
-    }
-    function getInitials(name) {
-        if (!name) return 'A';
-        const words = name.trim().split(/\s+/);
-        return words.slice(0, 2).map(w => w[0].toUpperCase()).join('');
     }
 
     let initials = getInitials(name)
@@ -626,79 +662,24 @@ export function truncateString(str, maxLength) {
 }
 
 export function createNotify(properties = {}) {
+    const type = valid(properties.type) ?? "info_i"
     const icon = valid(properties.icon) ?? "info_i"
     const title = valid(properties.title) ?? "Untitled"
-    const content = valid(properties.content) ?? ""
+    const content = valid(properties.content) ?? "No description provided"
     const time = valid(properties.time) ?? 3000
     const image = valid(properties.image) ?? false
 
-    let notifyWrapper = document.createElement("div")
-    notifyWrapper.classList.add("notify-wrapper")
-
-    if(!document.querySelector(".notify-wrapper")) {
-        document.body.insertAdjacentElement('afterbegin', notifyWrapper);
-    }
-    else {
-        notifyWrapper = document.querySelector(".notify-wrapper")
+    const notifyObject = {
+        title: title,
+        description: content,
+        timeout: time
     }
 
-    const notify = document.createElement("div")
-    notify.classList.add("notify", "hidden")
+    if(icon) notifyObject["icon"] = icon
+    if(type) notifyObject["type"] = type
+    if(image) notifyObject["image"] = image
 
-    const notifyTitleWrapperEl = createDIV()
-    notifyTitleWrapperEl.classList.add("notify-title")
-
-    const notifyTitleIconEl = createIcon(icon)
-
-    const notifyTitleEl = createDIV()
-    notifyTitleEl.classList.add("notify-title__text")
-    notifyTitleEl.textContent = title
-
-    const notifyTitleCloseIconEl = createIcon("close")
-    notifyTitleCloseIconEl.id = "close"
-
-    notifyTitleWrapperEl.appendChild(notifyTitleIconEl)
-    notifyTitleWrapperEl.appendChild(notifyTitleEl)
-    notifyTitleWrapperEl.appendChild(notifyTitleCloseIconEl)
-
-    const notifyContentEl = createDIV()
-    notifyContentEl.classList.add("notify-content")
-
-    const notifyContentDescEl = createDIV()
-    notifyContentDescEl.classList.add("notify-desc")
-    notifyContentDescEl.textContent = content
-
-    notifyContentEl.appendChild(notifyContentDescEl)
-
-    if(image) {
-        const notifyContentImageEl = createDIV()
-        notifyContentImageEl.classList.add("notify-image")
-        notifyContentImageEl.style.cssText = `background: linear-gradient(0deg, var(--body-color-solid), transparent), url(${image});background-size:cover;`
-
-        notifyContentEl.appendChild(notifyContentImageEl)
-    }
-
-    notify.appendChild(notifyTitleWrapperEl)
-    notify.appendChild(notifyContentEl)
-
-    notifyWrapper.appendChild(notify)
-
-    document.body.appendChild(notifyWrapper)
-
-    function close() {
-        notify.classList.add("hidden")
-        notify.addEventListener("transitionend", () => {
-            notify.remove()
-        })
-    }
-
-    notify.classList.remove("hidden")
-
-    notifyTitleCloseIconEl.addEventListener("click", close)
-
-    setTimeout(() => {
-        close()
-    }, time)
+    window.electron.createNotification(notifyObject)
 }
 
 export function getTheme() {
@@ -889,6 +870,45 @@ export function showNeedReloadTopBar() {
 
     needToReloadTopBar.on("hover", (instance) => { instance.show() })
     needToReloadTopBar.on("unhover", (instance) => { instance.hide({ iconVisible: true }) })
+}
+
+export function secondsToMinutes(seconds) {
+    return seconds / 60;
+}
+
+export function transparentColor(color, alpha = 1) {
+    alpha = Math.max(0, Math.min(1, alpha));
+    color = color.trim();
+
+    if (color.startsWith('#')) {
+        let hex = color.slice(1);
+
+        if (hex.length === 3) {
+            hex = hex.split('').map(c => c + c).join('');
+        }
+
+        if (hex.length !== 6) {
+            throw new Error('Invalid HEX color');
+        }
+
+        const r = parseInt(hex.slice(0, 2), 16);
+        const g = parseInt(hex.slice(2, 4), 16);
+        const b = parseInt(hex.slice(4, 6), 16);
+
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    const match = color.match(
+        /^rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)(?:[,\s/]+([\d.]+))?\s*\)$/i
+    );
+
+    if (match) {
+        const [, r, g, b] = match;
+
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    throw new Error('Unsupported color format');
 }
 
 window.Notificator = Notificator

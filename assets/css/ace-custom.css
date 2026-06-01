@@ -240,3 +240,8 @@
 .ace_marker-layer .ace_selected-word {
     border: none!important;
 }
+
+.ace-github-dark .ace_indent-guide {
+    background: unset;
+    border-right: 1px solid var(--context-border);
+}

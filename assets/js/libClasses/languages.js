@@ -63,7 +63,7 @@ export class _Languages {
             icon: "py",
             iconExt: "svg",
             mode: "python",
-            color: "#3776ab"
+            color: "#ffd931"
         },
         todo: {
             name: "To-Do List",
@@ -109,7 +109,7 @@ export class _Languages {
         },
         txt: {
             name: "Text",
-            icon: "txt",
+            icon: "default",
             iconExt: "svg",
             mode: "text",
             color: "#9aa0a6"
@@ -301,14 +301,21 @@ export class _Languages {
             icon: "lua",
             iconExt: "svg",
             mode: "lua",
-            color: "#000080"
+            color: "#1e81bb"
         },
         luau: {
             name: "Luau",
             icon: "lua",
             iconExt: "svg",
             mode: "lua",
-            color: "#000080"
+            color: "#1e81bb"
+        },
+        go: {
+            name: "GO",
+            icon: "go",
+            iconExt: "svg",
+            mode: "golang",
+            color: "#00ACD7"
         }
     }
     
@@ -358,7 +365,6 @@ export class _Languages {
             return this.languages[name]
         }
         else {
-            console.warn(`[Language] The language "${name}" was not found in the list of languages. Using default`)
             return this.languages.default
         }
     }
@@ -381,12 +387,10 @@ export class _Languages {
                 return fileName
             }
             else {
-                console.warn(`[Language] The language icon "${fileName}" was not found in the list of icons: ${allLanguageIcons.join(", ")}`)
                 return fileName
             }
         }
         else {
-            console.warn(`[Language] The language "${name}" was not found in the list of languages. Using default`)
             return `${this.languages.default.icon}.${this.languages.default.iconExt}`
         }
     }

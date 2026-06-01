@@ -39,6 +39,7 @@ function checkModulePackage(object) {
 
 function notifyError({ name, content }) {
     createNotify({
+        type: "danger",
         icon: "error",
         title: `Extension "${name}" have errors. Check Debugger for more info`,
         content: content
@@ -104,6 +105,7 @@ export async function initExtensions() {
         extensionExecFileContent = extensionExecFileContent.result
 
         createNotify({
+            type: "success",
             icon: "check",
             title: `Extension "${displayName}" successfully loaded`,
             content: `Version: ${version}`

@@ -1,3 +1,5 @@
+import { transparentColor } from "../lib.js";
+
 export class _Options {
     static instances = new Map();
 
@@ -27,6 +29,10 @@ export class _Options {
         });
 
         _Options.instances.set(id, this);
+    }
+
+    clear() {
+        this.el.querySelector(".options-selector__items").innerHTML = ""
     }
 
     static edit(id) {
@@ -67,6 +73,25 @@ export class _Options {
             }
             if("color" in additional && typeof additional.color == "string") {
                 item.style.color = additional.color
+            }
+            if("badge" in additional && typeof additional.badge == "object" && !Array.isArray(additional.badge)) {
+                const badgeWrapper = document.createElement("div")
+                badgeWrapper.classList.add("modal-badge")
+
+                const icon = document.createElement("span")
+                icon.classList.add("material-symbols-rounded")
+                
+                if("icon" in additional.badge) {
+                    icon.textContent = additional.badge.icon
+                    badgeWrapper.appendChild(icon)
+                }
+
+                if("color" in additional.badge) {
+                    icon.style.background = transparentColor(additional.badge.color, 0.2)
+                    icon.style.color = additional.badge.color
+                }
+
+                item.appendChild(badgeWrapper)
             }
         }
 

@@ -53,6 +53,13 @@ export class TopWindowList {
                     nameElement.id = item.id
                 }
 
+                if ("icon" in item) {
+                    const iconEl = document.createElement("img")
+                    iconEl.src = item.icon
+
+                    nameElement.prepend(iconEl)
+                }
+
                 itemElement.appendChild(nameElement)
 
                 itemElement.addEventListener("click", () => {

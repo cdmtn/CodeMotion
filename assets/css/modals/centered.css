@@ -1,0 +1,13 @@
+.modal-centered {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.modal-centered span {
+    font-size: 100px;
+    opacity: .1;
+}

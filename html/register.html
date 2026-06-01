@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../assets/css/main.css">
     <link rel="stylesheet" href="../assets/css/login.css">
+    <link rel="stylesheet" href="../assets/css/auth.css">
     <link rel="stylesheet" href="../assets/css/register.css">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -39,7 +40,7 @@
 
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
-    <script src="../assets/js/register.js" type="module"></script>
+    <script src="../assets/js/auth/register.js" type="module"></script>
     <script src="../assets/js/global.js" type="module"></script>
 </head>
 <body>
@@ -50,7 +51,7 @@
                     <div class="user-logo">
                         <span class="material-symbols-rounded">account_box</span>
                     </div>
-                    <div class="user-logo__title">Register</div>
+                    <div class="user-logo__title"></div>
                 </div>
                 <div class="user-logo__section">
                     <div class="user-logo__desc">Signup with your PlusID with your account username and password</div>
@@ -62,6 +63,12 @@
                     <input type="text" spellcheck="false" id="username"/>
                     <span class="form-label">
                         Username
+                    </span>
+                </div>
+                <div class="form-element">
+                    <input type="text" spellcheck="false" id="email"/>
+                    <span class="form-label">
+                        EMail
                     </span>
                 </div>
                 <div class="form-element">
@@ -77,13 +84,6 @@
                     </span>
                 </div>
                 <div class="form-submit">
-                    <l-line-spinner
-                    size="20"
-                    stroke="2"
-                    speed="1"
-                    color="white" 
-                    class="hidden"
-                    ></l-line-spinner>
                     Register
                 </div>
             </div>
@@ -94,9 +94,9 @@
         </div>
 
         <div class="user-form__links">
-            <a href="login.html">Already have an account?</a>
-            <a href="#">How to register organization</a>
-            <a href="#">Help</a>
+            <a href="login.html" id="alreadyHaveAccount">Already have an account?</a>
+            <a href="#" id="howToRegisterOrg">How to register organization</a>
+            <a href="#" id="help">Help</a>
         </div>
     </div>
 </body>

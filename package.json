@@ -1,14 +1,18 @@
 {
     "name": "codemotion-app",
-    "version": "0.0.2 (DEV Beta)",
+    "version": "0.0.2-dev",
     "description": "Web-First Code Editor",
     "author": "Yurba.Developers",
-    "main": "main.js",
+    "main": "app/dist/main.js",
     "scripts": {
-        "start": "electron ."
+        "build": "tsc",
+        "start": "npm run build && electron ."
     },
     "devDependencies": {
-        "electron": "^39.2.3"
+        "@types/electron": "^1.4.38",
+        "@types/node": "^25.9.1",
+        "electron": "^39.2.3",
+        "typescript": "^6.0.3"
     },
     "dependencies": {
         "@xterm/addon-fit": "^0.11.0",

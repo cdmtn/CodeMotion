@@ -20,7 +20,7 @@ import { getCurrentUserDataFromAPI } from "../assets/js/user.js"
 
 import * as object from "../assets/js/objects.js"
 
-import { openTab, reopenLastClosed, activateTab, recentlyClosed, tabsByPath, currentPath, updateTabPath } from "../assets/components/tabHandler.js"
+import { openTab, reopenLastClosed, activateTab, recentlyClosed, tabsByPath, currentPath, updateTabPath } from "../assets/js/explorerTree/tabHandler.js"
 import { handlePopovers } from "../assets/js/handlers/handlePopovers.js"
 import { initExtensions } from "../assets/js/extensionsHandler/extensionsHandler.js"
 import { sendDebugMsg } from "../assets/js/handlers/debuggerSignalHandlers.js"
@@ -28,8 +28,8 @@ import { initActions } from "../assets/js/actions.js"
 
 import { handleHistoryTab } from "../assets/js/explorerTabsHandlers/history.js"
 import { handleBugsTab } from "../assets/js/explorerTabsHandlers/bugs.js"
-import { getDirname, readSettings } from "../assets/js/global.js"
-import { closeAllTabs } from "../assets/components/tabHandler.js"
+import { electronAPI, getDirname, readSettings } from "../assets/js/global.js"
+import { closeAllTabs } from "../assets/js/explorerTree/tabHandler.js"
 
 import { handleSettings } from "../assets/js/settings.js"
 import { SidebarResizeHandler } from "../assets/js/handlers/SidebarResizeHandler.js"
@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     })
 
     const addBugModal = await getAddBugModal()
-    addBugModal.bind(document.querySelector("#add_local_bug"))
+    addBugModal.bind(document.querySelector("#add_bug"))
 
     const logoutModal = await getLogoutModal()
     logoutModal.bind(document.querySelector("#logout"))
@@ -193,17 +193,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.querySelector(`[popup="account"] .popup-content`).prepend(loginPopupItem)
     }
     else {
-        getCurrentUserDataFromAPI(gls).then((e) => {
-            if (!e.success) {
-                const errEl = loader?.querySelector(".loader-msg");
-                if (errEl) {
-                    errEl.classList.remove("hidden");
-                    errEl.textContent = `Error: ${e.result.result}`;
+        loader?.classList.add("hidden");
+
+        getCurrentUserDataFromAPI(gls)
+            .then((e) => {
+                if (!e || !e.success) {
+                    const errEl = loader?.querySelector(".loader-msg");
+                    if (errEl) {
+                        errEl.classList.remove("hidden");
+                        errEl.textContent = "Offline mode: server unavailable";
+                    }
                 }
-            } else {
-                loader?.classList.add("hidden");
-            }
-        });
+            })
+            .catch(() => {
+            });
     }
 
     // Explorer tabs
@@ -249,27 +252,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
 
             if (id === "history") {
-                const root = document.querySelector(`.explorer-elements[data-tab="${id}"] .elements`);
-
-                handleHistoryTab(
-                    {
-                        root: root,
-                        historyObject: historyObject
-                    }
-                )
+                handleHistoryTab(historyObject)
             }
 
             if (id === "bugs") {
-                const root = document.querySelector(`.explorer-elements[data-tab="${id}"] .elements`);
-                const rootParent = document.querySelector(`.explorer-elements[data-tab="${id}"]`);
-
-                await handleBugsTab(
-                    {
-                        root: root,
-                        rootParent: rootParent,
-                        bugsObject: bugsObject
-                    }
-                )
+                await handleBugsTab(bugsObject)
             }
         });
 
@@ -293,7 +280,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         const rec = tabsByPath.get(currentPath);
 
         if (rec.new) {
-            const saveNewFileRes = await window.electron.askToSaveNewFile(currentPath, rec.editor.getValue());
+            const saveNewFileRes = await electronAPI.askToSaveNewFile(
+                {
+                    filename: currentPath, 
+                    content: rec.editor.getValue()
+                });
 
             if (saveNewFileRes.success) {
                 const newPath = saveNewFileRes.path;

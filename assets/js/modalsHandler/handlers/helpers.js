@@ -1,11 +1,19 @@
 export function createDIV() {
     return document.createElement("div")
 }
-export function createParagraph(text) {
+export function createParagraph(text, isWrapper = false) {
     const p = document.createElement("p")
     p.textContent = text
 
-    return p
+    if(isWrapper) {
+        const wrapper = document.createElement("span")
+        wrapper.appendChild(p)
+
+        return wrapper
+    }
+    else {
+        return p
+    }
 }
 export function createIcon(name) {
     const icon = document.createElement("span")

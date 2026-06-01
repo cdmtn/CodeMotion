@@ -1,40 +1,40 @@
 import { Languages } from "../lib.js";
 import { TopWindowList, destroyAllTopWindowLists } from "../topWindowHandler/topWindowList.js";
 
-export function setCurrentLanguage(langName, properties = {}) {
+export async function setCurrentLanguage(langName, properties = {}) {
     destroyAllTopWindowLists()
 
-    if(!properties.editor) throw new Error(`Second argument "properties" must include { editor: Editor }`)
+    if (!properties.editor) throw new Error(`properties.editor required`)
 
     const aviableLanguageNames = []
 
-    Object.values(Languages.list()).map(lang => {
-        const notIncluded = ["Image", "Font", "To-Do List", "GIT File"]
-        if(!(notIncluded.includes(lang.name))) {
-            return { name: lang.name, id: lang.mode }
-        }
-    })
-    .filter(item => item != undefined)
-    .map(item => {
-        return aviableLanguageNames.push({ name: item.name, id: item.id })
-    });
+    const languages = Object.values(Languages.list())
+        .filter(lang => !["Image", "Font", "To-Do List", "GIT File"].includes(lang.name))
+
+    for (const lang of languages) {
+        const icon = await Languages.getIconPath(lang.icon)
+
+        aviableLanguageNames.push({
+            name: lang.name,
+            id: lang.mode,
+            icon
+        })
+    }
 
     const changeLanguageList = new TopWindowList("changeLanguage", aviableLanguageNames)
+
     changeLanguageList.on("click", (data) => {
         document.querySelectorAll("#currentLang").forEach(e => {
-            if (e) {
-                properties.editor.session.setMode(`ace/mode/${data.id}`);
-                e.textContent = data.name
-            }
+            properties.editor.session.setMode(`ace/mode/${data.id}`)
+            e.textContent = data.name
         })
     })
-    changeLanguageList.bind(document.querySelector("#currentLang"))
 
     document.querySelectorAll("#currentLang").forEach(e => {
-        if (e) {
-            e.textContent = langName
-        }
+        e.textContent = langName
     })
+
+    changeLanguageList.bind(document.querySelector("#currentLang"))
 }
 
 export function setColumn(col) {

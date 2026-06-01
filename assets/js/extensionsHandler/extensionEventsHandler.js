@@ -1,6 +1,6 @@
-import { Options, Languages, Dirs, escapeHtml, loadAceModule } from "../lib.js"
+import { Options, Languages, Dirs, escapeHtml, loadAceModule, createNotify } from "../lib.js"
 import { optionsThemeButtonHandler } from "../handlers/themesHandler.js"
-import { themeEditors } from "../../components/tabHandler.js"
+import { themeEditors } from "../explorerTree/tabHandler.js"
 import { registerAceLanguage } from "../../../helpers/aceRegisterLanguage.js"
 import { bus, sendEvent } from "../../js/bus.js"
 import { disableErrors, enableErrors } from "../handlers/bottomTabHandler.js"
@@ -299,6 +299,7 @@ export function handleExtensionEvents() {
         console.log(`[LOG FROM "${name}"] ${text}`)
     })
     window.electron.onThemeRegister((name, data) => {
+        console.log(data)
         const themeSelectOptions = Options.edit("themeSelect")
         themeSelectOptions.add(data.id, name)
 
@@ -467,5 +468,16 @@ export function handleExtensionEvents() {
         }
 
         refreshEditorHighlight()
+    })
+
+    window.electron.onNotification((name, data) => {
+        if("content" in data) {
+            data["content"] = `(${name}) ${data.content}`
+        }
+        if("time" in data) {
+            if(data.time > 15000) data.time = 4000 
+        }
+
+        createNotify(data)
     })
 }

@@ -17,6 +17,7 @@
     align-items: stretch;
     justify-content: flex-start;
     overflow: hidden;
+    flex-shrink: 0;
 }
 .modal-org p {
     margin: 0px;
@@ -43,6 +44,7 @@
     width: 100%;
     opacity: .5;
     line-height: 18px;
+    word-wrap: break-word;
 }
 .modal-org .modal-org__section {
     display: flex;

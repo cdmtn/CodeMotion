@@ -61,6 +61,8 @@
 
     --ui-scale: 1;
 
+    --sidebar-width: 70px;
+
     --bug-priority-medium: #ffc72361;
     --bug-priority-high: #ff232361;
 }
@@ -269,7 +271,7 @@ input~span {
     display: block;
     font-size: 14px;
     line-height: 1.23543;
-    font-family: Inter, sans-serif;
+    font-family: var(--main-font);
     transition-timing-function: ease-in;
     transition-duration: 0.125s;
 }
@@ -335,6 +337,7 @@ input~span {
 }
 .topbar-center {
     background: var(--topbar-menu-item-hover-bg);
+    border: 1px solid var(--context-border);
     font-size: 12px;
     color: #d1d1d1;
     line-height: 20px;
@@ -368,6 +371,58 @@ input~span {
 }
 .topbar-center span[class^="material-symbols"] {
     font-size: 15px;
+}
+
+.topbar-center span#bug_counter {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.topbar-center .bugs-assigned {
+    color: var(--warning);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+.topbar-center .bugs-assigned::before {
+    content: "A";
+    background: var(--warning);
+    color: black;
+    width: 12px;
+    height: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 100%;
+    font-size: 8px;
+    font-weight: 700;
+}
+.topbar-center .bugs-created {
+    color: var(--danger);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+.topbar-center .bugs-created::before {
+    content: "C";
+    background: var(--danger);
+    color: black;
+    width: 12px;
+    height: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 100%;
+    font-size: 8px;
+    font-weight: 700;
+}
+.topbar-center .divider {
+    width: 1px;
+    height: 20px;
+    background: var(--context-border);
+    border-radius: 100%;
+    margin-left: 2px;
+    margin-right: 2px;
 }
 
 .topbar-center.notification {
@@ -573,7 +628,7 @@ body.explorer-resizing {
     justify-content: space-between;
     padding: var(--explorer-padding);
     height: 40px;
-    text-transform: uppercase;
+    text-transform: capitalize;
     transition: .2s;
     align-items: center;
     position: absolute;
@@ -603,6 +658,11 @@ body.explorer-resizing {
 .explorer-title__actions span[class^="material-symbols"] {
     font-size: 20px;
     height: 20px;
+}
+.explorer-title__actions span[class^="material-symbols"].disabled {
+    opacity: .2;
+    pointer-events: none;
+    user-select: none;
 }
 .explorer-title__actions > * {
     opacity: .5;
@@ -819,19 +879,33 @@ body.explorer-resizing {
     content: "";
     position: absolute;
     left: 0;
-    bottom: 0;
+    bottom: 5px;
     width: 1px;
-    height: calc(100% - 15px);
+    height: calc(100% - 28px);
     background: var(--expanded-line);
+}
+.explorer-elements .dir.expanded.ignored::before {
+    opacity: .45;
 }
 .explorer-elements .dir.expanded > .dir-title:first-child::before {
     content: "";
     position: absolute;
-    width: 5px;
-    height: 5px;
+    width: 8px;
+    height: 10px;
     background: var(--expanded-line);
-    border-radius: 100%;
-    left: -2px;
+    border-top-left-radius: 5px;
+    left: 0px;
+    margin-top: 7px;
+}
+.explorer-elements .dir.expanded > .dir-title:first-child::after {
+    content: "";
+    position: absolute;
+    width: 8px;
+    height: 10px;
+    background: var(--topbar-color);
+    left: 1px;
+    border-top-left-radius: 5px;
+    margin-top: 10px;
 }
 .explorer-elements .file i {
     font-size: 10px;
@@ -866,7 +940,8 @@ body.explorer-resizing {
     margin-top: 2px;
 }
 .explorer-elements .file.ignored,
-.explorer-elements .dir.ignored > .dir-title {
+.explorer-elements .dir.ignored > .dir-title,
+.explorer-elements .dir.ignored .file {
     opacity: .45;
 }
 .explorer-elements .dir-content {
@@ -1552,6 +1627,7 @@ body.explorer-resizing {
     flex-direction: row;
     gap: 5px;
     overflow-x: auto;
+    background: var(--body-color);
 }
 .code-structure::-webkit-scrollbar {
     display: none;
@@ -1561,6 +1637,10 @@ body.explorer-resizing {
     align-items: center;
     gap: 5px;
     font-weight: var(--default-font-weight);
+}
+.code-structure .separator {
+    opacity: 0.5;
+    font-size: 14px;
 }
 .code-structure .context-item span[class^="material-symbols"] {
     width: 15px;
@@ -1748,62 +1828,12 @@ body.explorer-resizing {
 .transparent-scrollbar::-webkit-scrollbar-button {
     display: none;
 }
-/*  */
-
-.modal-calendar__day-badge__wrapper .modal-calendar__day-badge {
-    font-size: 12px;
-    background: var(--calendar-day-bg);
-    padding: 2px 5px;
-    width: fit-content;
-    mask-image: paint(squircle);
-    --squircle-radius: 3px;
-    --squircle-smooth: 0.3;
-    transition: .4s;
-    user-select: none;
-}
-.modal-calendar__day-badge__wrapper .modal-calendar__day-badge.removed {
-    transform: scale(0);
-}
-/*  */
-
-.modal-calendar__day-context {
-    position: absolute;
-    width: 200px;
-    background: var(--body-color);
-    backdrop-filter: blur(5px);
-    z-index: 81;
-    mask-image: paint(squircle);
-    --squircle-radius: 8px;
-    --squircle-smooth: 0.3;
-}
-.modal-calendar__day-context input {
-    width: -webkit-fill-available;
-    height: 20px;
-    padding: 10px 15px;
-    font-size: 14px;
-}
-.modal-calendar__day-context input:focus {
-    outline: none;
-}
-.modal-calendar__day-context button {
-    width: 100%;
-    height: 35px;
-    border-radius: 0px;
-    background: transparent;
-    border: none;
-    color: var(--text-color);
-    transition: .2s;
-    border-top: 1px solid var(--block-divider-border-color);
-}
-.modal-calendar__day-context button:hover {
-    cursor: pointer;
-}
 
 .sidebar {
-    width: 80px;
-    min-width: 80px;
-    max-width: 80px;
-    flex: 0 0 80px;
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    max-width: var(--sidebar-width);
+    flex: 0 0 var(--sidebar-width);
     background: var(--topbar-color);
     display: flex;
     flex-direction: column;

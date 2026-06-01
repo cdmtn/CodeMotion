@@ -3,3 +3,7 @@
     align-items: center;
     gap: 5px;
 }
+.modal-container.disabled {
+    pointer-events: none;
+    opacity: .5;
+}

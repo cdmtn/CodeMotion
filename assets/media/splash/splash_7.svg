@@ -1,19 +1,12 @@
 <svg width="627" height="886" viewBox="0 0 627 886" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_415_216)">
 <rect width="627" height="886" fill="#111111"/>
-<g filter="url(#filter0_f_415_216)">
-<circle cx="313.5" cy="442.5" r="170.5" fill="url(#paint0_linear_415_216)"/>
-</g>
+<path d="M212.586 579.939C216.609 582.898 220.766 585.686 225.048 588.29L176.231 661.174C173.926 664.615 169.268 665.536 165.826 663.231C162.385 660.926 161.464 656.267 163.769 652.826L212.586 579.939ZM414.64 305.227C456.711 336.276 484 386.2 484 442.5C484 536.664 407.665 613 313.5 613C281.113 613 250.836 603.969 225.048 588.29L414.64 305.227ZM313.5 272C345.988 272 376.352 281.088 402.192 296.858L212.586 579.939C170.387 548.903 143 498.9 143 442.5C143 348.335 219.336 272 313.5 272ZM454.545 222.642C458.608 221.839 462.555 224.482 463.358 228.546L476.453 294.762C477.257 298.826 474.613 302.772 470.55 303.576C466.487 304.379 462.541 301.736 461.737 297.674L452.155 249.217L414.64 305.227C410.622 302.262 406.469 299.468 402.192 296.858L439.692 240.871L391.237 250.453C387.174 251.256 383.229 248.613 382.425 244.55C381.621 240.487 384.264 236.541 388.327 235.737L454.545 222.642Z" fill="url(#paint0_linear_415_216)"/>
 </g>
 <defs>
-<filter id="filter0_f_415_216" x="43" y="172" width="541" height="541" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-<feFlood flood-opacity="0" result="BackgroundImageFix"/>
-<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
-<feGaussianBlur stdDeviation="50" result="effect1_foregroundBlur_415_216"/>
-</filter>
-<linearGradient id="paint0_linear_415_216" x1="313.5" y1="272" x2="313.5" y2="613" gradientUnits="userSpaceOnUse">
-<stop stop-color="#2DFAF4"/>
-<stop offset="1" stop-color="#FB33D4"/>
+<linearGradient id="paint0_linear_415_216" x1="313.5" y1="222.498" x2="313.5" y2="664.501" gradientUnits="userSpaceOnUse">
+<stop stop-color="#42E5F1"/>
+<stop offset="1" stop-color="#E748D6"/>
 </linearGradient>
 <clipPath id="clip0_415_216">
 <rect width="627" height="886" fill="white"/>

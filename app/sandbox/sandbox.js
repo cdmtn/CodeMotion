@@ -2,7 +2,7 @@ const { app, ipcMain, BrowserWindow } = require("electron")
 const fs = require("fs")
 const path = require("path")
 const bus = require("../../helpers/eventBus.js")
-const { APP_PATH } = require("../helpers/paths.js")
+const { APP_PATH } = require("../main/helpers/paths.js")
 const ErrorStackParser = require("error-stack-parser")
 
 const { 

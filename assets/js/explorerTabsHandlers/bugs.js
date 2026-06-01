@@ -3,7 +3,40 @@ import { ELEMENTS_EMPTY_TEXT_COMPONENT } from "./components.js"
 import { priorityClasses } from "../objects.js"
 import { GLS } from "../lib.js"
 
-export async function handleBugsTab({ root, rootParent, bugsObject }) {
+import { requestUser } from "../user.js"
+import { appendBugs } from "../userHandlers/appendBugs.js"
+
+const root = document.querySelector(`.explorer-elements[data-tab="bugs"] .elements`);
+const rootParent = document.querySelector(`.explorer-elements[data-tab="bugs"]`);
+
+async function refreshBugs() {
+    const user = await requestUser()
+
+    const bugsCreated = user.bugsCreated
+    const bugsAssigned = user.bugsAssigned
+
+    console.log({ ...bugsCreated, ...bugsAssigned })
+
+    appendBugs(bugsCreated, "created")
+    appendBugs(bugsAssigned, "assigned")
+
+    console.log(bugsObject)
+
+    handleBugsTab(bugsObject)
+}
+
+document.querySelector("#refresh_bugs").addEventListener("click", (e) => {
+    refreshBugs()
+
+    e.target.classList.add("disabled")
+
+    setTimeout(() => {
+        e.target.classList.remove("disabled")
+    }, 5000)
+})
+
+export async function handleBugsTab(bugsObject) {
+    console.log(bugsObject)
     const gls = await GLS.init()
 
     if (!root) return

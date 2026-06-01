@@ -5,6 +5,11 @@
     display: flex;
     flex-direction: column;
     gap: 5px;
+    overflow-x: scroll;
+    max-height: 50%;
+}
+.top-window.list::-webkit-scrollbar {
+    display: none;
 }
 .top-window.list .top-window__list-item {
     color: var(--text-color);
@@ -19,4 +24,15 @@
     opacity: 1;
     background: var(--block-divider-border-color);
     cursor: pointer;
+}
+
+.top-window.list .top-window__list-item .top-window__list-item__name img {
+    width: 14px;
+    height: 14px;
+    object-fit: cover;
+}
+.top-window.list .top-window__list-item .top-window__list-item__name {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }

@@ -43,12 +43,12 @@
     padding: 8px 10px;
     font-size: 14px;
     transition: .2s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 .options-selector__wrapper .options-selector__items .options-selector__item[default] {
     font-weight: var(--bold-font-weight);
-    display: flex;
-    align-items: center;
-    gap: 10px;
 }
 .options-selector__wrapper .options-selector__items .options-selector__item:hover {
     background: var(--body-color);
@@ -57,4 +57,13 @@
 
 .options-selector__wrapper .options-selector__items .options-selector__item .secondary {
     opacity: .5;
+}
+
+.options-selector__wrapper .options-selector__items .options-selector__item .modal-badge span {
+    background: rgba(50, 100, 168, 0.2);
+    color: rgb(50, 100, 168);
+    font-size: 14px;
+    font-variation-settings: 'FILL' 1, 'wght' 700 !important;
+    margin-top: 1px;
+    padding: 5px;
 }

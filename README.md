@@ -12,10 +12,6 @@ CodeMotion is a web-focused, advanced
 open-source code editor (IDE) 
 with native tools for web developers
 
-![JavaScript](https://img.shields.io/badge/JavaScript-98.6%25-F7DF1E?style=flat-square&logo=javascript)
-![CSS](https://img.shields.io/badge/CSS-1.2%25-1572B6?style=flat-square&logo=css3)
-![HTML](https://img.shields.io/badge/HTML-0.2%25-E34C26?style=flat-square&logo=html5)
-
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
@@ -68,6 +64,7 @@ codemotion-ide/
 ```
 ## 🛠️ Stack
 
+- **Backend**: TypeScript
 - **Frontend**: Pure JavaScript
 - **Styling**: Pure CSS
 - **Markup**: HTML

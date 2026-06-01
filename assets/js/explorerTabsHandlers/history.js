@@ -1,6 +1,8 @@
 import { setTabNameCounter, escapeHtml } from "../lib.js"
 import { ELEMENTS_EMPTY_TEXT_COMPONENT } from "./components.js"
 
+const root = document.querySelector(`.explorer-elements[data-tab="history"] .elements`);
+
 const typeIcons = {
     "created": 'add',
     "file-open": 'file_open',
@@ -9,7 +11,7 @@ const typeIcons = {
     "file-saved": 'file_save'
 };
 
-export function handleHistoryTab({ root, historyObject }) {
+export function handleHistoryTab(historyObject) {
     if (root) root.innerHTML = "";
 
     let historyKeys = Object.keys(historyObject)

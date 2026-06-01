@@ -1,15 +1,8 @@
 <svg width="627" height="886" viewBox="0 0 627 886" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_120_45)">
-<g filter="url(#filter0_f_120_45)">
 <g clip-path="url(#paint0_angular_120_45_clip_path)" data-figma-skip-parse="true"><g transform="matrix(0 0.70452 -0.523194 -1.57596e-10 313 442.5)"><foreignObject x="-699.549" y="-699.549" width="1399.1" height="1399.1"><div xmlns="http://www.w3.org/1999/xhtml" style="background:conic-gradient(from 90deg,rgba(46, 249, 245, 1) 0deg,rgba(252, 52, 211, 1) 360deg);height:100%;width:100%;opacity:1"></div></foreignObject></g></g><rect x="-52" y="-49" width="730" height="983" data-figma-gradient-fill="{&#34;type&#34;:&#34;GRADIENT_ANGULAR&#34;,&#34;stops&#34;:[{&#34;color&#34;:{&#34;r&#34;:0.18039216101169586,&#34;g&#34;:0.97647058963775635,&#34;b&#34;:0.96078431606292725,&#34;a&#34;:1.0},&#34;position&#34;:0.0},{&#34;color&#34;:{&#34;r&#34;:0.98823529481887817,&#34;g&#34;:0.20392157137393951,&#34;b&#34;:0.82745099067687988,&#34;a&#34;:1.0},&#34;position&#34;:1.0}],&#34;stopsVar&#34;:[{&#34;color&#34;:{&#34;r&#34;:0.18039216101169586,&#34;g&#34;:0.97647058963775635,&#34;b&#34;:0.96078431606292725,&#34;a&#34;:1.0},&#34;position&#34;:0.0},{&#34;color&#34;:{&#34;r&#34;:0.98823529481887817,&#34;g&#34;:0.20392157137393951,&#34;b&#34;:0.82745099067687988,&#34;a&#34;:1.0},&#34;position&#34;:1.0}],&#34;transform&#34;:{&#34;m00&#34;:1.0147467583007316e-13,&#34;m01&#34;:-1046.388183593750,&#34;m02&#34;:836.19403076171875,&#34;m10&#34;:1409.0406494140625,&#34;m11&#34;:-3.1519149956693582e-07,&#34;m12&#34;:-262.02032470703125},&#34;opacity&#34;:1.0,&#34;blendMode&#34;:&#34;NORMAL&#34;,&#34;visible&#34;:true}"/>
 </g>
-</g>
 <defs>
-<filter id="filter0_f_120_45" x="-152" y="-149" width="930" height="1183" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-<feFlood flood-opacity="0" result="BackgroundImageFix"/>
-<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
-<feGaussianBlur stdDeviation="50" result="effect1_foregroundBlur_120_45"/>
-</filter>
 <clipPath id="paint0_angular_120_45_clip_path"><rect x="-52" y="-49" width="730" height="983"/></clipPath><clipPath id="clip0_120_45">
 <rect width="627" height="886" fill="white"/>
 </clipPath>

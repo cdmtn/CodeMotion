@@ -6,6 +6,78 @@
         "withoutUsername": "How are you feeling today?"
     },
 
+    "help": "Help",
+
+    "splash": {
+        "createdBy": "Created by %{name}",
+        "description": "Web development environment",
+        "closeBtn": "Close",
+        "offlineBtn": "Sign in without an account"
+    },
+
+    "auth": {
+        "register": {
+            "title": "Register",
+            "description": "Sign up using your email address and password",
+
+            "inputs": {
+                "username": "Username",
+                "email": "EMail",
+                "password": "Password",
+                "repeatPassword": "Repeat password",
+                "submitBtn": "Register"
+            },
+
+            "successNotification": {
+                "title": "Registration complete",
+                "description": "Registration is complete. Now you need to log in to your account"
+            }
+        },
+        "login": {
+            "title": "Login",
+            "description": "Log in to your account using your email address",
+
+            "inputs": {
+                "email": "EMail",
+                "password": "Password",
+                "submitBtn": "Login"
+            }
+        },
+        "recovery": {
+            "title": "Recovery",
+            "description": "Recover access to your account by resetting your password. To get started, enter your email address",
+            "description_code": "Check your email inbox. If the email is there, you'll receive a 6-digit code",
+            "description_newpass": "Great! You now have exactly %{minutes} min. to reset your password. After this time, the request will expire.",
+            "description_newpass_success": "Your password has been successfully reset! Save it so you don't forget",
+
+            "inputs": {
+                "email": "EMail",
+                "code": "Generated code",
+                "newpass": "New password"
+            },
+
+            "submitBtn": "Send code",
+            "verifyCodeBtn": "Verify code",
+            "newPassBtn": "Setup new password",
+            "toLoginPageBtn": "Login with new password",
+
+            "successNotification": {
+                "title": "Recovery code sended to your email",
+                "description": "Check your inbox: %{email}"
+            }
+        },
+
+        "alreadyHaveAnAccount": "Already have an account?",
+        "howToRegOrganization": "How to register organization",
+        "registerNewAccount": "Register a new account",
+        "skipAccountCreation": "Skip account creation"
+    },
+
+    "errorPlaceholder": {
+        "title": "O-o-oops!",
+        "description": "There seems to be an error with this request, so please try again later and be sure to let us know. We hope you'll bear with us"
+    },
+
     "platformNotSupported": "Your platform (%{platform}) is not supported",
 
     "notAuth": "Not authenticated",
@@ -75,7 +147,83 @@
             "roleLabel": "Role",
             "ownerLabel": "You are the founder of this organization",
             "secondRoleLabel": "Your secondary role: %{role}",
-            "ownerRoleLabel": "Founder"
+            "ownerRoleLabel": "Founder",
+            "explore": {
+                "title": "Explore"
+            },
+            "membership": {
+                "title": "Membership"
+            },
+            "createNew": {
+                "title": "Create new",
+                "header": {
+                    "title": "Create new organization",
+                    "description": "With your organization, you can invite users to join so you can work on projects together. For example, you can create collaborative bugs"
+                },
+                "inputs": {
+                    "name": "Organization name",
+                    "about": "About this organization",
+                    "website": "Organization website (optional)"
+                },
+                "preview": {
+                    "title": "Preview",
+                    "description": "A preview of how the organization will appear in the list",
+                    "emptyName": "Unnamed",
+                    "emptyDescription": "No description provided"
+                }
+            },
+            "buttons": {
+                "create": "Create organization"
+            },
+            "notifications": {
+                "creatingError": {
+                    "title": "Organization creating error"
+                },
+                "creatingSuccess": {
+                    "title": "Organization created!",
+                    "description": "Your organization \"%{name}\" created"
+                }
+            },
+            "dashboard": {
+                "title": "Dashboard",
+                "description": "Select one of your organizations to view or edit its details",
+
+                "members": {
+                    "title": "Members"
+                },
+                "inviteCode": {
+                    "title": "Invite code",
+                    "note": "This code cannot be changed. You can share this code with trusted individuals so they can join the organization"
+                },
+                "createdAt": {
+                    "title": "Created at"
+                },
+                "dangerZone": {
+                    "switch": {
+                        "title": "Enable destructive actions",
+                        "description": "Unlocks the danger zone. Click only if you know what you're doing"
+                    },
+                    "title": "Danger Zone",
+                    "deleteBtn": "Delete organization"
+                }
+            },
+            "join": {
+                "title": "Join the organization",
+                "description": "You can join the organization by entering the invitation code",
+                "inputs": {
+                    "inviteCode": "Invite code"
+                },
+                "buttons": {
+                    "join": "Join with code"
+                },
+                "successNotification": {
+                    "title": "You have joined the \"%{name}\" organization",
+                    "description": "Good luck! We hope you have a pleasant stay!"
+                },
+                "errorNotification": {
+                    "title": "Error attempting to join an organization"
+                }
+            }
         },
 
         "appearance": {
