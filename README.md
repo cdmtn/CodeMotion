@@ -20,12 +20,13 @@ with native tools for web developers
 
 ## ✨ Features
 
-- **Work as a team**: built-in tools for collaboration
+- **Work as a team**: Built-in tools for collaboration
 - **Intuitive UI**: Clean, distraction-free coding environment
 - **Developer-Friendly**: Built by developers, for developers
-- **Built-in analysis**: Run Python applications and analyze JavaScript directly within them
+- **Lightweight**: About 2.5 times lighter than VSCode
+- **Built-in analysis**: Run Python applications and analyze JavaScript and TypeScript directly within them
 - **Smart Editing**: Advanced syntax highlighting and code completion
-- **Extensible**: Easily customize and extend with plugins
+- **Extensible**: Easily customize and extend with own easy plugins engine
 
 ## 🎯 Quick Start
 
