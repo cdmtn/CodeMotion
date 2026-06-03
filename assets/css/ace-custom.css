@@ -250,3 +250,8 @@
     opacity: .5;
     text-decoration: underline wavy #888;
 }
+
+.error-marker {
+    position: absolute;
+    background: color-mix(in srgb, var(--danger) 10%, transparent);
+}

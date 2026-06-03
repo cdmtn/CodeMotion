@@ -16,7 +16,8 @@ import {
     loadAceModule,
     loadAceModuleAsync,
     showCodeWindowVisuals,
-    Filenames
+    Filenames,
+    idify
 } from "../lib.js"
 import { BottomWindow, closeAllWindows } from "../handlers/BottomWindowHandler.js"
 import { initJSSH } from "../../../ace/plugins/languageSyntaxEnhance.js"
@@ -521,6 +522,8 @@ export async function openTab(path, content, extension, name, pathContext, isNew
         fixedWidthGutter: true
     });
 
+    const aceRange = ace.require("ace/range").Range
+
     // trigger first ace mode changed
 
     triggerAceChanged(editor)
@@ -564,11 +567,80 @@ export async function openTab(path, content, extension, name, pathContext, isNew
     const languageContextName = fileNameInfo != false ? `${fileNameInfo.name} (${fileNameInfo.mode.toUpperCase()})` : language.name
     setCurrentLanguage(languageContextName, { editor: editor })
 
+    // install color comments
     ColorComments.install(editor)
 
     if (tabsByPath.has(path)) {
         activateTab(tabsByPath.get(path).tabEl);
         return;
+    }
+
+    const errors = new Map()
+    const markerIds = new Set()
+
+    let diagnosticTimer = null
+    let generation = 0
+    let renderToken = 0
+
+    function addMarker(key, range) {
+        if (markerIds.has(key)) return
+        const id = editor.session.addMarker(range, "error-marker", "fullLine")
+        markerIds.set(key, id)
+    }
+
+    function clearMarkers() {
+        for (const id of markerIds) {
+            editor.session.removeMarker(id)
+        }
+        markerIds.clear()
+
+        editor.renderer.updateFull()
+    }
+
+    function makeErrorKey(item) {
+        return `${item.line}:${path}`
+    }
+
+    function renderErrors() {
+        const token = ++renderToken
+
+        for (const id of markerIds) {
+            editor.session.removeMarker(id)
+        }
+        markerIds.clear()
+
+        const annotations = []
+
+        for (const err of errors.values()) {
+            if (token !== renderToken) return
+
+            err.markerId = null
+            annotations.push(err.annotation)
+
+            const id = editor.session.addMarker(
+                err.range,
+                "error-marker",
+                "fullLine"
+            )
+
+            markerIds.add(id)
+            err.markerId = id
+        }
+
+        editor.session.setAnnotations(annotations)
+        editor.renderer.updateFull()
+    }
+    function clearErrors() {
+        const allMarkers = editor.session.getMarkers()
+        for (const id in allMarkers) {
+            if (allMarkers[id].clazz === "error-marker") {
+                editor.session.removeMarker(Number(id))
+            }
+        }
+        markerIds.clear()
+        errors.clear()
+        editor.session.setAnnotations([])
+        editor.renderer.updateFull()
     }
 
     function updateEditorData() {
@@ -584,109 +656,128 @@ export async function openTab(path, content, extension, name, pathContext, isNew
         setErrors(editor.getSession().getAnnotations())
     }
 
-    async function setEditorContext() {
+    async function setEditorContext(properties = {}) {
+        const isErrorsUpdate = properties.errorsUpdate !== false
+
         updateEditorData()
 
-        if (language.mode == "javascript") {
-            let debounceTimer;
+        clearTimeout(diagnosticTimer)
+        const currentGen = ++generation
 
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(async () => {
-                const jsDiagnostic = await window.electron.javascriptDiagnostic(editor.getValue())
+        if (language.mode === "javascript") {
+            diagnosticTimer = setTimeout(async () => {
+                const diagnostics = await window.electron.javascriptDiagnostic(editor.getValue())
 
-                if(jsDiagnostic.length > 0) {
-                    jsDiagnostic.forEach(item => {
-                        addRuntimeError(
-                            {
-                                msg: `${item.message}`,
-                                line: item.line,
-                                col: item.col,
-                                time: Math.floor(Date.now() / 1000)
-                            }
-                        )
-                    })
-                }
-                else {
-                    addRuntimeError(
-                        {
-                            isNull: true,
-                            time: Math.floor(Date.now() / 1000)
-                        }
+                if (currentGen !== generation) return
+                if (!isErrorsUpdate) return
+
+                clearErrors()
+
+                diagnostics.forEach(item => {
+                    const range = new aceRange(
+                        item.line - 1,
+                        item.col,
+                        item.line - 1,
+                        999
                     )
-                }
+
+                    errors.set(makeErrorKey(item), {
+                        range,
+                        annotation: {
+                            row: item.line - 1,
+                            column: item.col,
+                            text: item.message,
+                            type: "error"
+                        },
+                        markerId: null
+                    })
+
+                    addRuntimeError({
+                        msg: item.message,
+                        line: item.line,
+                        col: item.col,
+                        time: Math.floor(Date.now() / 1000)
+                    })
+                })
+
+                renderErrors()
             }, 500)
 
-            function getCursorRow() {
-                return editor.getCursorPosition().row + 1;
-            }
             const jsParser = new JavascriptParser()
-
             const ast = await window.electron.javascriptAST(editor.getValue())
-            const row = getCursorRow();
+            const row = editor.getCursorPosition().row + 1
 
-            const chain = jsParser.getContextChain(ast, row);
-            jsParser.renderContext(chain);
+            const chain = jsParser.getContextChain(ast, row)
+            jsParser.renderContext(chain)
         }
-        else if(language.mode == "typescript") {
-            let debounceTimer;
 
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(async () => {
-                const tsDiagnostic = await window.electron.typescriptDiagnostic(editor.getValue())
+        else if (language.mode === "typescript") {
+            diagnosticTimer = setTimeout(async () => {
+                const diagnostics = await window.electron.typescriptDiagnostic(editor.getValue())
 
-                if(tsDiagnostic.length > 0) {
-                    tsDiagnostic.forEach(item => {
-                        addRuntimeError(
-                            {
-                                msg: `${item.message}`,
-                                line: item.line,
-                                col: item.col,
-                                time: Math.floor(Date.now() / 1000)
-                            }
-                        )
-                    })
-                }
-                else {
-                    addRuntimeError(
-                        {
-                            isNull: true,
-                            time: Math.floor(Date.now() / 1000)
-                        }
+                if (currentGen !== generation) return
+                if (!isErrorsUpdate) return
+
+                clearErrors()
+
+                diagnostics.forEach(item => {
+                    const range = new aceRange(
+                        item.line - 1,
+                        item.col,
+                        item.line - 1,
+                        999
                     )
-                }
+
+                    errors.set(makeErrorKey(item), {
+                        range,
+                        annotation: {
+                            row: item.line - 1,
+                            column: item.col,
+                            text: item.message,
+                            type: "error"
+                        },
+                        markerId: null
+                    })
+
+                    addRuntimeError({
+                        msg: item.message,
+                        line: item.line,
+                        col: item.col,
+                        time: Math.floor(Date.now() / 1000)
+                    })
+                })
+
+                renderErrors()
             }, 500)
 
-            function getCursorRow() {
-                return editor.getCursorPosition().row + 1;
-            }
             const tsParser = new TypescriptParser()
-
             const ast = await window.electron.typescriptAST(editor.getValue())
-            const row = getCursorRow();
+            const row = editor.getCursorPosition().row + 1
 
-            const chain = tsParser.getContextChain(ast, row);
-            tsParser.renderContext(chain);
+            const chain = tsParser.getContextChain(ast, row)
+            tsParser.renderContext(chain)
         }
-        else if (language.mode == "json") {
+
+        else if (language.mode === "json") {
             const jsonParser = new JSONParser()
             jsonParser.showJSONContext(editor, document.querySelector(".code-structure"))
         }
-        else if (language.mode == "html") {
+
+        else if (language.mode === "html") {
             const htmlParser = new HTMLParser()
             htmlParser.showHTMLContext(editor, document.querySelector(".code-structure"))
         }
-        else if(language.mode == "css") {
-            function getCursorRow() {
-                return editor.getCursorPosition().row + 1;
-            }
-            const cssParser = new CSSParser()
-            const row = getCursorRow();
 
-            const chain = cssParser.getContextChain(editor.getValue(), row);
-            cssParser.renderContext(chain);
+        else if (language.mode === "css") {
+            const cssParser = new CSSParser()
+            const row = editor.getCursorPosition().row + 1
+
+            const chain = cssParser.getContextChain(editor.getValue(), row)
+            cssParser.renderContext(chain)
         }
+
         else {
-            const codeStructure = document.querySelector(".code-structure");
+            const codeStructure = document.querySelector(".code-structure")
             if (codeStructure) {
                 codeStructure.textContent = `Context unavailable for ${language.name}`
             }
@@ -702,8 +793,7 @@ export async function openTab(path, content, extension, name, pathContext, isNew
         }
     });
 
-    editor.session.on('change', async function (delta) {
-        updateEditorData()
+    editor.session.on('change', async () => {
         await setEditorContext()
         triggerAceChanged(editor)
 
@@ -723,10 +813,15 @@ export async function openTab(path, content, extension, name, pathContext, isNew
     });
 
     editor.on("click", async () => {
-        await setEditorContext()
+        await setEditorContext({ errorsUpdate: false })
     });
 
     editor.session.on('changeAnnotation', function () {
+        const worker = editor.session.$worker
+        if (worker) {
+            worker.send('changeOptions', [{ asi: true }]);
+        }
+
         updateEditorData()
     });
 
@@ -757,12 +852,14 @@ export async function openTab(path, content, extension, name, pathContext, isNew
         `;
     tabsBar.appendChild(tab);
 
-    // if tab - a new file (from dragNdrop or smth)
+    // if tab is a new file (from dragNdrop or smth)
 
     if (isNew) {
         showCodeWindowVisuals()
         tab.classList.add("not-saved")
     }
+
+    // 
 
     tabsByPath.set(path, { id, tabEl: tab, editor, paneEl: pane, ErrorsHistoryWindow, language, new: isNew });
     recentlyClosed.delete(path);
@@ -784,8 +881,7 @@ export async function openTab(path, content, extension, name, pathContext, isNew
         ev.preventDefault();
         closeTab(path);
     });
-
-    editor.session.on("change", () => {
+    editor.session.on('change', async () => {
         tab.classList.add("not-saved");
     });
 
