@@ -1,13 +1,13 @@
-export function onEditorChangeNewHLRulesCallback({ data, dynamicRules, refreshEditorHighlight }) {
-    const { action, id, rule } = data
+export function onEditorChangeNewHLRulesCallback({ data, contexts, refreshEditorHighlight }) {
+    const { fileId, rules } = data;
 
-    if (action === "add") {
-        dynamicRules.set(id, rule)
+    console.log(data)
+
+    contexts[fileId] = new Map();
+
+    for (const rule of rules) {
+        contexts[fileId].set(rule.id, rule);
     }
 
-    if (action === "remove") {
-        dynamicRules.delete(id)
-    }
-
-    refreshEditorHighlight()
+    refreshEditorHighlight();
 }

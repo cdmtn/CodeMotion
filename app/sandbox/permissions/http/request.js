@@ -1,8 +1,9 @@
 async function callback(data) {
-    const url = data.selfArgs[0]
-    const method = data.selfArgs[1] || "GET";
-    const headers = data.selfArgs[2] || {};
-    const body = data.selfArgs[3]
+    const properties = data.selfArgs[0]
+    const url = properties.url
+    const method = properties.method || "GET";
+    const headers = properties.headers || {};
+    const body = properties.body
 
     try {
         const options = {
@@ -10,12 +11,16 @@ async function callback(data) {
             headers
         };
 
+        const hasContentType = Object.keys(headers).some(
+            k => k.toLowerCase() === "content-type"
+        );
+
         if (body && method !== "GET") {
             options.body = typeof body === "string"
                 ? body
                 : JSON.stringify(body);
 
-            if (!headers["Content-Type"]) {
+            if (hasContentType) {
                 options.headers["Content-Type"] = "application/json";
             }
         }
@@ -31,17 +36,21 @@ async function callback(data) {
             data = text;
         }
 
-        return {
-            status: res.status,
-            ok: res.ok,
-            headers: Object.fromEntries(res.headers.entries()),
-            data
+        return async () => {
+            return {
+                status: res.status,
+                ok: res.ok,
+                headers: Object.fromEntries(res.headers.entries()),
+                data
+            }
         };
 
     } catch (err) {
-        return {
-            ok: false,
-            error: err.message
+        return async () => {
+            return {
+                ok: false,
+                error: err.message
+            }
         };
     }
 }

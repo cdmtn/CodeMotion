@@ -1,8 +1,0 @@
-{
-    "name": "google-design",
-    "displayName": "Google Design",
-    "description": "Allow to create Google-like themes",
-    "version": "1.0.0",
-    "main": "index",
-    "permissions": []
-}

@@ -133,18 +133,26 @@ contextBridge.exposeInMainWorld('electron', {
         },
         editor: {
             language: {
+                register: (data: any) =>
+                    ipcRenderer.send("language-register", data),
                 onRegister: (callback: any) => 
-                    ipcRenderer.on("new-language-register", (event: any, data: any) => callback(data)),
+                    ipcRenderer.on("on-language-register", (event: any, data: any) => callback(data)),
                 onIconsRegister: (callback: any) => 
                     ipcRenderer.on("new-language-icons-register", (event: any, data: any) => callback(data)),
                 onChangeHLRules: (callback: any) => 
                     ipcRenderer.on("on-editor-change-new-hl-rules", (event: any, data: any) => callback(data)),
+            },
+            api: {
+                onReplace: (callback: any) => 
+                    ipcRenderer.on("editor-api-replace", (event: any, data: any) => callback(data)),  
             },
             dir: {
                 onIconsRegister: (callback: any) => 
                     ipcRenderer.on("new-dir-icon-register", (event: any, data: any) => callback(data)),
             },
             docs: {
+                register: (data: any) =>
+                    ipcRenderer.send("docs-register", data),
                 onRegister: (callback: any) => 
                     ipcRenderer.on("new-documentation-register", (event: any, data: any) => callback(data)),
             }
@@ -175,9 +183,12 @@ contextBridge.exposeInMainWorld('electron', {
     sendCustomLanguageRegistrationReady: () => {
         ipcRenderer.send("custom-language-registration-ready")
     },
-
-    triggerFileOpenedEvent: (data: any) => ipcRenderer.send("file-opened-event", data),
-    triggerAceChangedEvent: (data: any) => ipcRenderer.send("ace-changed-event", data),
+    
+    triggers: {
+        sendFileOpened: (data: any) => ipcRenderer.send("file-opened-event", data),
+        sendAceChanged: (data: any) => ipcRenderer.send("ace-changed-event", data),
+        sendAceClicked: (data: any) => ipcRenderer.send("ace-clicked-event", data),
+    },
 
     // 
 

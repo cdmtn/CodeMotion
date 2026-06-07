@@ -1,9 +1,23 @@
-const { checkFields, saveReadFile } = require("../../../tools")
+const { ipcMain } = require("electron")
+const { checkFields, saveReadFile } = require("../tools")
 const path = require("path")
 
-function callback(data) {
-    const configPath = data.selfArgs[0]
+const bus = require("../../../helpers/eventBus")
+
+let debuggerSender = null
+let mainSender = null
+
+bus.on("debugger-ready", (sender) => {
+    debuggerSender = sender;
+});
+bus.on("main-ready", (sender) => {
+    mainSender = sender;
+});
+
+ipcMain.on("docs-register", async (event, data) => {
+    const configPath = data.configPath
     const extPath = data.extensionPath
+    const extName = data.extensionName
 
     let documentationProperties = {}
 
@@ -18,19 +32,19 @@ function callback(data) {
             if(docPropertiesKey in configContent) {
                 documentationProperties = configContent[docPropertiesKey]
 
-                checkFields(`${data.permissionName}:config:${docPropertiesKey}`, documentationProperties, {
+                checkFields(`docs.register:config:${docPropertiesKey}`, documentationProperties, {
                     onMode: "string"
                 })
 
                 delete configContent[docPropertiesKey]
             }
             else {
-                throw new Error(`${data.permissionName}: key "$props" in documentation config is required`)
+                throw new Error(`docs.register: key "$props" in documentation config is required`)
             }
 
             // check each config item
             Object.keys(configContent).forEach((item, index) => {
-                checkFields(`${data.permissionName}:config:${index}`, configContent[item], {
+                checkFields(`docs.register:config:${index}`, configContent[item], {
                     type: "string",
                     description: "string",
                     example: "string",
@@ -38,12 +52,10 @@ function callback(data) {
                 })
             })
 
-            data.mainSender.send("new-documentation-register", {
+            mainSender.send("new-documentation-register", {
                 config: configContent,
                 props: documentationProperties
             })
         }
     }
-}
-
-module.exports = { callback }
+})

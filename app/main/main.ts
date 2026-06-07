@@ -34,6 +34,10 @@ require("./ipc/misc")
 require("./ipc/organizations")
 require("./ipc/bugs")
 
+// ext
+require("../sandbox/regs/language")
+require("../sandbox/regs/docs")
+
 const { terminalManager } = require("../main/helpers/terminal.js")
 
 const { createDebuggerWindow } = require("../../helpers/debuggerWindow/debuggerWindow.js");

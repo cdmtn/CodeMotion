@@ -37,7 +37,7 @@ import { Console } from "../handlers/terminalHandler.js"
 import { minifyJS, minifyCSS } from "../handlers/minifyHandlers.js"
 import { initCodeContextMenu, destroyCodeContextMenu } from "../codeContextMenu.js"
 import { enableSave, disableSave } from "../../../app/renderer.js"
-import { bus, sendEvent } from "../bus.js"
+import { sendEvent } from "../bus.js"
 
 import { FindNoUsages } from "../editor/noUsagesFinder.js"
 import { ColorComments } from "../editor/colorComments.js"
@@ -49,6 +49,7 @@ import { JavascriptParser } from "../contextParsers/javascriptParser.js"
 import { JSONParser } from "../contextParsers/jsonParser.js"
 import { HTMLParser } from "../contextParsers/htmlParser.js"
 import { CSSParser } from "../contextParsers/cssParser.js"
+import { triggerAceChanged, triggerAceClicked } from "./triggers.js"
 
 export const recentlyClosed = new Map();
 export const tabsByPath = new Map();
@@ -83,6 +84,8 @@ export function updateTabPath(oldPath, newPath, newName) {
 }
 
 export class themeEditors {
+    static current = {}
+
     static themes = {
         default: "github_dark",
         light: "clouds",
@@ -114,6 +117,10 @@ function addThemeModificator(editor) {
         if (themeEditors.has(theme)) {
             loadAceModule(`theme-${themeEditors.themes[theme]}`)
             editor.setTheme(`ace/theme/${themeEditors.themes[theme]}`)
+            themeEditors.current = {
+                name: theme,
+                ace: themeEditors.themes[theme]
+            }
         }
     }
     proccess(getTheme())
@@ -452,15 +459,22 @@ function updateVisibleOnElements(extension, language) {
     })
 }
 
+function initExtensionEditorAPIEvents({ editor }) {
+    window.electron.ext.editor.api.onReplace((data) => {
+        const findString = data.findString
+        const replaceString = data.replaceString
+
+        editor.find(findString, {
+            caseSensitive: true,
+            wholeWord: false,
+            regExp: false
+        });
+
+        editor.replace(replaceString);
+    })
+}
+
 export async function openTab(path, content, extension, name, pathContext, isNew = false, settings = {}) {
-    window.electron.triggerFileOpenedEvent(
-        {
-            path: path,
-            extension: extension,
-            name: name,
-            context: pathContext ?? undefined
-        }
-    )
     closeAllWindows()
 
     currentContent = content
@@ -522,37 +536,39 @@ export async function openTab(path, content, extension, name, pathContext, isNew
         fixedWidthGutter: true
     });
 
+    window.electron.triggers.sendFileOpened(
+        {
+            path: path,
+            extension: extension,
+            name: name,
+            context: pathContext ?? undefined
+        }
+    )
+    sendEvent("file-opened-event",
+        {
+            editor: editor,
+            path: path,
+            extension: extension,
+            name: name,
+            context: pathContext ?? undefined
+        }
+    )
+
     const aceRange = ace.require("ace/range").Range
 
     // trigger first ace mode changed
 
-    triggerAceChanged(editor)
-
-    function triggerAceChanged(editor) {
-        window.electron.triggerAceChangedEvent(
-            {
-                editorValue: editor.getValue(),
-                editorMode: editor.session.$modeId,
-                editorLanguage: language.mode,
-                editorLanguageExtension: extension,
-                errors: editor.getSession().getAnnotations().filter(item => item.type === "error").length,
-                cursor: {
-                    line: editor.getCursorPosition().row + 1,
-                    column: editor.getCursorPosition().column + 1
-                }
-            }
-        )
-
-        sendEvent("aceModeChanged", { extension: extension, editor: editor, mode: editor.session.$modeId })
-    }
+    triggerAceChanged({ editor: editor, extension: extension, language: language })
+    initExtensionEditorAPIEvents({ editor: editor })
 
     let cursorChangeTimer = null
 
     function triggerCursorChanged() {
         updateEditorData()
+
         clearTimeout(cursorChangeTimer)
         cursorChangeTimer = setTimeout(() => {
-            triggerAceChanged(editor)
+            triggerAceClicked({ editor: editor, extension: extension, language: language })
         }, 100)
     }
 
@@ -649,8 +665,8 @@ export async function openTab(path, content, extension, name, pathContext, isNew
         let line = cursor.row
         let col = cursor.column
 
-        setColumn(col)
-        setLine(line)
+        setColumn(col + 1)
+        setLine(line + 1)
 
         setSymbols(editor.getValue().length)
         setErrors(editor.getSession().getAnnotations())
@@ -795,7 +811,7 @@ export async function openTab(path, content, extension, name, pathContext, isNew
 
     editor.session.on('change', async () => {
         await setEditorContext()
-        triggerAceChanged(editor)
+        triggerAceChanged({ editor: editor, extension: extension, language: language })
 
         // unused find
 

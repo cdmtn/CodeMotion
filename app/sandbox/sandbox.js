@@ -163,6 +163,8 @@ ipcMain.handle("run-extension", async (event, code, permissions, meta) => {
     const extensionVersion = meta.extensionVersion != undefined ? meta.extensionVersion : null
     const extensionPath = meta.extensionPath != undefined ? meta.extensionPath : null
     const isDev = meta.isDev != undefined ? meta.isDev : false
+    const activeOn = meta.activeOn
+
     let allCSSVariables = meta.allCSSVariables != undefined ? meta.allCSSVariables : []
 
     function createAPI(permissions) {
@@ -204,7 +206,7 @@ ipcMain.handle("run-extension", async (event, code, permissions, meta) => {
 
                     debuggerSender = debuggerSender ?? mainSender
 
-                    setNestedProperty(app, p, (...args) => {
+                    setNestedProperty(app, p, async (...args) => {
                         const factory = callback({
                             debuggerSender,
                             mainSender,
@@ -212,10 +214,18 @@ ipcMain.handle("run-extension", async (event, code, permissions, meta) => {
                             extensionPath,
                             permissionName: "app." + p,
                             allCSSVariables,
-                            selfArgs: args
+                            selfArgs: args,
+                            activeOn: activeOn
                         })
 
-                        if (factory && typeof factory === "function") {
+                        if(factory instanceof Promise) {
+                            const awaitedFactory = await factory
+
+                            if(typeof awaitedFactory == "function") {
+                                return awaitedFactory(...args)
+                            }
+                        }
+                        else if (factory && typeof factory === "function") {
                             return factory(...args);
                         }
                     })
@@ -241,7 +251,7 @@ ipcMain.handle("run-extension", async (event, code, permissions, meta) => {
         const context = vm.createContext(sandbox);
 
         await vm.runInContext(`
-            (function(){
+            (async function(){
                 "use strict";
                 ${code}
             })()

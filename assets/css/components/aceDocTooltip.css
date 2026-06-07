@@ -65,6 +65,15 @@
     padding-left: 15px;
     font-size: 12px;
 }
+.ace-documentation__tooltip .ace-documentation__tooltip-example .ace_editor {
+    background: transparent!important;
+    height: 50px;
+    font-size: 15px;
+    padding: 0px;
+}
+.ace-documentation__tooltip .ace-documentation__tooltip-example .ace_editor .ace_cursor {
+    display: none!important;
+}
 .ace-documentation__tooltip .ace-documentation__tooltip-example .content {
     font-family: var(--code-font);
 }

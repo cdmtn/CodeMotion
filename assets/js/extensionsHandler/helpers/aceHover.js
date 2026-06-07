@@ -1,13 +1,14 @@
 import { DocumentationTypes } from "./documentationTypes.js"
-import { escapeHtml } from "../../lib.js"
+import { escapeHtml, truncateString } from "../../lib.js"
+import { themeEditors } from "../../explorerTree/tabHandler.js"
 
-export function enableAceHover(editor, docs) {
+export function enableAceHover(editor, docs, props) {
     const tooltip = document.createElement("div")
     tooltip.classList.add("ace-documentation__tooltip", "hidden")
     tooltip.style.position = "fixed"
     tooltip.style.display = "none"
     tooltip.style.zIndex = 9999
-    tooltip.style.maxWidth = "300px"
+    tooltip.style.maxWidth = "800px"
     tooltip.style.wordWrap = "break-word"
 
     document.body.appendChild(tooltip)
@@ -165,17 +166,42 @@ export function enableAceHover(editor, docs) {
         }
 
         if (data.example.length > 0) {
+            let exampleContent = escapeHtml(data.example)
+            exampleContent = truncateString(exampleContent, 300)
+
             tooltip.innerHTML += `
                 <div class="ace-documentation__tooltip-example">
                     <div class="note">Example</div>
-                    <span class="content">${escapeHtml(data.example)}</span>
+                    <div id="${key}" class="editor">${exampleContent}</div>
                 </div>
-            `
+            `;
+
+            requestAnimationFrame(() => {
+                const editor = ace.edit(tooltip.querySelector(`#${key}`));
+
+                editor.setTheme(`ace/theme/${themeEditors.current.ace}`)
+
+                editor.renderer.setPadding(0);
+                editor.session.setUseWorker(false);
+                editor.setShowPrintMargin(false);
+                editor.setReadOnly(true);
+                editor.renderer.setShowGutter(false);
+                editor.setHighlightActiveLine(false);
+
+                editor.setOptions({
+                    maxLines: Infinity,
+                    minLines: 1,
+                    autoScrollEditorIntoView: true
+                });
+
+                editor.session.setMode(`ace/mode/${props.onMode}`);
+                editor.resize();
+            });
         }
 
         if (data.sources.length > 0) {
             let sources = data.sources.map(s =>
-                `<a target="_blank" href="https://${escapeHtml(s.url)}/">${escapeHtml(s.title)}</a>`
+                `<a target="_blank" title="${s.url}" href="https://${escapeHtml(s.url)}/">${escapeHtml(s.title)}</a>`
             ).join("")
 
             tooltip.innerHTML += `

@@ -17,7 +17,7 @@ import { onNewDocumentationRegisterCallback } from "./events/editor/onNewDocumen
 const preloadapi = window.electron
 const extapi = preloadapi.ext
 
-const dynamicRules = new Map()
+const contexts = {}
 let currentEditor = null
 
 export function handleExtensionEvents() {
@@ -43,7 +43,7 @@ export function handleExtensionEvents() {
         onNewDirIconRegisterCallback({ data: data })
     })
     extapi.editor.language.onChangeHLRules((data) => {
-        onEditorChangeNewHLRulesCallback({ data: data, dynamicRules: dynamicRules, refreshEditorHighlight: refreshEditorHighlight })
+        onEditorChangeNewHLRulesCallback({ data: data, contexts: contexts, refreshEditorHighlight: refreshEditorHighlight })
     })
     extapi.app.onNotification((name, data) => {
         onNotificationCallback({ data: data, name: name })
@@ -61,7 +61,9 @@ export function handleExtensionEvents() {
             rule => !rule._dynamicId
         )
 
-        for (const [id, rule] of dynamicRules) {
+        console.log(contexts)
+
+        for (const [id, rule] of contexts[currentEditor.id]) {
             mode.$highlightRules.$rules.start.unshift({
                 ...rule,
                 _dynamicId: id
@@ -76,8 +78,17 @@ export function handleExtensionEvents() {
         currentEditor.session.bgTokenizer.start(0)
     }
 
-    bus.addEventListener("aceModeChanged", (d) => {
+    bus.addEventListener("ace-mode-changed", (d) => {
         currentEditor = d.detail.editor
+        refreshEditorHighlight()
+    })
+    bus.addEventListener("ace-mode-clicked", (d) => {
+        currentEditor = d.detail.editor
+        refreshEditorHighlight()
+    })
+    bus.addEventListener("file-opened-event", (d) => {
+        currentEditor = d.detail.editor
+        contexts[currentEditor.id] = new Map()
         refreshEditorHighlight()
     })
 }
