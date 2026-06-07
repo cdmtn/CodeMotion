@@ -59,7 +59,7 @@ codemotion-ide/
 ├── ace/                 # Ace code editor builds
 ├── app/                 # App functions
 ├── aseets/              # App assets
-├── extension_modules/   # Public modules for extensions
+├── extensions/          # Path for extensions (Optional)
 ├── helpers/             # Renderer helpers
 └── html/                # HTML templates
 ```
