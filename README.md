@@ -58,7 +58,7 @@ npm start -- --d
 codemotion-ide/
 ├── ace/                 # Ace code editor builds
 ├── app/                 # App functions
-├── aseets/              # App assets
+├── assets/              # App assets
 ├── extensions/          # Path for extensions (Optional)
 ├── helpers/             # Renderer helpers
 └── html/                # HTML templates
