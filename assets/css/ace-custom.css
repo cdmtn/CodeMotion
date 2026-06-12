@@ -1,13 +1,14 @@
 :root {
     --color-boolean: #c19aff;
     --color-const: #72abff;
-    --color-class: #83ffb4;
+    --color-class: #84ea9a;
     --color-function: #ffef9d;
     --color-number: #ffa981;
     --color-string: #ffc17a;
-    --color-special-operator: #ff93ce;
+    --color-special-operator: #ff6fcb;
     --color-default: #8dbeff;
-    --color-keyword: rgb(255, 125, 125);
+    --color-keyword: rgb(255 107 107);
+    --color-other: #c960a8;
 }
 
 .ace_boolean,
@@ -249,6 +250,14 @@
 .ace_no_usage {
     opacity: .5;
     text-decoration: underline wavy #888;
+}
+
+.ace_operator {
+    color: var(--color-keyword)
+}
+
+.ace_other {
+    color: var(--color-other);
 }
 
 .error-marker {

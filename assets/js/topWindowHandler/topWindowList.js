@@ -52,6 +52,7 @@ export class TopWindowList {
                 if ("name" in item) {
                     nameElement.classList.add("top-window__list-item__name")
                     const nameElementSpan = document.createElement("span")
+                    nameElementSpan.classList.add("name")
                     nameElementSpan.textContent = item.name
 
                     nameElement.appendChild(nameElementSpan)
@@ -106,10 +107,13 @@ export class TopWindowList {
 
                 if(target.tagName == "SPAN") target = target.parentElement
 
+                console.log(target)
+
                 cb({
                     target: target,
                     id: target.id,
-                    name: target.textContent
+                    name: target.querySelector(".name").textContent,
+                    secondary: target.querySelector(".secondary").textContent
                 })
             })
         })

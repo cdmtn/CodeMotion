@@ -1,6 +1,6 @@
 export let autoBracketPatched = false
 
-export function enableAutoBrackets(languageId) {
+export function enableAutoBrackets(languageId, editor) {
     if (autoBracketPatched) return
     autoBracketPatched = true
 
@@ -26,44 +26,13 @@ export function enableAutoBrackets(languageId) {
         if (mode === `ace/mode/${languageId}`) {
             if (pairs[text]) {
                 const closing = pairs[text]
-
                 originalInsert.call(this, text + closing)
-
                 this.navigateLeft(1)
                 return
             }
         }
 
         return originalInsert.call(this, text)
-    }
-
-    const originalExec = Editor.prototype.execCommand
-    Editor.prototype.execCommand = function(command, args) {
-        const mode = this.session.$mode?.$id
-
-        if (mode === `ace/mode/${languageId}` && command === "newline") {
-            const cursor = this.getCursorPosition()
-            const line = this.session.getLine(cursor.row)
-
-            const charBefore = line[cursor.column - 1]
-            const charAfter = line[cursor.column]
-
-            if (blockPairs[charBefore] && pairs[charBefore] === charAfter) {
-                const indent = this.session.getTabString()
-                const currentIndent = line.match(/^\s*/)[0]
-
-                this.session.doc.insert(
-                    { row: cursor.row, column: cursor.column },
-                    "\n" + currentIndent + indent + "\n" + currentIndent
-                )
-
-                this.navigateUp(1)
-                this.navigateLineEnd()
-                return
-            }
-        }
-
-        return originalExec.call(this, command, args)
     }
 
     const originalRemove = Editor.prototype.remove
@@ -88,4 +57,36 @@ export function enableAutoBrackets(languageId) {
 
         return originalRemove.call(this, direction)
     }
+
+    editor.commands.addCommand({
+        name: "autoBracketNewline",
+        bindKey: { win: "Enter", mac: "Enter" },
+        exec: function(ed) {
+            const mode = ed.session.$mode?.$id
+
+            if (mode === `ace/mode/${languageId}`) {
+                const cursor = ed.getCursorPosition()
+                const line = ed.session.getLine(cursor.row)
+
+                const charBefore = line[cursor.column - 1]
+                const charAfter = line[cursor.column]
+
+                if (blockPairs[charBefore] && pairs[charBefore] === charAfter) {
+                    const indent = ed.session.getTabString()
+                    const currentIndent = line.match(/^\s*/)[0]
+
+                    ed.session.doc.insert(
+                        { row: cursor.row, column: cursor.column },
+                        "\n" + currentIndent + indent + "\n" + currentIndent
+                    )
+
+                    ed.navigateUp(1)
+                    ed.navigateLineEnd()
+                    return
+                }
+            }
+
+            ed.insert("\n")
+        }
+    })
 }

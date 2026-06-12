@@ -5,6 +5,8 @@ export function createHighlightRules(config = {}) {
         Array.isArray(arr) ? arr.filter(v => typeof v === "string" && v.trim()) : []
 
     const keywords = safeArray(config.keywords)
+    const operators = safeArray(config.operators)
+    const others = safeArray(config.other)
     const constants = safeArray(config.constants)
     const booleans = safeArray(config.booleans)
     const alreadyDefinedClassnames = safeArray(config.alreadyDefinedClassnames)
@@ -14,6 +16,12 @@ export function createHighlightRules(config = {}) {
 
     const keywordMap = Object.create(null)
     keywords.forEach(k => keywordMap[k] = "keyword")
+
+    const operatorsMap = Object.create(null)
+    operators.forEach(k => operatorsMap[k] = "operator")
+
+    const othersMap = Object.create(null)
+    others.forEach(k => othersMap[k] = "other")
 
     const booleansMap = Object.create(null)
     booleans.forEach(b => booleansMap[b] = "constant.language.boolean")
@@ -114,6 +122,8 @@ export function createHighlightRules(config = {}) {
             if (typesMap[value]) return "entity.name.class"
             if (booleansMap[value]) return "constant.language.boolean"
             if (keywordMap[value]) return "keyword"
+            if (operatorsMap[value]) return "operator"
+            if (othersMap[value]) return "other"
             if (constantsMap[value]) return "constant.language"
             if (classNamesMap[value]) return "entity.name.type.class"
 

@@ -21,9 +21,13 @@ export function registerAceLanguage(id, config = {}) {
         registeredCompleters: registeredCompleters
     })
 
-    if (config?.autocomplete?.auto) {
-        enableAutoBrackets(id)
-    }
+    bus.addEventListener("ace-mode-changed", (data) => {
+        const properties = data.detail
+        
+        if (config?.autocomplete?.auto) {
+            enableAutoBrackets(id, properties.editor)
+        }
+    })
 
     const registerMode = () => {
         ace.define(highlightModuleId, [
