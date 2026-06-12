@@ -136,22 +136,27 @@ export async function handleSettings(settingsObject) {
 
     themeSelect.appendTo(document.querySelector("#setting_theme"))
 
+    const pyInfo = await window.electron.getPython()
+    const installedPythonLabel = pyInfo != false
+        ? `${gls.get("modals.appearance.editor.pythonRunner.select.userDefined")} (Python ${pyInfo.version})`
+        : gls.get("modals.appearance.editor.pythonRunner.select.userDefined")
+
     if(platform == "win32") {
-        const pyInfo = await window.electron.getPython()
-
         pythonRunnerMethodSelect.add("builtin", gls.get("modals.appearance.editor.pythonRunner.select.builtIn")).default()
-
-        if(pyInfo != false) {
-            pythonRunnerMethodSelect.add("installed", `${gls.get("modals.appearance.editor.pythonRunner.select.userDefined")} (Python ${pyInfo.version})`)
-        }
-
-        pythonRunnerMethodSelect.appendTo(document.querySelector("#setting_pythonRunMethod"))
-        pythonRunnerMethodSelect.on("click", (e) => {
-            const ID = e.id
-
-            Setting.pythonRunnerMethod(ID)
-        })
     }
+
+    const installedPythonOption = pythonRunnerMethodSelect.add("installed", installedPythonLabel)
+
+    if(platform != "win32") {
+        installedPythonOption.default()
+    }
+
+    pythonRunnerMethodSelect.appendTo(document.querySelector("#setting_pythonRunMethod"))
+    pythonRunnerMethodSelect.on("click", (e) => {
+        const ID = e.id
+
+        Setting.pythonRunnerMethod(ID)
+    })
 
     if(aviableLanguages) {
         for(const index in aviableLanguages) {

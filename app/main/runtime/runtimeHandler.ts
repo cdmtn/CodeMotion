@@ -1,5 +1,5 @@
 import { ipcMain, IpcMainInvokeEvent, app } from "electron"
-import { spawn, ChildProcessWithoutNullStreams } from "node:child_process"
+import { spawn, ChildProcessWithoutNullStreams, SpawnOptionsWithoutStdio } from "node:child_process"
 import fs from "fs"
 import path from "node:path"
 import { RunPythonPayload } from "../payloads"
@@ -26,122 +26,142 @@ type RunPythonResult =
         interpreter: string
     }
 
+const getSystemPythonCommands = (): string[] => {
+    if (process.platform === "win32") {
+        return ["python", "python3", "py"]
+    }
+
+    return ["python3", "python"]
+}
+
+const spawnPython = (
+    command: string,
+    args: string[],
+    options: SpawnOptionsWithoutStdio
+): Promise<ChildProcessWithoutNullStreams> => {
+    return new Promise((resolve, reject) => {
+        const child = spawn(command, args, options) as ChildProcessWithoutNullStreams
+
+        const handleSpawn = (): void => {
+            child.removeListener("error", handleError)
+            resolve(child)
+        }
+
+        const handleError = (error: Error): void => {
+            child.removeListener("spawn", handleSpawn)
+            reject(error)
+        }
+
+        child.once("spawn", handleSpawn)
+        child.once("error", handleError)
+    })
+}
+
 ipcMain.handle(
     "run-python-code",
-    (
+    async (
         _: IpcMainInvokeEvent,
         data: RunPythonPayload
     ): Promise<RunPythonResult> => {
-        return new Promise((resolve) => {
-            let runPath: string
-            let isTempFile = false
-            let resolved = false
+        let runPath: string
+        let isTempFile = false
 
-            const filePath = data.filePath
-            const code = data.code
-            const useEmbed = data.useEmbed
+        const filePath = data.filePath
+        const code = data.code
+        const useEmbed = data.useEmbed
 
-            const tempDir = path.join(app.getAppPath(), "temp")
+        const tempDir = path.join(app.getAppPath(), "temp")
 
-            const embeddedPy = app.isPackaged
-                ? path.join(process.resourcesPath, "runtime", "python", "python.exe")
-                : path.join(__dirname, "..", "runtime", "python", "python.exe")
+        const embeddedPy = app.isPackaged
+            ? path.join(process.resourcesPath, "runtime", "python", "python.exe")
+            : path.join(__dirname, "..", "runtime", "python", "python.exe")
 
-            const cleanup = (): void => {
-                if (isTempFile && runPath && fs.existsSync(runPath)) {
-                    try {
-                        fs.unlinkSync(runPath)
-                    } catch {}
-                }
-            }
-
-            const finish = (result: RunPythonResult): void => {
-                if (resolved) return
-                resolved = true
-                cleanup()
-                resolve(result)
-            }
-
-            const trySpawn = (
-                command: string,
-                args: string[],
-                options: any = {}
-            ): ChildProcessWithoutNullStreams | null => {
+        const cleanup = (): void => {
+            if (isTempFile && runPath && fs.existsSync(runPath)) {
                 try {
-                    return spawn(command, args, options)
-                } catch {
-                    return null
+                    fs.unlinkSync(runPath)
+                } catch {}
+            }
+        }
+
+        try {
+            if (filePath) {
+                if (!fs.existsSync(filePath)) {
+                    return {
+                        type: "file_not_found",
+                        result: `File not found: ${filePath}`
+                    }
+                }
+
+                runPath = filePath
+            } else if (code) {
+                if (!fs.existsSync(tempDir)) {
+                    fs.mkdirSync(tempDir, { recursive: true })
+                }
+
+                runPath = path.join(tempDir, `temp-${Date.now()}.py`)
+                fs.writeFileSync(runPath, code, "utf8")
+                isTempFile = true
+            } else {
+                return {
+                    type: "no_input",
+                    result: "No code or filePath provided"
                 }
             }
 
-            try {
-                if (filePath) {
-                    if (!fs.existsSync(filePath)) {
-                        return finish({
-                            type: "file_not_found",
-                            result: `File not found: ${filePath}`
-                        })
+            const spawnOptions: SpawnOptionsWithoutStdio = {
+                cwd: path.dirname(runPath)
+            }
+
+            const candidates = useEmbed && fs.existsSync(embeddedPy)
+                ? [embeddedPy]
+                : getSystemPythonCommands()
+
+            let py: ChildProcessWithoutNullStreams | null = null
+            let pyCommand = ""
+
+            for (const command of candidates) {
+                try {
+                    py = await spawnPython(command, [runPath], spawnOptions)
+                    pyCommand = command
+                    break
+                } catch {
+                    continue
+                }
+            }
+
+            if (!py) {
+                cleanup()
+                return {
+                    type: "python_not_found",
+                    result: useEmbed
+                        ? "Embedded Python not found"
+                        : "System Python not found"
+                }
+            }
+
+            let stdout = ""
+            let stderr = ""
+
+            const result = await new Promise<RunPythonResult>((resolve) => {
+                let settled = false
+                let timeout: NodeJS.Timeout | null = null
+
+                const settle = (value: RunPythonResult): void => {
+                    if (settled) return
+                    settled = true
+
+                    if (timeout) {
+                        clearTimeout(timeout)
                     }
 
-                    runPath = filePath
-                } else if (code) {
-                    if (!fs.existsSync(tempDir)) {
-                        fs.mkdirSync(tempDir, { recursive: true })
-                    }
-
-                    runPath = path.join(tempDir, `temp-${Date.now()}.py`)
-                    fs.writeFileSync(runPath, code, "utf8")
-                    isTempFile = true
-                } else {
-                    return finish({
-                        type: "no_input",
-                        result: "No code or filePath provided"
-                    })
+                    resolve(value)
                 }
 
-                let pyCommand: string
-                let pyArgs: string[] = [runPath]
+                timeout = setTimeout(() => {
+                    py?.kill()
 
-                if (useEmbed) {
-                    if (!fs.existsSync(embeddedPy)) {
-                        return finish({
-                            type: "python_not_found",
-                            result: "Embedded Python not found"
-                        })
-                    }
-
-                    pyCommand = embeddedPy
-                } else {
-                    pyCommand = "python"
-                }
-
-                let py = trySpawn(pyCommand, pyArgs, {
-                    cwd: path.dirname(runPath)
-                })
-
-                if (!py && !useEmbed) {
-                    pyCommand = "py"
-                    py = trySpawn(pyCommand, pyArgs, {
-                        cwd: path.dirname(runPath)
-                    })
-                }
-
-                if (!py) {
-                    return finish({
-                        type: "python_not_found",
-                        result: useEmbed
-                            ? "Embedded Python not found"
-                            : "System Python not found"
-                    })
-                }
-
-                let stdout = ""
-                let stderr = ""
-
-                const timeout = setTimeout(() => {
-                    py!.kill()
-
-                    finish({
+                    settle({
                         type: "timeout",
                         result: "Execution timed out"
                     })
@@ -156,25 +176,14 @@ ipcMain.handle(
                 })
 
                 py.on("error", () => {
-                    clearTimeout(timeout)
-
-                    if (!useEmbed && pyCommand === "python") {
-                        py = spawn("py", pyArgs, {
-                            cwd: path.dirname(runPath)
-                        })
-                        return
-                    }
-
-                    finish({
+                    settle({
                         type: "spawn_error",
                         result: "Failed to start Python process"
                     })
                 })
 
                 py.on("close", (exitCode: number | null) => {
-                    clearTimeout(timeout)
-
-                    finish({
+                    settle({
                         type: exitCode === 0 ? "success" : "error",
                         stdout,
                         stderr,
@@ -183,16 +192,20 @@ ipcMain.handle(
                         interpreter: pyCommand
                     })
                 })
+            })
 
-            } catch (err: unknown) {
-                const message =
-                    err instanceof Error ? err.message : String(err)
+            cleanup()
+            return result
+        } catch (err: unknown) {
+            cleanup()
 
-                finish({
-                    type: "internal_error",
-                    result: message
-                })
+            const message =
+                err instanceof Error ? err.message : String(err)
+
+            return {
+                type: "internal_error",
+                result: message
             }
-        })
+        }
     }
 )
