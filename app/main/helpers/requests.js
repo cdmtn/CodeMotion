@@ -1,3 +1,4 @@
+const { app } = require("electron")
 const fs = require("fs")
 const path = require("path")
 const fsPromise = require('fs/promises');
@@ -162,19 +163,27 @@ async function getAppIcon() {
     }
 }
 function readFilesInFolder(folderPath) {
-    return fs.readdirSync(folderPath).map(file => {
-        const fullPath = path.join(folderPath, file);
+    const base = path.isAbsolute(folderPath)
+        ? folderPath
+        : path.join(app.getAppPath(), folderPath);
+
+    return fs.readdirSync(base).map(file => {
+        const fullPath = path.join(base, file);
         const isDir = fs.statSync(fullPath).isDirectory();
 
         return {
             name: file,
             path: fullPath,
-            type: isDir ? 'folder' : 'file'
+            type: isDir ? "folder" : "file"
         };
     });
 }
 async function readFileContent(filePath, encoding = 'utf8') {
-    const abs = path.resolve(filePath);
+    const base = path.isAbsolute(filePath)
+        ? filePath
+        : path.join(app.getAppPath(), filePath);
+
+    const abs = path.resolve(base, filePath);
     const data = await fsPromise.readFile(abs, { encoding: encoding === null ? undefined : encoding });
     return data;
 }

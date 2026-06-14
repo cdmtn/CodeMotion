@@ -16,14 +16,13 @@ let mainWindow: any
 let workSeconds: number = 0
 
 require("../sandbox/sandbox")
-require("../../helpers/files")
 require("../../helpers/getPython")
 require("../auth")
 require("../electron/live-server")
 require("./runtime/runtimeHandler")
 require("./tools/diagnostics")
 require("./tools/javascript/ast")
-require("./tools/typescript/ast")
+require("./tools/typescript/ast-ts")
 
 require("./ipc/filesWork")
 require("./ipc/api")
@@ -37,6 +36,8 @@ require("./ipc/bugs")
 // ext
 require("../sandbox/regs/language")
 require("../sandbox/regs/docs")
+
+console.log("APP PATH:", app.getAppPath());
 
 const { terminalManager } = require("../main/helpers/terminal.js")
 
@@ -77,7 +78,7 @@ async function createWindow() {
     const localData = getLocalAppData();
     const settingsData = getSettingsData()
     const appIcon = await getAppIcon();
-
+    const isPackaged = !app.isPackaged;
     const primaryDisplay = screen.getPrimaryDisplay();
     const { width, height } = primaryDisplay.workAreaSize;
 

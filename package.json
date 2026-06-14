@@ -6,15 +6,46 @@
     "main": "app/dist/main.js",
     "scripts": {
         "build": "tsc",
-        "start": "npm run build && electron ."
+        "start": "npm run build && electron .",
+        "dist": "npm run build && electron-builder"
+    },
+    "build": {
+        "appId": "com.codemotion",
+        "productName": "CodeMotion",
+        "files": [
+            "ace/**/*",
+            "app/**/*",
+            "assets/**/*",
+            "helpers/**/*",
+            "html/**/*",
+            "languages/**/*"
+        ],
+        "extraResources": [
+            {
+                "from": "extensions",
+                "to": "extensions"
+            }
+        ],
+        "win": {
+            "target": "nsis",
+            "icon": "assets/media/builder-icons/codemotion-icon.ico"
+        },
+        "mac": {
+            "target": "dmg"
+        },
+        "linux": {
+            "target": "AppImage"
+        }
     },
     "devDependencies": {
         "@types/electron": "^1.4.38",
         "@types/node": "^25.9.1",
         "electron": "^39.2.3",
+        "electron-builder": "^26.15.3",
         "typescript": "^6.0.3"
     },
     "dependencies": {
+        "@babel/parser": "^7.29.7",
         "@xterm/addon-fit": "^0.11.0",
         "@xterm/xterm": "^6.0.0",
         "child_process": "^1.0.2",

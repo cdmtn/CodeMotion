@@ -24,8 +24,12 @@ const { basicMinifyCSS } = require("../../helpers/minify.js")
 const vm = require("vm");
 const { config } = require("process")
 
-const EXTENSIONS_DIR = path.resolve(app.getAppPath(), "extensions")
-const EXTENSIONS_MODULES_DIR = path.resolve(app.getAppPath(), "extension_modules")
+const EXTENSIONS_DIR = path.resolve(
+    app.isPackaged ? process.resourcesPath : app.getAppPath(), 
+    "extensions"
+)
+
+console.log("EXTENSIONS PATH:", EXTENSIONS_DIR)
 
 let debuggerSender = null;
 let mainSender = null;
@@ -44,6 +48,10 @@ bus.on("main-ready", (sender) => {
     mainSender = sender;
     console.log("ExtensionManager: main connected");
 });
+
+ipcMain.handle("get-extensions-dir", () => {
+    return EXTENSIONS_DIR
+})
 
 ipcMain.handle("request-extensions", async () => {
     try {
@@ -98,60 +106,6 @@ ipcMain.handle("request-extension", async (event, name) => {
         }
 
         return ok({ package: json, path: extPath })
-
-    } catch (err) {
-        return fail(err)
-    }
-})
-
-ipcMain.handle("load-module", async (event, name, version) => {
-    try {
-        if (!isSafeName(name) || !isSafeName(version)) {
-            return fail("Invalid name or version")
-        }
-
-        if (!fs.existsSync(EXTENSIONS_MODULES_DIR)) {
-            return fail("Modules directory does not exist")
-        }
-
-        const modulePath = path.join(EXTENSIONS_MODULES_DIR, name)
-
-        if (!fs.existsSync(modulePath)) {
-            return fail("Module not found")
-        }
-
-        const moduleStat = await fs.promises.stat(modulePath)
-        if (!moduleStat.isDirectory()) {
-            return fail("Module path is not a directory")
-        }
-
-        const versionPath = path.join(modulePath, version)
-
-        if (!fs.existsSync(versionPath)) {
-            return fail("Version not found")
-        }
-
-        const versionStat = await fs.promises.stat(versionPath)
-        if (!versionStat.isDirectory()) {
-            return fail("Version path is not a directory")
-        }
-
-        const packagePath = path.join(versionPath, "package.json")
-
-        if (!fs.existsSync(packagePath)) {
-            return fail("package.json not found")
-        }
-
-        const raw = await fs.promises.readFile(packagePath, "utf-8")
-
-        let json
-        try {
-            json = parsePackageJson(raw)
-        } catch {
-            return fail("Invalid JSON in package.json")
-        }
-
-        return ok(json)
 
     } catch (err) {
         return fail(err)

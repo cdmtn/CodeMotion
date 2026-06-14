@@ -5,6 +5,7 @@ import fs from "fs"
 import { readDirTree, saveFile } from "../helpers/os"
 import { readFileContent } from "../helpers/requests"
 import { SaveContentPayload } from "../payloads"
+import { APP_PATH } from "../helpers/paths"
 
 ipcMain.handle("create-file", async (_: IpcMainInvokeEvent, targetPath: string) => {
     try {
@@ -135,3 +136,25 @@ ipcMain.handle('ask-to-save-content', async (_: IpcMainInvokeEvent, payload: Sav
         };
     }
 });
+
+ipcMain.handle("read-file", async (event: IpcMainInvokeEvent, filePath: string, parentPath: string): Promise<{ success: boolean; result: string | Error }> => {
+    try {
+        const data = await fs.promises.readFile(
+            path.join(parentPath, filePath),
+            "utf-8"
+        )
+
+        return {
+            success: true,
+            result: data
+        }
+    } catch (error) {
+        return {
+            success: false,
+            result: error instanceof Error
+                ? error
+                : new Error(String(error))
+        }
+    }
+}
+)

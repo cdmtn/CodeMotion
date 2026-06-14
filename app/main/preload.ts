@@ -2,7 +2,7 @@ import { RunPythonPayload, SaveContentPayload } from "./payloads";
 
 const { contextBridge, ipcRenderer } = require('electron');
 
-let isRegisteredCustomLanguageRegistration = false
+let isRegisteredCustomLanguageRegistration = false;
 
 contextBridge.exposeInMainWorld('electron', {
     readDirTree: (rootPath: any, options = {}) => ipcRenderer.invoke('readDirTree', rootPath, options),
@@ -16,6 +16,7 @@ contextBridge.exposeInMainWorld('electron', {
     getAllLanguagesJSON: () => ipcRenderer.invoke("get-all-languages-json"),
     getUserToken: () => ipcRenderer.invoke("get-user-token"),
     getUsedLanguagesByPath: (path: any) => ipcRenderer.invoke("get-used-languages-by-path", path),
+    getExtensionsDir: () => ipcRenderer.invoke("get-extensions-dir"),
 
     requestAddBug: (params: any) => ipcRenderer.invoke("request-add-bug", params),
     requestMakeVerifyBug: (params: any) => ipcRenderer.invoke("request-make-verify-bug", params),
@@ -92,7 +93,7 @@ contextBridge.exposeInMainWorld('electron', {
     createDebuggerWindow: () => ipcRenderer.invoke("create-debugger-window"),
     loadExtensionModule: (name: string, version: string) => ipcRenderer.invoke("load-module", name, version),
 
-    readFile: (path: string) => ipcRenderer.invoke("read-file", path),
+    readFile: (path: string, parentPath: string) => ipcRenderer.invoke("read-file", path, parentPath),
 
     removeByPath: (path: string) => ipcRenderer.invoke("remove-by-path", path),
 

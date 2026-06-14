@@ -316,6 +316,13 @@ export class _Languages {
             iconExt: "svg",
             mode: "golang",
             color: "#00ACD7"
+        },
+        bat: {
+            name: "BAT File",
+            icon: "bat",
+            iconExt: "svg",
+            mode: "batchfile",
+            color: "#444444"
         }
     }
     

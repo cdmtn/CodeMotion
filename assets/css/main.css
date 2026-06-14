@@ -3,6 +3,7 @@
 @import url("components/codeWrapper.css");
 @import url("auth.css");
 @import url("xterm-custom.css");
+@import url("editor/screenshot.css");
 
 :root {
     --body-color: #141414;
@@ -72,6 +73,7 @@ html {
     height: 100vh;
     overflow: hidden;
     overscroll-behavior: none;
+    user-select: none;
 }
 
 ::-webkit-scrollbar {

@@ -75,17 +75,24 @@ ipcMain.on("language-register", async (event, data) => {
 
             dataToSend["languageDocumentation"] = documentationConfig
         }
+        
+        // send data
+        if (mainSender && !mainSender.isDestroyed()) {
+            mainSender.send("on-language-register", dataToSend)
+        } else {
+            console.error("[language.register] mainSender is destroyed")
+        }
 
-        mainSender.send("on-language-register", dataToSend)
-
-        debuggerSender.send("debug-event", {
-            data: {
-                type: "msg",
-                content: `Added new language: ${configContent.name}`,
-                from: extName
-            },
-            time: Date.now()
-        })
+        if(debuggerSender) {
+            debuggerSender.send("debug-event", {
+                data: {
+                    type: "msg",
+                    content: `Added new language: ${configContent.name}`,
+                    from: extName
+                },
+                time: Date.now()
+            })
+        }
     }
     else {
         throw new Error(`[language.register] You must specify the configuration for language registration`)

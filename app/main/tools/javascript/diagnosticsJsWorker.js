@@ -1,59 +1,103 @@
 const { workerData, parentPort } = require("worker_threads");
-const ts = require("typescript");
+const parser = require("@babel/parser");
 
-const compilerOptions = {
-    noEmit: true,
-    allowJs: true,
-    checkJs: false,
-    strict: false,
-    target: ts.ScriptTarget.ES2020,
-    lib: ["lib.es2020.d.ts", "lib.dom.d.ts"],
-};
+const JS_PLUGINS = [
+    "jsx",
+    "decorators-legacy",
+    "classProperties",
+    "classPrivateMethods",
+    "classPrivateProperties",
+    "dynamicImport",
+    "exportDefaultFrom",
+    "optionalChaining",
+    "nullishCoalescingOperator",
+    "logicalAssignment",
+];
 
-let cachedContent = "";
-let languageService = null;
+const TS_PLUGINS = [...JS_PLUGINS, "typescript"];
 
-function createService() {
-    const serviceHost = {
-        getScriptFileNames: () => ["file.js"],
-        getScriptVersion: () => String(cachedContent.length),
-        getScriptSnapshot: (fileName) => {
-            if (fileName === "file.js") return ts.ScriptSnapshot.fromString(cachedContent);
-            const fs = require("fs");
-            if (fs.existsSync(fileName)) return ts.ScriptSnapshot.fromString(fs.readFileSync(fileName, "utf8"));
-            return undefined;
-        },
-        getCurrentDirectory: () => process.cwd(),
-        getCompilationSettings: () => compilerOptions,
-        getDefaultLibFileName: (opts) => ts.getDefaultLibFilePath(opts),
-        fileExists: ts.sys.fileExists,
-        readFile: ts.sys.readFile,
-        readDirectory: ts.sys.readDirectory,
+function getDiagnostics(code, isTS = false) {
+    let recoveredErrors = [];
+    const plugins = isTS ? TS_PLUGINS : JS_PLUGINS;
+
+    try {
+        parser.parse(code, {
+            sourceType: "unambiguous",
+            allowImportExportEverywhere: true,
+            allowReturnOutsideFunction: true,
+            allowSuperOutsideMethod: true,
+            errorRecovery: true,
+            plugins,
+        });
+        recoveredErrors = ast.errors || []
+    } catch (_) {}
+
+    if (recoveredErrors.length > 0) {
+        return recoveredErrors.map(e => formatError(e, code));
+    }
+
+    try {
+        parser.parse(code, {
+            sourceType: "unambiguous",
+            allowImportExportEverywhere: true,
+            allowReturnOutsideFunction: true,
+            allowSuperOutsideMethod: true,
+            errorRecovery: false,
+            plugins,
+        });
+    } catch (e) {
+        if (e && e.loc) {
+            if (e?.loc) return [formatError(e, code)];
+        }
+    }
+
+    return [];
+}
+
+function formatError(e, code) {
+    const line = e.loc?.line ?? null;
+    const col = e.loc?.column ?? null;
+
+    let start = e.pos ?? null;
+    if (start === null && line !== null && col !== null) {
+        start = lineColToOffset(code, line, col);
+    }
+
+    const length = guessLength(code, start);
+
+    return {
+        message: e.reasonCode
+            ? `${e.message} [${e.reasonCode}]`
+            : e.message,
+        start,
+        length,
+        line,
+        col: col !== null ? col + 1 : null,
     };
+}
 
-    languageService = ts.createLanguageService(serviceHost, ts.createDocumentRegistry());
+function lineColToOffset(code, line, col) {
+    const lines = code.split("\n");
+    let offset = 0;
+    for (let i = 0; i < line - 1 && i < lines.length; i++) {
+        offset += lines[i].length + 1;
+    }
+    return offset + col;
+}
+
+function guessLength(code, start) {
+    if (start === null || !code) return 1;
+    let end = start;
+    while (end < code.length && /\w/.test(code[end])) end++;
+    return Math.max(1, end - start);
 }
 
 parentPort.on("message", (code) => {
-    cachedContent = code;
-
-    if (!languageService) createService();
-
-    const diagnostics = languageService.getSyntacticDiagnostics("file.js").map(d => {
-        let line, col;
-        if (d.file && d.start !== undefined) {
-            const { line: l, character } = ts.getLineAndCharacterOfPosition(d.file, d.start);
-            line = l + 1;
-            col = character + 1;
-        }
-        return {
-            message: ts.flattenDiagnosticMessageText(d.messageText, "\n"),
-            start: d.start,
-            length: d.length,
-            line,
-            col,
-        };
-    });
-
-    parentPort.postMessage(diagnostics);
+    try {
+        const diagnostics = getDiagnostics(code);
+        parentPort.postMessage(diagnostics);
+    } catch (e) {
+        console.error("diagnosticsJsWorker error:", e);
+        parentPort.postMessage([]);
+    }
 });

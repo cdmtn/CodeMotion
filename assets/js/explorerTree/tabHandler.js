@@ -561,6 +561,7 @@ export async function openTab(path, content, extension, name, pathContext, isNew
         cursorStyle: "smooth",
         fixedWidthGutter: true
     });
+    editor.getSession().setUseWorker(true)
 
     window.electron.triggers.sendFileOpened(
         {
@@ -707,6 +708,8 @@ export async function openTab(path, content, extension, name, pathContext, isNew
         const currentGen = ++generation
 
         if (language.mode === "javascript") {
+            editor.getSession().setUseWorker(false)
+
             diagnosticTimer = setTimeout(async () => {
                 const diagnostics = await window.electron.javascriptDiagnostic(editor.getValue())
 
@@ -754,8 +757,12 @@ export async function openTab(path, content, extension, name, pathContext, isNew
         }
 
         else if (language.mode === "typescript") {
+            editor.getSession().setUseWorker(false)
+
             diagnosticTimer = setTimeout(async () => {
                 const diagnostics = await window.electron.typescriptDiagnostic(editor.getValue())
+
+                console.log(diagnostics)
 
                 if (currentGen !== generation) return
                 if (!isErrorsUpdate) return
@@ -819,6 +826,8 @@ export async function openTab(path, content, extension, name, pathContext, isNew
         }
 
         else {
+            editor.getSession().setUseWorker(true)
+
             const codeStructure = document.querySelector(".code-structure")
             if (codeStructure) {
                 codeStructure.textContent = `Context unavailable for ${language.name}`
@@ -903,7 +912,7 @@ export async function openTab(path, content, extension, name, pathContext, isNew
 
     // 
 
-    tabsByPath.set(path, { id, tabEl: tab, editor, paneEl: pane, ErrorsHistoryWindow, language, new: isNew });
+    tabsByPath.set(path, { id, tabEl: tab, editor, paneEl: pane, ErrorsHistoryWindow, language, new: isNew, fileName: name });
     recentlyClosed.delete(path);
 
     addToHistory(
@@ -1005,7 +1014,7 @@ export function activateTab(tabEl) {
     const editor = rec.editor;
     if (!editor) return;
 
-    bindEditorBtns(editor)
+    bindEditorBtns(editor, { fileName: rec.fileName })
 
     document.querySelectorAll(".explorer-elements .file").forEach(file => {
         file.classList.toggle("active", file.getAttribute("data-path") === realPath);
@@ -1022,7 +1031,7 @@ export function activateTab(tabEl) {
     }
 }
 
-function bindEditorBtns(editor) {
+function bindEditorBtns(editor, properties = {}) {
     let buttonWrapper = document.querySelector(".code-footer:not(.structure)")
     if (!buttonWrapper) return;
 
@@ -1051,22 +1060,88 @@ function bindEditorBtns(editor) {
 
     if (codeSnippet) {
         codeSnippet.addEventListener("click", () => {
-            html2canvas(editor.container).then(canvas => {
-                canvas.toBlob(blob => {
-                    navigator.clipboard.write([
-                        new ClipboardItem({ 'image/png': blob })
-                    ])
-                })
-                let image = canvas.toDataURL("image/png")
+            const currentMode = editor.session.$modeId
+            const currentTheme = editor.getTheme()
 
-                createNotify(
-                    {
-                        icon: "image",
-                        title: "Screenshot taken!",
-                        content: "Screenshot taken and copied to your clipboard"
-                    }
-                )
-            })
+            const captureWrapper = document.createElement("div")
+            captureWrapper.classList.add("code-snippet__wrapper")
+            captureWrapper.innerHTML = `
+                <div id="title-wrapper">
+                    <div id="fake-controls">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                    <div id="title">${properties.fileName}</div>
+                    <div id="language">${capitilize(currentMode.substr(currentMode.lastIndexOf('/') + 1))}</div>
+                </div>
+                <div id="code-snippet-area"></div>
+            `
+
+            let value = null;
+            const selectedText = editor.getSelectedText();
+
+            if(selectedText.length > 0) {
+                value = selectedText
+            }
+            else {
+                value = editor.getValue()
+            }
+            
+            const captureArea = captureWrapper.querySelector("#code-snippet-area")
+            captureArea.textContent = value
+            captureArea.id = "code-snippet-area"
+
+            document.body.appendChild(captureWrapper)
+
+            const captureEditor = ace.edit(captureArea)
+            captureEditor.session.setMode(currentMode);
+            captureEditor.setTheme(currentTheme);
+
+            captureEditor.setOption("scrollPastEnd", 0);
+            captureEditor.setOption("maxLines", Infinity);
+            captureEditor.setOption("wrap", true);
+
+            captureEditor.session.setUseWrapMode(true);
+            captureEditor.session.setUseWorker(false)
+
+            const flashEl = document.createElement("div")
+            flashEl.classList.add("ace-flash", "hidden")
+
+            setTimeout(() => {
+                html2canvas(captureWrapper, {
+                    backgroundColor: null,
+                    scale: 3
+                }).then(canvas => {
+                    // flash animation
+                    editor.container.appendChild(flashEl)
+
+                    flashEl.classList.remove("hidden")
+                    
+                    setTimeout(() => {
+                        flashEl.classList.add("hidden")
+                        flashEl.addEventListener("transitionend", () => {
+                            flashEl.remove()
+                        })
+                    }, 100)
+                    // 
+
+                    canvas.toBlob(blob => {
+                        navigator.clipboard.write([
+                            new ClipboardItem({ 'image/png': blob })
+                        ])
+                    })
+                    let image = canvas.toDataURL("image/png")
+
+                    createNotify(
+                        {
+                            icon: "image",
+                            title: "Screenshot taken!",
+                            content: "Screenshot taken and copied to your clipboard"
+                        }
+                    )
+                })
+            }, 100)
         })
     }
 }

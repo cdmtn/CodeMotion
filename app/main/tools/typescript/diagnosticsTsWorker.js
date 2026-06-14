@@ -1,61 +1,100 @@
 const { parentPort } = require("worker_threads");
-const ts = require("typescript");
+const parser = require("@babel/parser");
 
-const compilerOptions = {
-    noEmit: true,
-    strict: true,
-    target: ts.ScriptTarget.ES2020,
-    lib: ["lib.es2020.d.ts", "lib.dom.d.ts"],
-};
+const BABEL_PLUGINS = [
+    "typescript",
+    "jsx",
+    "decorators-legacy",
+    "classProperties",
+    "classPrivateMethods",
+    "classPrivateProperties",
+    "dynamicImport",
+    "exportDefaultFrom",
+    "optionalChaining",
+    "nullishCoalescingOperator",
+    "logicalAssignment",
+];
 
-let cachedContent = "";
-let languageService = null;
+function getDiagnostics(code) {
+    let recoveredErrors = [];
 
-function createService() {
-    const serviceHost = {
-        getScriptFileNames: () => ["file.ts"],
-        getScriptVersion: () => String(cachedContent.length),
-        getScriptSnapshot: (fileName) => {
-            if (fileName === "file.ts") return ts.ScriptSnapshot.fromString(cachedContent);
-            const fs = require("fs");
-            if (fs.existsSync(fileName)) return ts.ScriptSnapshot.fromString(fs.readFileSync(fileName, "utf8"));
-            return undefined;
-        },
-        getCurrentDirectory: () => process.cwd(),
-        getCompilationSettings: () => compilerOptions,
-        getDefaultLibFileName: (opts) => ts.getDefaultLibFilePath(opts),
-        fileExists: ts.sys.fileExists,
-        readFile: ts.sys.readFile,
-        readDirectory: ts.sys.readDirectory,
+    try {
+        const ast = parser.parse(code, {
+            sourceType: "unambiguous",
+            allowImportExportEverywhere: true,
+            allowReturnOutsideFunction: true,
+            allowSuperOutsideMethod: true,
+            errorRecovery: true,
+            plugins: BABEL_PLUGINS,
+        });
+        recoveredErrors = ast.errors || [];
+    } catch (_) {}
+
+    if (recoveredErrors.length > 0) {
+        return recoveredErrors.map(e => formatError(e, code));
+    }
+
+    try {
+        parser.parse(code, {
+            sourceType: "unambiguous",
+            allowImportExportEverywhere: true,
+            allowReturnOutsideFunction: true,
+            allowSuperOutsideMethod: true,
+            errorRecovery: false,
+            plugins: BABEL_PLUGINS,
+        });
+    } catch (e) {
+        if (e?.loc) {
+            return [formatError(e, code)];
+        }
+    }
+
+    return [];
+}
+
+function formatError(e, code) {
+    const line = e.loc?.line ?? null;
+    const col = e.loc?.column ?? null;
+
+    let start = e.pos ?? null;
+    if (start === null && line !== null && col !== null) {
+        start = lineColToOffset(code, line, col);
+    }
+
+    const length = guessLength(code, start);
+
+    return {
+        message: e.reasonCode ? `${e.message} [${e.reasonCode}]` : e.message,
+        category: "Error",
+        start,
+        length,
+        line,
+        col: col !== null ? col + 1 : null,
     };
+}
 
-    languageService = ts.createLanguageService(serviceHost, ts.createDocumentRegistry());
+function lineColToOffset(code, line, col) {
+    const lines = code.split("\n");
+    let offset = 0;
+    for (let i = 0; i < line - 1 && i < lines.length; i++) {
+        offset += lines[i].length + 1;
+    }
+    return offset + col;
+}
+
+function guessLength(code, start) {
+    if (start === null || !code) return 1;
+    let end = start;
+    while (end < code.length && /\w/.test(code[end])) end++;
+    return Math.max(1, end - start);
 }
 
 parentPort.on("message", (code) => {
-    cachedContent = code;
-
-    if (!languageService) createService();
-
-    const diagnostics = [
-        ...languageService.getSemanticDiagnostics("file.ts"),
-        ...languageService.getSyntacticDiagnostics("file.ts"),
-    ].map(d => {
-        let line, col;
-        if (d.file && d.start !== undefined) {
-            const { line: l, character } = ts.getLineAndCharacterOfPosition(d.file, d.start);
-            line = l + 1;
-            col = character + 1;
-        }
-        return {
-            message: ts.flattenDiagnosticMessageText(d.messageText, "\n"),
-            category: ts.DiagnosticCategory[d.category],
-            start: d.start,
-            length: d.length,
-            line,
-            col,
-        };
-    });
-
-    parentPort.postMessage(diagnostics);
+    try {
+        const diagnostics = getDiagnostics(code);
+        parentPort.postMessage(diagnostics);
+    } catch (e) {
+        console.error("diagnosticsTsWorker error:", e);
+        parentPort.postMessage([]);
+    }
 });

@@ -56,18 +56,23 @@ workers.ts.on("message", (diagnostics: DiagnosticResult) => {
     }
 })
 
+workers.js.on("error", (err) => {
+    console.error("JS worker error:", err)
+})
+workers.ts.on("error", (err) => {
+    console.error("TS worker error:", err)
+})
+
 ipcMain.handle("javascript-diagnostic", (_event: IpcMainInvokeEvent, code: string): Promise<DiagnosticResult> => {
-        return new Promise((resolve) => {
-            pending.js = resolve
-            workers.js.postMessage(code)
-        })
-    }
-)
+    return new Promise((resolve) => {
+        pending.js = resolve
+        workers.js.postMessage(code)
+    })
+})
 
 ipcMain.handle("typescript-diagnostic", (_event: IpcMainInvokeEvent, code: string): Promise<DiagnosticResult> => {
-        return new Promise((resolve) => {
-            pending.ts = resolve
-            workers.ts.postMessage(code)
-        })
-    }
-)
+    return new Promise((resolve) => {
+        pending.ts = resolve
+        workers.ts.postMessage(code)
+    })
+})

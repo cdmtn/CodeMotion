@@ -264,3 +264,19 @@
     position: absolute;
     background: color-mix(in srgb, var(--danger) 10%, transparent);
 }
+
+.ace-flash {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: .1;
+    background: white;
+    top: 0;
+    left: 0;
+    z-index: 999999;
+    transition: .2s;
+}
+.ace-flash.hidden {
+    display: flex!important;
+    opacity: 0;
+}

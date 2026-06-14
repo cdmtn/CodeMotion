@@ -10,6 +10,9 @@ export async function setCurrentLanguage(langName, properties = {}) {
         .filter(([_, lang]) =>
             !["Image", "Font", "To-Do List", "GIT File"].includes(lang.name)
         )
+        .filter(([_, lang], index, arr) =>
+            arr.findIndex(([_, l]) => l.name === lang.name) === index
+        )
 
     for (const [key, lang] of languages) {
         const icon = await Languages.getIconPath(key)

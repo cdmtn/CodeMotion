@@ -1,12 +1,16 @@
 const { app } = require("electron")
 const path = require("path")
+
 const appPath = app.getAppPath()
 
+const USER_DATA_PATH = app.getPath("userData")
+
 const HTML_PATH = path.join(appPath, "html")
-const JSON_PATH = path.join(appPath, "json")
 const ASSETS_PATH = path.join(appPath, "assets")
 const APP_PATH = path.join(appPath, "app")
 const LANGUAGES_PATH = path.join(appPath, "languages")
+
+const JSON_PATH = USER_DATA_PATH
 
 const SETTINGS_PATH = path.join(JSON_PATH, "settings.json");
 const LOCAL_BUGS_PATH = path.join(JSON_PATH, "bugs.json");
@@ -42,5 +46,6 @@ module.exports = {
     PRELOAD_PATH,
     RENDERER_PATH,
     LANGUAGES_PATH,
-    API
+    API,
+    USER_DATA_PATH
 }

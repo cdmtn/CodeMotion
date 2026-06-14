@@ -1,6 +1,17 @@
 import { ipcMain, IpcMainInvokeEvent } from "electron";
 import os from "node:os"
-import { getAllLanguages, getAllLanguagesJSON, getAppIcon, getLocalAppData, getLocalBugsData, getPackageData, getUsedLanguagesByPath, getUserToken, readFilesInFolder, readSettings } from "../helpers/requests";
+import {
+    getAllLanguages,
+    getAllLanguagesJSON,
+    getAppIcon,
+    getLocalAppData,
+    getLocalBugsData,
+    getPackageData,
+    getUsedLanguagesByPath,
+    getUserToken,
+    readFilesInFolder,
+    readSettings
+} from "../helpers/requests";
 import path from "node:path";
 import fs from "node:fs"
 import { ASSETS_PATH } from "../helpers/paths";
@@ -23,10 +34,10 @@ ipcMain.handle("get-user-pc-info", async () => {
     };
 });
 ipcMain.handle('get-all-app-icons', () => {
-    return readFilesInFolder("./assets/media/icons");
+    return readFilesInFolder("assets/media/icons");
 });
 ipcMain.handle('get-all-filenames-app-icons', () => {
-    return readFilesInFolder("./assets/media/icons/filenames");
+    return readFilesInFolder("assets/media/icons/filenames");
 });
 ipcMain.handle("get-app-icons", async () => {
     try {

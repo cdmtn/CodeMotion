@@ -81,8 +81,6 @@ export function handleExtensionEvents() {
             rule => !rule._dynamicId
         )
 
-        console.log(contexts)
-
         for (const [id, rule] of contexts[currentEditor.id]) {
             mode.$highlightRules.$rules.start.unshift({
                 ...rule,

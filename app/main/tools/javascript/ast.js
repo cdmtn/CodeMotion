@@ -1,214 +1,332 @@
 const { ipcMain } = require("electron");
-const ts = require("typescript");
+const parser = require("@babel/parser");
 
-function convertNode(node, sourceFile) {
-    const result = {};
-
-    const start = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
-    const end = sourceFile.getLineAndCharacterOfPosition(node.end);
-    result.loc = {
-        start: { line: start.line + 1, column: start.character },
-        end: { line: end.line + 1, column: end.character },
+function getLoc(node) {
+    return {
+        start: { line: node.loc.start.line, column: node.loc.start.column },
+        end: { line: node.loc.end.line, column: node.loc.end.column },
     };
-
-    if (node.kind === ts.SyntaxKind.VariableStatement) {
-        result.type = "VariableDeclaration";
-        result.declarations = node.declarationList.declarations.map(d => {
-            const dStart = sourceFile.getLineAndCharacterOfPosition(d.getStart(sourceFile));
-            const dEnd = sourceFile.getLineAndCharacterOfPosition(d.end);
-            const loc = {
-                start: { line: dStart.line + 1, column: dStart.character },
-                end: { line: dEnd.line + 1, column: dEnd.character },
-            };
-            const name = d.name?.text || "";
-            const init = d.initializer;
-
-            // const fn = () => {}
-            if (init?.kind === ts.SyntaxKind.ArrowFunction) {
-                return {
-                    type: "VariableDeclarator",
-                    isArrow: true,
-                    id: { name },
-                    loc,
-                    body: collectChildren(init, sourceFile),
-                };
-            }
-
-            // const data = { ... }
-            if (init?.kind === ts.SyntaxKind.ObjectLiteralExpression) {
-                return {
-                    type: "VariableDeclarator",
-                    isObject: true,
-                    id: { name },
-                    loc,
-                    properties: init.properties.map(p => convertProperty(p, sourceFile)),
-                };
-            }
-
-            return { type: "VariableDeclarator", id: { name }, loc };
-        });
-        return result;
-    }
-
-    if (node.kind === ts.SyntaxKind.ClassDeclaration) {
-        result.type = "ClassDeclaration";
-        result.id = { name: node.name?.text || "anonymous" };
-        result.body = node.members.map(m => convertClassMember(m, sourceFile)).filter(Boolean);
-        return result;
-    }
-
-    result.type = mapKind(node.kind);
-    if (node.name?.text) result.id = { name: node.name.text };
-
-    // CallExpression: console.log(), fn()
-    if (node.kind === ts.SyntaxKind.CallExpression) {
-        const callee = node.expression;
-        let name = "";
-        if (callee.kind === ts.SyntaxKind.PropertyAccessExpression) {
-            const obj = callee.expression?.text || callee.expression?.escapedText || "<...>";
-            const prop = callee.name?.text || "<...>";
-            name = `${obj}.${prop}()`;
-        } else {
-            name = callee.text || callee.escapedText || "<...>";
-            if (name !== "<...>") name += "()";
-        }
-        result.calleeName = name;
-    }
-
-    const children = collectChildren(node, sourceFile);
-    if (node.kind === ts.SyntaxKind.SourceFile) {
-        result.type = "Program";
-        result.body = children;
-    } else if (children.length) {
-        result.body = children;
-    }
-
-    return result;
 }
 
-function convertProperty(node, sourceFile) {
-    const s = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
-    const e = sourceFile.getLineAndCharacterOfPosition(node.end);
-    const name = node.name?.text || "";
-    const loc = {
-        start: { line: s.line + 1, column: s.character },
-        end: { line: e.line + 1, column: e.character },
-    };
+function convertNode(node) {
+    if (!node || !node.type) return null;
 
-    // method in object
-    if (node.kind === ts.SyntaxKind.MethodDeclaration) {
-        return { type: "ObjectMethod", id: { name }, loc, body: collectChildren(node.body, sourceFile) };
+    switch (node.type) {
+        case "File":
+            return convertNode(node.program);
+
+        case "Program":
+            return {
+                type: "Program",
+                loc: getLoc(node),
+                body: node.body.map(convertNode).filter(Boolean),
+            };
+
+        case "VariableDeclaration":
+            return {
+                type: "VariableDeclaration",
+                loc: getLoc(node),
+                declarations: node.declarations.map(d => convertVariableDeclarator(d)),
+            };
+
+        case "ClassDeclaration":
+        case "ClassExpression":
+            return {
+                type: "ClassDeclaration",
+                id: { name: node.id?.name || "anonymous" },
+                loc: getLoc(node),
+                body: node.body.body.map(convertClassMember).filter(Boolean),
+            };
+
+        case "FunctionDeclaration":
+            return {
+                type: "FunctionDeclaration",
+                id: node.id ? { name: node.id.name } : undefined,
+                loc: getLoc(node),
+                body: collectChildren(node.body),
+            };
+
+        case "ExpressionStatement":
+            return convertExpressionStatement(node);
+
+        case "CallExpression":
+        case "OptionalCallExpression":
+            return convertCallExpression(node);
+
+        default:
+            return convertGeneric(node);
     }
+}
 
-    // for matryoshka object
-    if (node.initializer?.kind === ts.SyntaxKind.ObjectLiteralExpression) {
+function convertVariableDeclarator(d) {
+    const name = d.id?.name || d.id?.left?.name || "";
+    const init = d.init;
+    const loc = getLoc(d);
+
+    if (init?.type === "ArrowFunctionExpression") {
         return {
-            type: "Property",
+            type: "VariableDeclarator",
+            isArrow: true,
             id: { name },
             loc,
-            isObject: true,
-            properties: node.initializer.properties.map(p => convertProperty(p, sourceFile)),
+            body: collectChildren(init.body),
         };
     }
 
-    // arrow functions
-    if (node.initializer?.kind === ts.SyntaxKind.ArrowFunction) {
-        return { type: "Property", isArrow: true, id: { name }, loc, body: collectChildren(node.initializer, sourceFile) };
+    if (init?.type === "ObjectExpression") {
+        return {
+            type: "VariableDeclarator",
+            isObject: true,
+            id: { name },
+            loc,
+            properties: init.properties.map(convertProperty).filter(Boolean),
+        };
     }
 
-    return { type: "Property", id: { name }, loc };
+    return { type: "VariableDeclarator", id: { name }, loc };
 }
 
-function convertClassMember(node, sourceFile) {
-    const s = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
-    const e = sourceFile.getLineAndCharacterOfPosition(node.end);
-    const loc = {
-        start: { line: s.line + 1, column: s.character },
-        end: { line: e.line + 1, column: e.character },
-    };
+function convertProperty(node) {
+    if (!node) return null;
+    const loc = getLoc(node);
 
-    if (node.kind === ts.SyntaxKind.Constructor) {
-        return { type: "MethodDefinition", isConstructor: true, key: { name: "constructor" }, loc, body: collectChildren(node.body, sourceFile) };
-    }
-
-    if (node.kind === ts.SyntaxKind.MethodDeclaration) {
-        const isStatic = node.modifiers?.some(m => m.kind === ts.SyntaxKind.StaticKeyword);
-        const isAsync = node.modifiers?.some(m => m.kind === ts.SyntaxKind.AsyncKeyword);
-        const isPrivate = node.modifiers?.some(m => m.kind === ts.SyntaxKind.PrivateKeyword)
-            || node.name?.text?.startsWith("#");
+    // shorthand method: { foo() {} }
+    if (node.type === "ObjectMethod") {
         return {
-            type: "MethodDefinition",
-            key: { name: node.name?.text || "" },
-            isStatic,
-            isAsync,
-            isPrivate,
+            type: "ObjectMethod",
+            id: { name: node.key?.name || node.key?.value || "" },
             loc,
-            body: collectChildren(node.body, sourceFile),
+            body: collectChildren(node.body),
         };
     }
 
-    // getters and setters
-    if (node.kind === ts.SyntaxKind.GetAccessor) {
-        return { type: "MethodDefinition", isGetter: true, key: { name: node.name?.text || "" }, loc, body: collectChildren(node.body, sourceFile) };
-    }
-    if (node.kind === ts.SyntaxKind.SetAccessor) {
-        return { type: "MethodDefinition", isSetter: true, key: { name: node.name?.text || "" }, loc, body: collectChildren(node.body, sourceFile) };
-    }
+    if (node.type === "ObjectProperty") {
+        const name = node.key?.name || node.key?.value || "";
+        const value = node.value;
 
-    // class field: x = 1 или static x = 1
-    if (node.kind === ts.SyntaxKind.PropertyDeclaration) {
-        const isStatic = node.modifiers?.some(m => m.kind === ts.SyntaxKind.StaticKeyword);
-        const isPrivate = node.modifiers?.some(m => m.kind === ts.SyntaxKind.PrivateKeyword)
-            || node.name?.text?.startsWith("#");
-        return { type: "ClassProperty", id: { name: node.name?.text || "" }, isStatic, isPrivate, loc };
+        if (value?.type === "ObjectExpression") {
+            return {
+                type: "Property",
+                isObject: true,
+                id: { name },
+                loc,
+                properties: value.properties.map(convertProperty).filter(Boolean),
+            };
+        }
+
+        if (value?.type === "ArrowFunctionExpression") {
+            return {
+                type: "Property",
+                isArrow: true,
+                id: { name },
+                loc,
+                body: collectChildren(value.body),
+            };
+        }
+
+        return { type: "Property", id: { name }, loc };
     }
 
     return null;
 }
 
-function collectChildren(node, sourceFile) {
+function convertClassMember(node) {
+    if (!node) return null;
+    const loc = getLoc(node);
+
+    if (node.type === "ClassMethod" || node.type === "TSDeclareMethod") {
+        const name = node.key?.name || node.key?.value || "";
+        const isConstructor = node.kind === "constructor";
+
+        if (isConstructor) {
+            return {
+                type: "MethodDefinition",
+                isConstructor: true,
+                key: { name: "constructor" },
+                loc,
+                body: collectChildren(node.body),
+            };
+        }
+
+        return {
+            type: "MethodDefinition",
+            key: { name },
+            isStatic: node.static ?? false,
+            isAsync: node.async ?? false,
+            isPrivate: node.access === "private" || name.startsWith("#"),
+            isGetter: node.kind === "get",
+            isSetter: node.kind === "set",
+            loc,
+            body: collectChildren(node.body),
+        };
+    }
+
+    if (node.type === "ClassProperty" || node.type === "ClassAccessorProperty") {
+        const name = node.key?.name || node.key?.value || "";
+        return {
+            type: "ClassProperty",
+            id: { name },
+            isStatic: node.static ?? false,
+            isPrivate: node.access === "private" || name.startsWith("#"),
+            loc,
+        };
+    }
+
+    if (node.type === "ClassPrivateMethod") {
+        return {
+            type: "MethodDefinition",
+            key: { name: "#" + (node.key?.id?.name || "") },
+            isPrivate: true,
+            isStatic: node.static ?? false,
+            isAsync: node.async ?? false,
+            loc,
+            body: collectChildren(node.body),
+        };
+    }
+
+    if (node.type === "ClassPrivateProperty") {
+        return {
+            type: "ClassProperty",
+            id: { name: "#" + (node.key?.id?.name || "") },
+            isPrivate: true,
+            isStatic: node.static ?? false,
+            loc,
+        };
+    }
+
+    return null;
+}
+
+function convertExpressionStatement(node) {
+    const expr = node.expression;
+    if (
+        expr?.type === "CallExpression" ||
+        expr?.type === "OptionalCallExpression"
+    ) {
+        return convertCallExpression(expr);
+    }
+    return convertGeneric(node);
+}
+
+function convertCallExpression(node) {
+    const callee = node.callee;
+    let calleeName;
+
+    if (callee?.type === "MemberExpression" || callee?.type === "OptionalMemberExpression") {
+        const obj = callee.object?.name || callee.object?.escapedText || "<...>";
+        const prop = callee.property?.name || callee.property?.value || "<...>";
+        calleeName = `${obj}.${prop}()`;
+    } else {
+        const raw = callee?.name || callee?.escapedText || "";
+        calleeName = raw ? `${raw}()` : "<...>";
+    }
+
+    return {
+        type: "CallExpression",
+        calleeName,
+        loc: getLoc(node),
+        body: collectChildren(node),
+    };
+}
+
+function convertGeneric(node) {
+    const result = {
+        type: mapType(node.type),
+        loc: getLoc(node),
+    };
+
+    if (node.id?.name) result.id = { name: node.id.name };
+    if (node.key?.name) result.id = { name: node.key.name };
+
+    const children = collectChildren(node);
+    if (children.length) result.body = children;
+
+    return result;
+}
+
+const SKIP_CHILD_KEYS = new Set(["loc", "start", "end", "extra", "trailingComments", "leadingComments", "innerComments"]);
+
+function collectChildren(node) {
     if (!node) return [];
     const children = [];
-    ts.forEachChild(node, child => {
-        const c = convertNode(child, sourceFile);
-        if (c) children.push(c);
-    });
+
+    for (const key of Object.keys(node)) {
+        if (SKIP_CHILD_KEYS.has(key)) continue;
+        const val = node[key];
+
+        if (Array.isArray(val)) {
+            for (const child of val) {
+                if (child && typeof child === "object" && child.type) {
+                    const c = convertNode(child);
+                    if (c) children.push(c);
+                }
+            }
+        } else if (val && typeof val === "object" && val.type) {
+            if (key === "body" || key === "declarations" || key === "properties" || key === "members") {
+                const c = convertNode(val);
+                if (c) children.push(c);
+            }
+        }
+    }
+
     return children;
 }
 
-function mapKind(kind) {
-    switch (kind) {
-        case ts.SyntaxKind.GetAccessor: return "MethodDefinition";
-        case ts.SyntaxKind.SetAccessor: return "MethodDefinition";
-        case ts.SyntaxKind.FunctionDeclaration: return "FunctionDeclaration";
-        case ts.SyntaxKind.FunctionExpression: return "FunctionExpression";
-        case ts.SyntaxKind.ArrowFunction: return "ArrowFunction";
-        case ts.SyntaxKind.ClassDeclaration: return "ClassDeclaration";
-        case ts.SyntaxKind.MethodDeclaration: return "MethodDefinition";
-        case ts.SyntaxKind.Constructor: return "MethodDefinition";
-        case ts.SyntaxKind.VariableDeclaration: return "VariableDeclarator";
-        case ts.SyntaxKind.VariableStatement: return "VariableDeclaration";
-        case ts.SyntaxKind.CallExpression: return "CallExpression";
-        case ts.SyntaxKind.ObjectLiteralExpression: return "ObjectExpression";
-        case ts.SyntaxKind.PropertyAssignment: return "Property";
-        case ts.SyntaxKind.ExpressionStatement: return "ExpressionStatement";
-        case ts.SyntaxKind.Block: return "BlockStatement";
-        case ts.SyntaxKind.SourceFile: return "Program";
-        default: return ts.SyntaxKind[kind];
+function mapType(type) {
+    switch (type) {
+        case "ArrowFunctionExpression": return "ArrowFunction";
+        case "FunctionExpression": return "FunctionExpression";
+        case "FunctionDeclaration": return "FunctionDeclaration";
+        case "ClassDeclaration":
+        case "ClassExpression": return "ClassDeclaration";
+        case "ClassMethod":
+        case "ObjectMethod": return "MethodDefinition";
+        case "VariableDeclaration": return "VariableDeclaration";
+        case "VariableDeclarator": return "VariableDeclarator";
+        case "CallExpression":
+        case "OptionalCallExpression": return "CallExpression";
+        case "ObjectExpression": return "ObjectExpression";
+        case "ObjectProperty": return "Property";
+        case "ExpressionStatement": return "ExpressionStatement";
+        case "BlockStatement": return "BlockStatement";
+        case "Program": return "Program";
+        default: return type;
     }
 }
 
-function buildAST(code) {
-    const sourceFile = ts.createSourceFile(
-        "file.js",
-        code,
-        ts.ScriptTarget.ES2020,
-        true,
-        ts.ScriptKind.JS
-    );
-    return convertNode(sourceFile, sourceFile);
+function buildAST(code, isTS = false) {
+    const plugins = [
+        "jsx",
+        "decorators-legacy",
+        "classProperties",
+        "classPrivateMethods",
+        "classPrivateProperties",
+        "dynamicImport",
+        "exportDefaultFrom",
+        "optionalChaining",
+        "nullishCoalescingOperator",
+        "logicalAssignment",
+    ];
+
+    if (isTS) plugins.push("typescript");
+
+    const ast = parser.parse(code, {
+        sourceType: "unambiguous",
+        allowImportExportEverywhere: true,
+        allowReturnOutsideFunction: true,
+        allowSuperOutsideMethod: true,
+        errorRecovery: true,
+        createParenthesizedExpressions: false,
+        plugins,
+    });
+
+    return convertNode(ast);
 }
 
-ipcMain.handle("javascript-ast", (_, code) => {
-    return buildAST(code);
+ipcMain.handle("javascript-ast", (_, code, isTS = false) => {
+    try {
+        return buildAST(code, isTS);
+    } catch (e) {
+        return { type: "Program", loc: null, body: [] };
+    }
 });
