@@ -55,7 +55,7 @@ const {
     checkStatus,
 } = require("../main/helpers/requests.js")
 
-const { spawnNotification } = require("../notifications/notifications.js")
+const { spawnNotification, notifications } = require("../notifications/notifications.js")
 
 const { 
     selectFile, 
@@ -112,6 +112,11 @@ async function createWindow() {
         if(splash) splash.destroy();
         mainWindow.maximize()
         mainWindow.show();
+    })
+    mainWindow.on("closed", () => {
+        for (const win of notifications) {
+            if (win && !win.isDestroyed()) win.close()
+        }
     })
 
     if(splash) updateSplash("Waiting for connect...")
@@ -189,6 +194,11 @@ async function createWindow() {
     ipcMain.handle("create-debugger-window", async () => {
         createDebuggerWindow(mainWindow)
         return true
+    })
+
+    // send app close. Example: close all notification windows
+    app.on('window-all-closed', () => {
+        bus.emit("main-closed", mainWindow);
     })
 
     return { mainWindow, splash };

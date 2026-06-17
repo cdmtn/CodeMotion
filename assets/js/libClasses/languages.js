@@ -105,7 +105,7 @@ export class _Languages {
             icon: "json",
             iconExt: "svg",
             mode: "json",
-            color: "#cbcb41"
+            color: "#e9a949"
         },
         txt: {
             name: "Text",
@@ -167,7 +167,7 @@ export class _Languages {
             name: "React JavaScript",
             icon: "react",
             iconExt: "svg",
-            mode: "javascript",
+            mode: "jsx",
             color: "#61dafb"
         },
         tsx: {
@@ -323,6 +323,34 @@ export class _Languages {
             iconExt: "svg",
             mode: "batchfile",
             color: "#444444"
+        },
+        wasm: {
+            name: "WebAssembly",
+            icon: "wasm",
+            iconExt: "svg",
+            mode: "wasm",
+            color: "#3856ff"  
+        },
+        java: {
+            name: "Java",
+            icon: "java",
+            iconExt: "svg",
+            mode: "wasm",
+            color: "#f03b3b"  
+        },
+        kt: {
+            name: "Kotlin",
+            icon: "kotlin",
+            iconExt: "svg",
+            mode: "kotlin",
+            color: "#cc3bf0"  
+        },
+        vue: {
+            name: "Vue.js",
+            icon: "vue",
+            iconExt: "svg",
+            mode: "vue",
+            color: "#46cc82"  
         }
     }
     

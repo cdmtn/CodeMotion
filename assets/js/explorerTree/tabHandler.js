@@ -5,7 +5,6 @@ import {
     escapeHtml,
     runCode,
     runSandbox,
-    addRuntimeError,
     clearRuntimeErrors,
     isFloat,
     isStringifiedObject,
@@ -37,7 +36,7 @@ import { Console } from "../handlers/terminalHandler.js"
 import { minifyJS, minifyCSS } from "../handlers/minifyHandlers.js"
 import { initCodeContextMenu, destroyCodeContextMenu } from "../codeContextMenu.js"
 import { enableSave, disableSave } from "../../../app/renderer.js"
-import { sendEvent } from "../bus.js"
+import { bus, sendEvent } from "../bus.js"
 
 import { FindNoUsages } from "../editor/noUsagesFinder.js"
 import { ColorComments } from "../editor/colorComments.js"
@@ -61,6 +60,12 @@ export const startScreen = document.querySelector("#main-code");
 const globalButtonsInitialized = new Map();
 let isLiveServerActive = false;
 const codeContextMenuPerTab = new Map();
+
+function setTabColor(tab, color) {
+    tab.style.borderBottomColor = color
+}
+
+let settingsObject = {}
 
 export function updateTabPath(oldPath, newPath, newName) {
     const rec = tabsByPath.get(oldPath);
@@ -499,6 +504,7 @@ export async function openTab(path, content, extension, name, pathContext, isNew
     closeAllWindows()
 
     currentContent = content
+    settingsObject = settings
 
     const cached = recentlyClosed.get(path) || null;
     const id = toBase64(path);
@@ -576,8 +582,6 @@ export async function openTab(path, content, extension, name, pathContext, isNew
         }
     )
 
-    const aceRange = ace.require("ace/range").Range
-
     // trigger first ace mode changed
 
     triggerAceChanged({ editor: editor, extension: extension, language: language })
@@ -639,7 +643,8 @@ export async function openTab(path, content, extension, name, pathContext, isNew
         await setEditorContext({}, {
             editor: editor,
             language: language,
-            updateEditorData: updateEditorData
+            updateEditorData: updateEditorData,
+            path: path
         })
 
         triggerAceChanged({ editor: editor, extension: extension, language: language })
@@ -663,7 +668,8 @@ export async function openTab(path, content, extension, name, pathContext, isNew
         await setEditorContext({ errorsUpdate: false }, {
             editor: editor,
             language: language,
-            updateEditorData: updateEditorData
+            updateEditorData: updateEditorData,
+            path: path
         })
     });
 
@@ -693,7 +699,9 @@ export async function openTab(path, content, extension, name, pathContext, isNew
     tab.setAttribute("data-path", path);
 
     // colored tabs
-    // tab.style.borderBottomColor = language.color
+    if ("editor" in settings && "coloredTabs" in settings.editor && settings.editor.coloredTabs) {
+        setTabColor(tab, language.color)
+    }
 
     const languageTabIcon = fileNameInfoIcon != false ? fileNameInfoIcon : languageIcon
     tab.innerHTML = `
@@ -712,7 +720,18 @@ export async function openTab(path, content, extension, name, pathContext, isNew
 
     // 
 
-    tabsByPath.set(path, { id, tabEl: tab, editor, paneEl: pane, ErrorsHistoryWindow, language, new: isNew, fileName: name });
+    tabsByPath.set(path, {
+        id: id,
+        tabEl: tab,
+        editor: editor,
+        paneEl: pane,
+        ErrorsHistoryWindow: ErrorsHistoryWindow,
+        language: language,
+        new: isNew,
+        fileName: name,
+        color: language.color
+    });
+
     recentlyClosed.delete(path);
 
     addToHistory(
@@ -738,6 +757,27 @@ export async function openTab(path, content, extension, name, pathContext, isNew
 
     activateTab(tab);
 }
+
+bus.addEventListener("on-setting-colored-tabs", (data) => {
+    const value = data.detail
+
+    // update settings editor.coloredTabs
+    settingsObject.editor.coloredTabs = value
+
+    tabsByPath.forEach(item => {
+        const tabEl = item.tabEl
+
+        console.log(item.color)
+
+        if(value) {
+            tabEl.classList.remove("no-color")
+            setTabColor(tabEl, item.color)
+        }
+        else {
+            tabEl.classList.add("no-color")
+        }
+    })
+})
 
 export function closeTab(path) {
     const rec = tabsByPath.get(path);

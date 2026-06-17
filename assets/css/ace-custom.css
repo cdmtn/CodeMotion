@@ -255,6 +255,9 @@
 .ace_operator {
     color: var(--color-keyword)
 }
+.ace_punctuation.ace_operator {
+    color: inherit!important;
+}
 
 .ace_other {
     color: var(--color-other);

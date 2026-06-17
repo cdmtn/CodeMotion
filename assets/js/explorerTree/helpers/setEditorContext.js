@@ -4,8 +4,11 @@ import { JSONParser } from "../../contextParsers/jsonParser.js"
 import { HTMLParser } from "../../contextParsers/htmlParser.js"
 import { CSSParser } from "../../contextParsers/cssParser.js"
 
+import { addRuntimeError } from "../../lib.js"
+
 const errors = new Map()
 const markerIds = new Set()
+const aceRange = ace.require("ace/range").Range
 
 let diagnosticTimer = null
 let generation = 0
@@ -26,7 +29,7 @@ function clearMarkers() {
     editor.renderer.updateFull()
 }
 
-function makeErrorKey(item) {
+function makeErrorKey(item, path) {
     return `${item.line}:${path}`
 }
 
@@ -73,7 +76,7 @@ function clearErrors({ editor }) {
     editor.renderer.updateFull()
 }
 
-export async function setEditorContext(properties = {}, { editor, language, updateEditorData }) {
+export async function setEditorContext(properties = {}, { editor, language, updateEditorData, path }) {
     const isErrorsUpdate = properties.errorsUpdate !== false
 
     updateEditorData()
@@ -102,7 +105,7 @@ export async function setEditorContext(properties = {}, { editor, language, upda
                     999
                 )
 
-                errors.set(makeErrorKey(item), {
+                errors.set(makeErrorKey(item, path), {
                     range,
                     annotation: {
                         row: item.line - 1,
@@ -121,7 +124,7 @@ export async function setEditorContext(properties = {}, { editor, language, upda
                 })
             })
 
-            renderErrors()
+            renderErrors({ editor: editor })
         }, 500)
 
         const jsParser = new JavascriptParser()
@@ -153,7 +156,7 @@ export async function setEditorContext(properties = {}, { editor, language, upda
                     999
                 )
 
-                errors.set(makeErrorKey(item), {
+                errors.set(makeErrorKey(item, path), {
                     range,
                     annotation: {
                         row: item.line - 1,
@@ -172,7 +175,7 @@ export async function setEditorContext(properties = {}, { editor, language, upda
                 })
             })
 
-            renderErrors()
+            renderErrors({ editor: editor })
         }, 500)
 
         const tsParser = new TypescriptParser()

@@ -42,8 +42,6 @@ async function setProjectDataUsedLanguages(path) {
         const languagePercentage = key.percentage
         const languageColor = key.color
 
-        console.log(languageColor)
-
         if(languagePercentage != 0) {
             createGraphElement({ name: languageName, perc: languagePercentage, color: languageColor })
         }

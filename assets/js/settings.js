@@ -5,7 +5,7 @@ import { Modal } from "../js/modalsHandler/engine.js"
 import { getDirname, readSettings } from "../../assets/js/global.js"
 import { capitilize } from "./lib.js"
 
-import { bus } from "./bus.js"
+import { bus, sendEvent } from "./bus.js"
 import { BottomWindow } from "./handlers/BottomWindowHandler.js"
 
 import { getSettingsModal } from "./modals/settingsModal.js"
@@ -54,6 +54,8 @@ export async function handleSettings(settingsObject) {
             splash: document.querySelector("#setting_splash"),
             reduceMotion: document.querySelector("#setting_reduceMotion"),
             uiScale: document.querySelector("#setting_uiScale"),
+
+            coloredTabs: document.querySelector("#setting_coloredTabs"),
         }
     )
 
@@ -92,6 +94,11 @@ export async function handleSettings(settingsObject) {
         renderIcon(`../assets/media/app-icons/${icon}`, appIconCodeNormalize, appIconCode)
     })
     // 
+
+    settingsSelectors.coloredTabs.addEventListener("click", (e) => {
+        let t = e.target
+        Setting.coloredTabs(t.checked)
+    })
 
     settingsSelectors.editorTextSize.addEventListener("change", (e) => {
         Setting.editorTextSize(e.target.value)
@@ -185,6 +192,7 @@ export async function handleSettings(settingsObject) {
         if("fontSize" in settingsObject.editor) Setting.editorTextSize(settingsObject.editor.fontSize, false, false)
         if("smoothScroll" in settingsObject.editor) Setting.editorSmoothScroll(settingsObject.editor.smoothScroll, false, false)
         if("pythonRunnerMethod" in settingsObject.editor) Setting.pythonRunnerMethod(settingsObject.editor.pythonRunnerMethod, false)
+        if("coloredTabs" in settingsObject.editor) Setting.coloredTabs(settingsObject.editor.coloredTabs, false)
     }
     if(settingsObject.ui) {
         if("useSystemFont" in settingsObject.ui) Setting.useSystemFonts(settingsObject.ui.useSystemFont, false)
@@ -298,6 +306,7 @@ export class Setting {
     }
     static async reduceMotion(value, set = true) {
         settingsSelectors.reduceMotion.checked = value
+
         BottomWindow.settings = {
             ...BottomWindow.settings,
             app: {
@@ -351,6 +360,15 @@ export class Setting {
         if(set) {
             showNeedReloadTopBar()
             await window.electron.setSettings({ app: { language: value }})
+        }
+    }
+    static async coloredTabs(value, set = true) {
+        settingsSelectors.coloredTabs.checked = value
+
+        sendEvent("on-setting-colored-tabs", value)
+
+        if(set) {
+            await window.electron.setSettings({ editor: { coloredTabs: value }})
         }
     }
 }

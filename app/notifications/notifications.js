@@ -1,4 +1,4 @@
-const { BrowserWindow, screen, ipcMain } = require("electron")
+const { BrowserWindow, screen, ipcMain, app } = require("electron")
 const { HTML_PATH, APP_PATH } = require("../main/helpers/paths.js")
 
 const path = require("path")
@@ -10,6 +10,8 @@ const margin = 5
 const minHeight = 50
 const maxHeight = 200
 const maxStack = 5
+
+const bus = require("../../helpers/eventBus")
 
 function updatePositions() {
     const { width, height } = screen.getPrimaryDisplay().workAreaSize
@@ -108,4 +110,4 @@ function spawnNotification(properties = {}) {
     return win
 }
 
-module.exports = { spawnNotification }
+module.exports = { spawnNotification, notifications }

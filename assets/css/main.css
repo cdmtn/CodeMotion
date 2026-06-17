@@ -774,6 +774,9 @@ body.explorer-resizing {
 .code-tab.active {
     border-bottom: 2px solid var(--link-color);
 }
+.code-tab.active.no-color {
+    border-bottom: 2px solid var(--link-color)!important;
+}
 .code-tab.active .file-name {
     color: var(--text-color);
 }

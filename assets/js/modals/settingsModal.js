@@ -187,6 +187,12 @@ export async function getSettingsModal({ platform }) {
                         items: [
                             {
                                 type: "switch",
+                                title: "Colored tabs",
+                                description: "The bottom part of the active tab will glow in the color of the language",
+                                id: "setting_coloredTabs"
+                            },
+                            {
+                                type: "switch",
                                 title: "Show tab close button",
                                 description: "Displays the X close button on editor tabs",
                                 id: "setting_tabShowClose",
