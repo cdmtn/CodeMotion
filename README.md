@@ -6,7 +6,7 @@
 (Early-Development Alpha)</h1>
 
 > [!IMPORTANT]
-> If you download a pre-compiled build (exe), Windows may flag it as a keylogger, and VirusTotal may flag it as containing random viruses—and this is NORMAL, since this project is new and in alpha development, so it may raise suspicion with such systems. If you don't trust the build, you can compile the project [yourself](https://github.com/cdmtn-dev/codemotion-ide/wiki/%5BFOR-BEGINNERS%5D-How-do-I-build-an-app%3F)
+> If you download a pre-compiled build (exe), Windows may flag it as a keylogger, and VirusTotal may flag it for random viruses—and that’s NORMAL; I honestly don’t know why this happens. The project is in alpha development. If you don’t trust the build, you can compile the project [yourself](https://github.com/cdmtn-dev/codemotion-ide/wiki/%5BFOR-BEGINNERS%5D-How-do-I-build-an-app%3F)
 
 CodeMotion is a web-focused, advanced 
 open-source code editor (IDE) 
