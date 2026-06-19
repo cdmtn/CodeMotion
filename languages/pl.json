@@ -1,0 +1,365 @@
+{
+    "name": "Polish",
+
+    "greeting": {
+        "default": "Jak się dzisiaj czujesz, %{name}?",
+        "withoutUsername": "Jak się dzisiaj czujesz?"
+    },
+
+    "help": "Pomoc",
+
+    "splash": {
+        "createdBy": "Stworzone przez %{name}",
+        "description": "Środowisko programistyczne web",
+        "closeBtn": "Zamknij",
+        "offlineBtn": "Zaloguj się bez konta"
+    },
+
+    "auth": {
+        "register": {
+            "title": "Rejestracja",
+            "description": "Zarejestruj się za pomocą adresu e-mail i hasła",
+
+            "inputs": {
+                "username": "Nazwa użytkownika",
+                "email": "E-mail",
+                "password": "Hasło",
+                "repeatPassword": "Powtórz hasło",
+                "submitBtn": "Zarejestruj"
+            },
+
+            "successNotification": {
+                "title": "Rejestracja zakończona",
+                "description": "Rejestracja zakończona. Teraz musisz zalogować się na swoje konto"
+            }
+        },
+        "login": {
+            "title": "Logowanie",
+            "description": "Zaloguj się na swoje konto za pomocą adresu e-mail",
+
+            "inputs": {
+                "email": "E-mail",
+                "password": "Hasło",
+                "submitBtn": "Zaloguj"
+            }
+        },
+        "recovery": {
+            "title": "Odzyskiwanie",
+            "description": "Odzyskaj dostęp do swojego konta, resetując hasło. Aby rozpocząć, wprowadź swój adres e-mail",
+            "description_code": "Sprawdź swoją skrzynkę odbiorczą. Jeśli wiadomość tam jest, otrzymasz 6-cyfrowy kod",
+            "description_newpass": "Świetnie! Masz teraz dokładnie %{minutes} min. na zresetowanie hasła. Po tym czasie prośba wygaśnie.",
+            "description_newpass_success": "Twoje hasło zostało pomyślnie zresetowane! Zapisz je, aby nie zapomnieć",
+
+            "inputs": {
+                "email": "E-mail",
+                "code": "Wygenerowany kod",
+                "newpass": "Nowe hasło"
+            },
+
+            "submitBtn": "Wyślij kod",
+            "verifyCodeBtn": "Weryfikuj kod",
+            "newPassBtn": "Ustaw nowe hasło",
+            "toLoginPageBtn": "Zaloguj z nowym hasłem",
+
+            "successNotification": {
+                "title": "Kod odzyskiwania wysłany na twój e-mail",
+                "description": "Sprawdź swoją skrzynkę: %{email}"
+            }
+        },
+
+        "alreadyHaveAnAccount": "Masz już konto?",
+        "howToRegOrganization": "Jak zarejestrować organizację",
+        "registerNewAccount": "Zarejestruj nowe konto",
+        "skipAccountCreation": "Pomiń tworzenie konta"
+    },
+
+    "errorPlaceholder": {
+        "title": "O-o-oj!",
+        "description": "Wystąpił błąd podczas tego żądania, więc spróbuj ponownie później i koniecznie daj nam znać. Mamy nadzieję, że wykażesz się cierpliwością"
+    },
+
+    "platformNotSupported": "Twoja platforma (%{platform}) nie jest obsługiwana",
+
+    "notAuth": "Nie uwierzytelniono",
+    "devModeEnabled": "Tryb programisty",
+
+    "cancel": "Anuluj",
+
+    "popups": {
+        "file": {
+            "title": "Plik"
+        },
+        "tools": {
+            "title": "Narzędzia",
+            "appearance": "Ustawienia wyglądu"
+        },
+        "actions": {
+            "title": "Akcje",
+            "maximize": "Maksymalizuj aplikację",
+            "minimize": "Minimalizuj aplikację",
+            "reload": "Przeładuj aplikację",
+            "close": "Zamknij aplikację"
+        },
+        "account": {
+            "title": "Ja",
+            "installedExtensions": "Zainstalowane rozszerzenia",
+            "yourOrganizations": "Organizacje",
+            "createOrganization": "Utwórz organizację",
+            "login": "Zaloguj",
+            "logout": "Wyloguj"
+        }
+    },
+
+    "tooltips": {
+        "files": "Pliki",
+        "history": "Historia",
+        "bugs": "Błędy",
+        "pythonEmulator": "Emulator Pythona",
+        "mdPreview": "Podgląd Markdown",
+        "htmlLiveServer": "Live Server",
+        "errors": "Błędy",
+        "project": "Dane projektu",
+        "sidebar": "Przełącz pasek boczny",
+
+        "codeSnippet": "Zrób zrzut ekranu",
+        "copy": "Kopiuj",
+        "terminal": "Terminal",
+        "jsMinify": "Minifikuj JS",
+        "cssMinify": "Minifikuj CSS",
+        "organizations": "Organizacje"
+    },
+
+    "editor": {
+        "nocontext": "Kontekst niedostępny"
+    },
+
+    "explorer": {
+        "emptyBeforeIcon": "Kliknij",
+        "emptyAfterIcon": "aby otworzyć folder"
+    },
+
+    "modals": {
+        "needToReloadNote": "Zrestartuj aplikację po zmianie tego ustawienia",
+        "appReloadNote": "Zmiana tego ustawienia zrestartuje aplikację",
+
+        "organizations": {
+            "title": "Organizacje",
+            "membersLabel": "Członkowie",
+            "roleLabel": "Rola",
+            "ownerLabel": "Jesteś założycielem tej organizacji",
+            "secondRoleLabel": "Twoja dodatkowa rola: %{role}",
+            "ownerRoleLabel": "Założyciel",
+            "explore": {
+                "title": "Odkrywaj"
+            },
+            "membership": {
+                "title": "Członkostwo"
+            },
+            "createNew": {
+                "title": "Utwórz nową",
+                "header": {
+                    "title": "Utwórz nową organizację",
+                    "description": "Dzięki swojej organizacji możesz zapraszać użytkowników, aby wspólnie pracować nad projektami. Na przykład, możecie tworzyć wspólne zgłoszenia błędów"
+                },
+                "inputs": {
+                    "name": "Nazwa organizacji",
+                    "about": "O tej organizacji",
+                    "website": "Strona internetowa organizacji (opcjonalnie)"
+                },
+                "preview": {
+                    "title": "Podgląd",
+                    "description": "Podgląd tego, jak organizacja będzie wyglądać na liście",
+                    "emptyName": "Bez nazwy",
+                    "emptyDescription": "Brak opisu"
+                }
+            },
+            "buttons": {
+                "create": "Utwórz organizację"
+            },
+            "notifications": {
+                "creatingError": {
+                    "title": "Błąd tworzenia organizacji"
+                },
+                "creatingSuccess": {
+                    "title": "Organizacja utworzona!",
+                    "description": "Twoja organizacja \"%{name}\" została utworzona"
+                }
+            },
+            "dashboard": {
+                "title": "Panel główny",
+                "description": "Wybierz jedną ze swoich organizacji, aby zobaczyć lub edytować jej szczegóły",
+
+                "members": {
+                    "title": "Członkowie"
+                },
+                "inviteCode": {
+                    "title": "Kod zaproszenia",
+                    "note": "Tego kodu nie można zmienić. Możesz udostępnić go zaufanym osobom, aby mogły dołączyć do organizacji"
+                },
+                "createdAt": {
+                    "title": "Data utworzenia"
+                },
+                "dangerZone": {
+                    "switch": {
+                        "title": "Włącz niszczące działania",
+                        "description": "Odblokowuje strefę zagrożenia. Klikaj tylko, jeśli wiesz, co robisz"
+                    },
+                    "title": "Strefa zagrożenia",
+                    "deleteBtn": "Usuń organizację"
+                }
+            },
+            "join": {
+                "title": "Dołącz do organizacji",
+                "description": "Możesz dołączyć do organizacji, wprowadzając kod zaproszenia",
+                "inputs": {
+                    "inviteCode": "Kod zaproszenia"
+                },
+                "buttons": {
+                    "join": "Dołącz za pomocą kodu"
+                },
+                "successNotification": {
+                    "title": "Dołączyłeś do organizacji \"%{name}\"",
+                    "description": "Powodzenia! Mamy nadzieję, że miło spędzisz czas!"
+                },
+                "errorNotification": {
+                    "title": "Błąd podczas próby dołączenia do organizacji"
+                }
+            }
+        },
+
+        "appearance": {
+            "title": "{{popups.tools.appearance}}",
+            "generalCategory": "Ogólne",
+            "sideBarCategory": "Pasek boczny",
+            "terminalCategory": "Terminal",
+            "fileWindowCategory": "Okno plików",
+            "editorCategory": "Edytor",
+
+            "application": {
+                "applicationLabel": "Aplikacja",
+
+                "uiScale": {
+                    "title": "Skala UI",
+                    "description": "Zmienia globalną skalę interfejsu"
+                },
+
+                "language": {
+                    "title": "Język",
+                    "description": "Wybierz domyślny język aplikacji"
+                },
+
+                "useSystemFonts": {
+                    "title": "Użyj czcionek systemowych",
+                    "description": "Używa system-ui dla czcionek interfejsu oraz monospace dla edytora"
+                },
+
+                "splashWindow": {
+                    "title": "Ekran powitalny",
+                    "description": "Czy ekran powitalny powinien być ukryty przy starcie?"
+                },
+
+                "reduceMotion": {
+                    "title": "Ogranicz ruch",
+                    "description": "Ogranicza efekty wizualne w całej aplikacji, mniej animacji i zoptymalizowane przejścia"
+                },
+
+                "boldFont": {
+                    "title": "Pogrubiona czcionka",
+                    "description": "Zwiększa wagę czcionki w całej aplikacji"
+                },
+
+                "theme": {
+                    "title": "Motyw",
+                    "description": "Zmień motyw aplikacji"
+                },
+
+                "developerMode": {
+                    "title": "Tryb programisty",
+                    "description": "Włącz narzędzia programistyczne i funkcje debugowania"
+                },
+
+                "appIcons": {
+                    "title": "Ikony aplikacji",
+                    "description": "Zmienia ikony aplikacji w całym programie"
+                }
+            },
+
+            "editor": {
+                "editorLabel": "Edytor",
+
+                "builtInPythonCausePlatformNote": "{{platformNotSupported}}. Użyte zostanie wbudowane środowisko Python",
+
+                "textSize": {
+                    "title": "Rozmiar czcionki",
+                    "description": "Pozwala na zwiększenie rozmiaru tekstu w edytorze do 200%"
+                },
+
+                "smoothScroll": {
+                    "title": "Płynne przewijanie",
+                    "description": "Wyłączyć płynne przewijanie w edytorze?"
+                },
+
+                "pythonRunner": {
+                    "title": "Emulator Pythona",
+                    "description": "Wybierz wersję Pythona, której chcesz używać",
+
+                    "select": {
+                        "builtIn": "Wbudowany w IDE",
+                        "userDefined": "Zainstalowany przez użytkownika"
+                    }
+                }
+            }
+        },
+
+        "addBug": {
+            "title": "Dodaj błąd",
+
+            "header": {
+                "title": "Dodaj informacje o błędzie",
+                "description": "Wypełnij wszystkie pola przed wysłaniem zgłoszenia błędu"
+            },
+
+            "inputs": {
+                "name": "Nazwa",
+                "description": "Opis"
+            },
+
+            "privateBugSwitch": {
+                "title": "Dodaj jako prywatny błąd",
+                "description": "W takim przypadku tylko Ty będziesz widzieć ten błąd"
+            },
+
+            "confirmBtn": "Potwierdź i dodaj globalnie",
+            "confirmBtnPrivate": "Potwierdź i dodaj prywatnie"
+        },
+
+        "logout": {
+            "title": "Czy jesteś pewien?",
+            "header": {
+                "title": "Wyloguj",
+                "description": "Tej akcji nie można cofnąć. Jeśli zrobisz to teraz, będziesz musiał zalogować się ponownie"
+            },
+            "buttonConfirm": "Wyloguj"
+        }
+    },
+
+    "projectTab": {
+        "noData": "Otwórz projekt, aby zobaczyć dane",
+        "path": "Ścieżka projektu",
+        "files": "Pliki",
+        "filesAnalys": "Analiza plików"
+    },
+
+    "bug": {
+        "noDesc": "Brak opisu",
+        "orgMore": "i %{count} więcej",
+        "createdBy": "Stworzone przez %{name}",
+        "assignedTo": "Przypisane do %{name}",
+        "private": "Prywatne",
+        "priority": {
+            "common": "Zwykły priorytet",
+            "medium": "Średni priorytet",
+            "high": "Wysoki priorytet"
+        }
+    }
+}
