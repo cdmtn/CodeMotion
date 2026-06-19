@@ -308,6 +308,11 @@
                         "userDefined": "Zainstalowany przez użytkownika"
                     }
                 }
+            },
+
+            "fileWindow": {
+                "title": "Kolorowe karty",
+                "description": "Dolna część aktywnej karty będzie podświetlana w kolorze języka"
             }
         },
 
