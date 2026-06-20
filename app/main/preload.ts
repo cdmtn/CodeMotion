@@ -202,4 +202,10 @@ contextBridge.exposeInMainWorld('electron', {
     
     on: (event: any, msg: any) => ipcRenderer.on(event, msg),
     oncb: (event: any, cb: any) => ipcRenderer.on(event, (_: any, data: any) => cb(data)),
+
+    // aiChat: (payload: any) => ipcRenderer.invoke("ai-chat", payload),
+    // aiGetModels: () => ipcRenderer.invoke("ai-get-models"),
+
+    // aiAgentTool: (toolName: string, args: any) => ipcRenderer.invoke("ai-agent-tool", toolName, args),
+    // aiAgentChat: (payload: any) => ipcRenderer.invoke("ai-agent-chat", payload),
 });

@@ -33,6 +33,8 @@ require("./ipc/updaters")
 require("./ipc/misc")
 require("./ipc/organizations")
 require("./ipc/bugs")
+// require("./ipc/ai")
+// require("./ipc/aiAgent")
 
 // ext
 require("../sandbox/regs/language")

@@ -126,7 +126,21 @@
         "terminal": "Тэрмінал",
         "jsMinify": "Мініфікаваць JS",
         "cssMinify": "Мініфікаваць CSS",
-        "organizations": "Арганізацыі"
+        "organizations": "Арганізацыі",
+        "ai": "Асістэнт"
+    },
+
+    "ai": {
+        "title": "AI Асістэнт",
+        "provider": "Правайдар",
+        "model": "Мадэль",
+        "apiKey": "API Ключ",
+        "save": "Захаваць",
+        "inputPlaceholder": "Задайце пытанне...",
+        "explain": "Патлумачыць код",
+        "fix": "Выпраўціць памылкі",
+        "tests": "Напісаць тэсты",
+        "review": "Рэв'ю"
     },
 
     "editor": {

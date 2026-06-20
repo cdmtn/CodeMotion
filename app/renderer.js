@@ -43,6 +43,7 @@ import { setupSegmentedControl } from "../assets/js/handlers/segmentedControlHan
 import { getAddBugModal } from "../assets/js/modals/addBugModal.js"
 import { getLogoutModal } from "../assets/js/modals/logoutModal.js"
 import { ExplorerSidebar } from "../assets/js/sidebar/ExplorerSidebar.js"
+// import { initAiPanel } from "../assets/js/aiPanel.js"
 
 let isSaveAviable = true
 
@@ -269,6 +270,27 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (tab.hasAttribute("default")) tab.click();
     });
+
+    // // AI Panel (temporarily disabled for debugging)
+    // initAiPanel(
+    //     () => {
+    //         if (currentPath && tabsByPath.has(currentPath)) {
+    //             return tabsByPath.get(currentPath).editor.getValue();
+    //         }
+    //         return "";
+    //     },
+    //     () => currentPath || "",
+    //     gls
+    // );
+
+    // document.addEventListener("ai-request-insert", (e) => {
+    //     if (currentPath && tabsByPath.has(currentPath)) {
+    //         const editor = tabsByPath.get(currentPath).editor;
+    //         const session = editor.getSession();
+    //         const cursor = editor.getCursorPosition();
+    //         session.insert(cursor, e.detail);
+    //     }
+    // });
 
     // File panel
 

@@ -103,7 +103,21 @@
         "terminal": "Терминал",
         "jsMinify": "Минифицировать JS",
         "cssMinify": "Минифицировать CSS",
-        "organizations": "Организации"
+        "organizations": "Организации",
+        "ai": "Ассистент"
+    },
+
+    "ai": {
+        "title": "AI Ассистент",
+        "provider": "Провайдер",
+        "model": "Модель",
+        "apiKey": "API Ключ",
+        "save": "Сохранить",
+        "inputPlaceholder": "Задайте вопрос...",
+        "explain": "Объяснить код",
+        "fix": "Исправить ошибки",
+        "tests": "Написать тесты",
+        "review": "Ревью"
     },
 
     "editor": {
