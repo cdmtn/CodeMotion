@@ -293,6 +293,7 @@ export function handlePopups() {
                 const isOpen = !popupContent.classList.contains("hidden");
 
                 popups.forEach(p => p.querySelector(".popup-content").classList.add("hidden"));
+                popups.forEach(p => p.querySelector(".popup-title").classList.remove("active"));
 
                 if (!isOpen) {
                     popupContent.classList.remove("hidden");
