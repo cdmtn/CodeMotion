@@ -20,7 +20,7 @@ ipcMain.handle('get-user-data-from-api', async () => {
         if (!response.ok) {
             return {
                 success: false,
-                result: result
+                result: (result as any)?.result || (result as any)?.message || "API request failed"
             }
         }
         

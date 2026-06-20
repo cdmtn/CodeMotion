@@ -175,12 +175,22 @@ function getExt(filename) {
     return ext
 }
 
-module.exports = { 
-    createNativeImageFromUrl, 
-    getType, 
-    checkType, 
-    ok, 
-    fail, 
+function resolveSandboxPath(extPath, relativePath) {
+    const resolved = path.resolve(path.join(extPath, relativePath))
+    const resolvedExt = path.resolve(extPath)
+    const separator = path.sep
+    if (!resolved.startsWith(resolvedExt + separator)) {
+        throw new Error(`Path traversal detected: "${relativePath}" resolves outside extension directory`)
+    }
+    return resolved
+}
+
+module.exports = {
+    createNativeImageFromUrl,
+    getType,
+    checkType,
+    ok,
+    fail,
     isSafeName,
     stringify,
     saveReadFile,
@@ -189,5 +199,6 @@ module.exports = {
     createSandboxConsole,
     getArgumentNames,
     log,
-    getExt
+    getExt,
+    resolveSandboxPath
 }

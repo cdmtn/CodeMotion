@@ -192,49 +192,67 @@ ipcMain.handle("run-extension", async (event, code, permissions, meta) => {
             }
         })
 
-        return Object.freeze(app);
+        function deepFreeze(obj) {
+            Object.keys(obj).forEach(key => {
+                const val = obj[key]
+                if (val && typeof val === "object") {
+                    deepFreeze(val)
+                }
+            })
+            return Object.freeze(obj)
+        }
+
+        return deepFreeze(app);
     }
 
     try {
         let app = createAPI(permissions);
 
+        if (typeof code !== "string") {
+            return { success: false, error: "Extension code must be a string" }
+        }
+
+        if (code.includes('`')) {
+            return { success: false, error: "Back-tick characters are not allowed in extension code" }
+        }
+
         const sandbox = {
             console: createSandboxConsole(extensionName, debuggerSender),
-            Map: Map,
             app
         };
 
         const context = vm.createContext(sandbox);
 
-        await vm.runInContext(`
-            (async function(){
-                "use strict";
-                ${code}
-            })()
-        `, context);
+        const script = new vm.Script(`(async function(){"use strict";${code}})()`);
+        await script.runInContext(context, { timeout: 5000 });
 
         return { success: true };
     } catch (err) {
         const stack = err?.stack || String(err)
         const evalLocation = stack.match(/evalmachine\.<anonymous>:(\d+):(\d+)/)
 
+        let cleanStack = stack
+            .split('\n')
+            .filter(line => !line.includes('evalmachine.<anonymous>'))
+            .join('\n')
+
         if (!evalLocation) {
             return {
                 success: false,
-                error: `\n${err?.message || stack}`
+                error: `\n${err?.message || cleanStack}`
             };
         }
 
         const lineNumber = Number(evalLocation[1])
         const columnNumber = Number(evalLocation[2])
-        let message = stack.replaceAll(evalLocation[0], "").split("at")[0].trim()
+        let message = cleanStack.replaceAll(evalLocation[0], "").split("at")[0].trim()
 
         message += `\n\tat line: ${lineNumber - 3}`
         message += `\n\tat column: ${columnNumber}`
 
-        return { 
+        return {
             success: false,
-            error: String(err)
+            error: message
         };
     }
 });

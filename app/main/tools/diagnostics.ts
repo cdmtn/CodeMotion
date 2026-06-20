@@ -4,17 +4,22 @@ import path from "path"
 
 type DiagnosticResult = unknown
 
-type PendingResolver = ((value: DiagnosticResult) => void) | null
-
 type WorkerMap = {
     js: Worker
     ts: Worker
 }
 
-type PendingMap = {
-    js: PendingResolver
-    ts: PendingResolver
+interface PendingEntry {
+    id: number
+    resolve: (value: DiagnosticResult) => void
 }
+
+type PendingMap = {
+    js: Map<number, PendingEntry>
+    ts: Map<number, PendingEntry>
+}
+
+let nextId = 1
 
 function createWorker(filename: string): Worker {
     const worker = new Worker(path.join(__dirname, filename))
@@ -38,21 +43,23 @@ const workers: WorkerMap = {
 }
 
 const pending: PendingMap = {
-    js: null,
-    ts: null,
+    js: new Map(),
+    ts: new Map(),
 }
 
-workers.js.on("message", (diagnostics: DiagnosticResult) => {
-    if (pending.js) {
-        pending.js(diagnostics)
-        pending.js = null
+workers.js.on("message", (msg: { id?: number; diagnostics: DiagnosticResult }) => {
+    const entry = pending.js.get(msg.id ?? 0)
+    if (entry) {
+        entry.resolve(msg.diagnostics)
+        pending.js.delete(msg.id ?? 0)
     }
 })
 
-workers.ts.on("message", (diagnostics: DiagnosticResult) => {
-    if (pending.ts) {
-        pending.ts(diagnostics)
-        pending.ts = null
+workers.ts.on("message", (msg: { id?: number; diagnostics: DiagnosticResult }) => {
+    const entry = pending.ts.get(msg.id ?? 0)
+    if (entry) {
+        entry.resolve(msg.diagnostics)
+        pending.ts.delete(msg.id ?? 0)
     }
 })
 
@@ -65,14 +72,16 @@ workers.ts.on("error", (err) => {
 
 ipcMain.handle("javascript-diagnostic", (_event: IpcMainInvokeEvent, code: string): Promise<DiagnosticResult> => {
     return new Promise((resolve) => {
-        pending.js = resolve
-        workers.js.postMessage(code)
+        const id = nextId++
+        pending.js.set(id, { id, resolve })
+        workers.js.postMessage({ id, code })
     })
 })
 
 ipcMain.handle("typescript-diagnostic", (_event: IpcMainInvokeEvent, code: string): Promise<DiagnosticResult> => {
     return new Promise((resolve) => {
-        pending.ts = resolve
-        workers.ts.postMessage(code)
+        const id = nextId++
+        pending.ts.set(id, { id, resolve })
+        workers.ts.postMessage({ id, code })
     })
 })

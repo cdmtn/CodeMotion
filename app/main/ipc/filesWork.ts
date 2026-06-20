@@ -7,9 +7,17 @@ import { readFileContent } from "../helpers/requests"
 import { SaveContentPayload } from "../payloads"
 import { APP_PATH } from "../helpers/paths"
 
+function guardPath(targetPath: string): string {
+    const resolved = path.resolve(targetPath)
+    if (targetPath.includes('..') || !resolved.startsWith(path.resolve(process.cwd()))) {
+        throw new Error('Path traversal detected: path must stay within the working directory')
+    }
+    return resolved
+}
+
 ipcMain.handle("create-file", async (_: IpcMainInvokeEvent, targetPath: string) => {
     try {
-        const resolvedPath = path.resolve(targetPath)
+        const resolvedPath = guardPath(targetPath)
         const handle = await fs.promises.open(resolvedPath, "wx")
         await handle.close()
         return { success: true, path: resolvedPath }
@@ -19,7 +27,7 @@ ipcMain.handle("create-file", async (_: IpcMainInvokeEvent, targetPath: string) 
 })
 ipcMain.handle("create-folder", async (_: IpcMainInvokeEvent, targetPath: string) => {
     try {
-        const resolvedPath = path.resolve(targetPath)
+        const resolvedPath = guardPath(targetPath)
         await fs.promises.mkdir(resolvedPath)
         return { success: true, path: resolvedPath }
     } catch (err: unknown) {
@@ -88,7 +96,7 @@ ipcMain.handle("remove-by-path", async (_: IpcMainInvokeEvent, targetPath: strin
             throw new Error("Invalid path")
         }
 
-        const resolvedPath = path.resolve(targetPath)
+        const resolvedPath = guardPath(targetPath)
 
         if (!fs.existsSync(resolvedPath)) {
             return { success: false, error: "Path does not exist" }
@@ -139,10 +147,13 @@ ipcMain.handle('ask-to-save-content', async (_: IpcMainInvokeEvent, payload: Sav
 
 ipcMain.handle("read-file", async (event: IpcMainInvokeEvent, filePath: string, parentPath: string): Promise<{ success: boolean; result: string | Error }> => {
     try {
-        const data = await fs.promises.readFile(
-            path.join(parentPath, filePath),
-            "utf-8"
-        )
+        const target = path.resolve(path.join(parentPath, filePath))
+        const resolvedParent = path.resolve(parentPath)
+        if (!target.startsWith(resolvedParent + path.sep)) {
+            throw new Error('Path traversal detected')
+        }
+
+        const data = await fs.promises.readFile(target, "utf-8")
 
         return {
             success: true,

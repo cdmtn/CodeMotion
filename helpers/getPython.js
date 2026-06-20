@@ -6,11 +6,14 @@ function getPythonInfo() {
         const commands = ["python3", "python", "py"];
 
         let checked = 0;
+        let resolved = false;
 
         for (const cmd of commands) {
             exec(`${cmd} --version`, (err, stdout, stderr) => {
+                if (resolved) return;
                 if (!err) {
                     const versionOutput = stdout || stderr;
+                    resolved = true;
 
                     exec(process.platform === "win32" ? `where ${cmd}` : `which ${cmd}`, (err2, stdout2) => {
                         if (!err2) {

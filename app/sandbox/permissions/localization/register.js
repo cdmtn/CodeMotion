@@ -1,5 +1,4 @@
-const path = require("node:path")
-const { saveReadFile, createSandboxConsole, checkFields } = require("../../tools.js")
+const { saveReadFile, createSandboxConsole, checkFields, resolveSandboxPath } = require("../../tools.js")
 
 function callback(data) {
     const langName = data.selfArgs[0]
@@ -18,7 +17,7 @@ function callback(data) {
     }
 
     if(configPath) {
-        let configContent = saveReadFile(path.join(extPath, configPath + ".json"))
+        let configContent = saveReadFile(resolveSandboxPath(extPath, configPath + ".json"))
         configContent = JSON.parse(configContent)
 
         if(!configContent) {

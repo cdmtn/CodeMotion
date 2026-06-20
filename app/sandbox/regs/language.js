@@ -1,5 +1,5 @@
 const { app, ipcMain } = require("electron")
-const { checkFields, saveReadFile, isFileExists } = require("../tools")
+const { checkFields, saveReadFile, isFileExists, resolveSandboxPath } = require("../tools")
 const path = require("path")
 const bus = require("../../../helpers/eventBus")
 
@@ -19,7 +19,7 @@ ipcMain.on("language-register", async (event, data) => {
     const extName = data.extensionName
 
     if (configPath) {
-        let configContent = saveReadFile(path.join(extPath, configPath + ".json"), true)
+        let configContent = saveReadFile(resolveSandboxPath(extPath, configPath + ".json"), true)
         configContent = JSON.parse(configContent)
 
         checkFields(`language.register:config`, configContent, {
@@ -29,7 +29,7 @@ ipcMain.on("language-register", async (event, data) => {
             rules: "string"
         })
 
-        let rulesConfig = saveReadFile(path.join(extPath, configContent.rules + ".json"), true)
+        let rulesConfig = saveReadFile(resolveSandboxPath(extPath, configContent.rules + ".json"), true)
         rulesConfig = JSON.parse(rulesConfig)
 
         checkFields(`language.register:config:rules`, rulesConfig, {
@@ -45,7 +45,7 @@ ipcMain.on("language-register", async (event, data) => {
                 icon: "SVGFile|PNGFile"
             })
 
-            iconPath = path.join(extPath, configContent.icon)
+            iconPath = resolveSandboxPath(extPath, configContent.icon)
             isFileExists(iconPath, true)
         }
         else {
@@ -70,7 +70,7 @@ ipcMain.on("language-register", async (event, data) => {
         }
 
         if ("documentation" in configContent) {
-            let documentationConfig = saveReadFile(path.join(extPath, configContent.documentation + ".json"), true)
+            let documentationConfig = saveReadFile(resolveSandboxPath(extPath, configContent.documentation + ".json"), true)
             documentationConfig = JSON.parse(documentationConfig)
 
             dataToSend["languageDocumentation"] = documentationConfig

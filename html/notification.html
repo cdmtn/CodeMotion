@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;">
 
     <link rel="stylesheet" href="../assets/css/notification.css">
     <link rel="stylesheet" href="../assets//css/main.css">
@@ -23,7 +24,6 @@
             <div class="notification-description"></div>
         </div>
     </div>
+    <script type="module" src="../app/notifications/renderer.js"></script>
 </body>
 </html>
-
-<script type="module" src="../app/notifications/renderer.js"></script>

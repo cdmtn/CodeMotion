@@ -40,8 +40,6 @@ function closeNotification(win) {
 }
 
 function spawnNotification(properties = {}) {
-    ipcMain.removeAllListeners("notification-close")
-
     const timeout = properties.timeout ?? 4000
 
     const win = new BrowserWindow({
@@ -87,7 +85,15 @@ function spawnNotification(properties = {}) {
         }, 50)
     })
 
-    win.on("closed", () => {
+    const closeHandler = (event) => {
+        const senderWin = BrowserWindow.fromWebContents(event.sender)
+        if (senderWin === win && !win.isDestroyed()) win.close()
+    }
+
+    ipcMain.on("notification-close", closeHandler)
+
+    win.once("closed", () => {
+        ipcMain.removeListener("notification-close", closeHandler)
         const i = notifications.indexOf(win)
         if (i !== -1) notifications.splice(i, 1)
 
@@ -101,11 +107,6 @@ function spawnNotification(properties = {}) {
             closeNotification(win)
         }, timeout)
     }
-
-    ipcMain.on("notification-close", (event) => {
-        const win = BrowserWindow.fromWebContents(event.sender)
-        if (win && !win.isDestroyed()) win.close()
-    })
 
     return win
 }

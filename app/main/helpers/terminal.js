@@ -40,14 +40,16 @@ class TerminalManager {
     handleOutput(data, type, event) {
         const output = data.toString();
         const prefix = type === 'stderr' ? '[ERR] ' : '';
-        
+
         console.log(`[Terminal ${type}] ${output}`);
-        
-        event.sender.send("terminal-result", {
-            type: type === 'stderr' ? 'error' : 'output',
-            data: prefix + output,
-            timestamp: Date.now()
-        });
+
+        if (!event.sender.isDestroyed()) {
+            event.sender.send("terminal-result", {
+                type: type === 'stderr' ? 'error' : 'output',
+                data: prefix + output,
+                timestamp: Date.now()
+            });
+        }
     }
 
     cleanupInputHandler() {
@@ -86,7 +88,32 @@ class TerminalManager {
     }
 
     executeCommand(event, data) {
-        const { cmd, cwd } = data;
+        let { cmd, cwd } = data;
+
+        if (typeof cmd !== 'string') {
+            event.sender.send("terminal-result", {
+                type: 'error',
+                data: 'Invalid command: must be a string\r\n'
+            });
+            return;
+        }
+
+        cmd = cmd.trim();
+        if (!cmd) {
+            event.sender.send("terminal-result", {
+                type: 'error',
+                data: 'Empty command\r\n'
+            });
+            return;
+        }
+
+        if (cmd.length > 5000) {
+            event.sender.send("terminal-result", {
+                type: 'error',
+                data: 'Command too long (max 5000 chars)\r\n'
+            });
+            return;
+        }
 
         if (this.activeProcess) {
             event.sender.send("terminal-result", {
@@ -163,9 +190,10 @@ class TerminalManager {
             this.inputHandler = (e, input) => {
                 if (this.activeProcess && !this.activeProcess.killed) {
                     try {
-                        const inputWithNewline = input.endsWith('\n') ? input : input + '\n';
+                        const str = String(input ?? '');
+                        const inputWithNewline = str.endsWith('\n') ? str : str + '\n';
                         this.activeProcess.stdin.write(inputWithNewline);
-                        console.log(`[Terminal] Sent input: ${input}`);
+                        console.log(`[Terminal] Sent input: ${str}`);
                     } catch (err) {
                         console.error("Error writing to stdin:", err.message);
                         event.sender.send("terminal-result", {

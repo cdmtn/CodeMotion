@@ -4,6 +4,46 @@ import fs from "fs"
 import path from "node:path"
 import { RunPythonPayload } from "../payloads"
 
+const BLOCKED_PYTHON_PATTERNS = [
+    /\b__import__\b/,
+    /\bimport\s+os\b/,
+    /\bimport\s+subprocess\b/,
+    /\bimport\s+sys\b/,
+    /\bimport\s+socket\b/,
+    /\bimport\s+urllib\b/,
+    /\bimport\s+ftplib\b/,
+    /\bimport\s+shutil\b/,
+    /\bimport\s+pty\b/,
+    /\bimport\s+multiprocessing\b/,
+    /\bimport\s+threading\b/,
+    /\bfrom\s+os\b/,
+    /\bfrom\s+subprocess\b/,
+    /\bfrom\s+sys\b/,
+    /\bfrom\s+socket\b/,
+    /\bfrom\s+urllib\b/,
+    /\bfrom\s+ftplib\b/,
+    /\bfrom\s+shutil\b/,
+    /\bopen\s*\(/,
+    /\bexec\s*\(/,
+    /\beval\s*\(/,
+    /\bcompile\s*\(/,
+    /\binput\s*\(/,
+    /\bgetattr\s*\(/,
+    /\bsetattr\s*\(/,
+    /\bdelattr\s*\(/,
+]
+
+function validatePythonCode(code: string): string | null {
+    if (typeof code !== "string") return "Python code must be a string"
+    if (code.length > 50000) return "Python code exceeds maximum length of 50000 characters"
+    for (const pattern of BLOCKED_PYTHON_PATTERNS) {
+        if (pattern.test(code)) {
+            return `Forbidden Python pattern detected: ${pattern.source}`
+        }
+    }
+    return null
+}
+
 type RunPythonResult =
     | {
         type: "file_not_found" | "no_input" | "python_not_found" | "timeout" | "spawn_error" | "internal_error"
@@ -85,6 +125,14 @@ ipcMain.handle(
 
                     runPath = filePath
                 } else if (code) {
+                    const validationError = validatePythonCode(code)
+                    if (validationError) {
+                        return finish({
+                            type: "internal_error",
+                            result: validationError
+                        })
+                    }
+
                     if (!fs.existsSync(tempDir)) {
                         fs.mkdirSync(tempDir, { recursive: true })
                     }
@@ -139,7 +187,7 @@ ipcMain.handle(
                 let stderr = ""
 
                 const timeout = setTimeout(() => {
-                    py!.kill()
+                    py?.kill()
 
                     finish({
                         type: "timeout",

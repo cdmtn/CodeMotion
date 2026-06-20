@@ -89,12 +89,14 @@ function guessLength(code, start) {
     return Math.max(1, end - start);
 }
 
-parentPort.on("message", (code) => {
+parentPort.on("message", (msg) => {
+    const code = typeof msg === "object" && msg !== null ? msg.code : msg;
+    const id = typeof msg === "object" && msg !== null ? msg.id : undefined;
     try {
         const diagnostics = getDiagnostics(code);
-        parentPort.postMessage(diagnostics);
+        parentPort.postMessage({ id, diagnostics });
     } catch (e) {
         console.error("diagnosticsTsWorker error:", e);
-        parentPort.postMessage([]);
+        parentPort.postMessage({ id, diagnostics: [] });
     }
 });
