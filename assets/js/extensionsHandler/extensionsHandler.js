@@ -65,7 +65,7 @@ export async function initExtensions() {
         if (!extensionRequest.success) {
             notifyError({ name: name, content: extensionRequest.result })
             sendDebugError(`(Extension) ${name}: load error. ${extensionRequest.result}`)
-            continue
+            return
         }
 
         let extensionFinalContent = ""
@@ -78,7 +78,7 @@ export async function initExtensions() {
         if (!extensionPackageCheck.success) {
             notifyError({ name: name, content: extensionPackageCheck.msg })
             sendDebugError(`(Extension) ${name}: package.json error. ${extensionPackageCheck.msg}`)
-            continue
+            return
         }
 
         let version = extensionPackage.version
