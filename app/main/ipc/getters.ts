@@ -28,9 +28,7 @@ ipcMain.handle("get-user-pc-info", async () => {
         arch: process.arch,
         cpus: os.cpus().length,
         totalMemory: os.totalmem(),
-        freeMemory: os.freemem(),
-        hostname: os.hostname(),
-        homedir: os.homedir()
+        freeMemory: os.freemem()
     };
 });
 ipcMain.handle('get-all-app-icons', () => {
@@ -70,7 +68,7 @@ ipcMain.handle("get-all-languages-json", async () => {
     return await getAllLanguagesJSON()
 })
 ipcMain.handle("get-app-icon", async () => {
-    return await getAppIcon()
+    return getAppIcon()
 })
 ipcMain.handle("get-dirname", async () => {
     return __dirname

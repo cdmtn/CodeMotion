@@ -17,7 +17,7 @@ window.electron.onData(data => {
     const notifyClose = document.querySelector(".notification-close")
 
     if(!icon) {
-        if(image) {
+        if(image && /^https?:\/\//.test(String(image))) {
             const img = document.createElement("img")
             img.classList.add("notification-image")
             img.src = image

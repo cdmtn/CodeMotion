@@ -42,9 +42,7 @@
         }
     },
     "devDependencies": {
-        "@types/electron": "^1.4.38",
         "@types/node": "^25.9.1",
-        "electron": "^39.2.3",
         "electron-builder": "^26.15.3",
         "typescript": "^6.0.3"
     },
@@ -52,8 +50,8 @@
         "@babel/parser": "^7.29.7",
         "@xterm/addon-fit": "^0.11.0",
         "@xterm/xterm": "^6.0.0",
-        "child_process": "^1.0.2",
         "chokidar": "^5.0.0",
+        "electron": "^39.2.3",
         "error-stack-parser": "^2.1.4",
         "flashot": "^1.4.1",
         "node-global-key-listener": "^0.3.0",

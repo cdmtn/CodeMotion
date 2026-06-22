@@ -6,6 +6,7 @@ import fs from "node:fs"
 import { GlobalKeyboardListener } from "node-global-key-listener";
 
 const v = new GlobalKeyboardListener();
+let keyboardListener: ((e: any, down: any) => void) | null = null;
 const bus = require("../../helpers/eventBus")
 
 const { verifyToken } = require("../auth")
@@ -32,6 +33,8 @@ require("./ipc/updaters")
 require("./ipc/misc")
 require("./ipc/organizations")
 require("./ipc/bugs")
+// require("./ipc/ai")
+// require("./ipc/aiAgent")
 
 // ext
 require("../sandbox/regs/language")
@@ -77,8 +80,7 @@ async function createWindow() {
 
     const localData = getLocalAppData();
     const settingsData = getSettingsData()
-    const appIcon = await getAppIcon();
-    const isPackaged = !app.isPackaged;
+    const appIcon = getAppIcon();
     const primaryDisplay = screen.getPrimaryDisplay();
     const { width, height } = primaryDisplay.workAreaSize;
 
@@ -114,6 +116,10 @@ async function createWindow() {
         mainWindow.show();
     })
     mainWindow.on("closed", () => {
+        if (keyboardListener) {
+            v.removeListener(keyboardListener)
+            keyboardListener = null
+        }
         for (const win of notifications) {
             if (win && !win.isDestroyed()) win.close()
         }
@@ -143,13 +149,14 @@ async function createWindow() {
                     }
                 }
 
-                v.addListener(function (e: any, down: any) {
-                    if (mainWindow && mainWindow.isFocused() && e.state == "DOWN" && e.name == "S" && down["LEFT CTRL"]) {
+                keyboardListener = function (e: any, down: any) {
+                    if (mainWindow && !mainWindow.isDestroyed() && mainWindow.isFocused() && e.state == "DOWN" && e.name == "S" && down["LEFT CTRL"]) {
                         mainWindow.webContents.send("keyboard_action", {
                             type: "saved"
                         });
                     }
-                });
+                }
+                v.addListener(keyboardListener);
             })
             .catch((err: TypeError) => {
                 updateSplash(`Error: ${err.message}. Please report this error to the developer and try again later`, true)
@@ -196,11 +203,6 @@ async function createWindow() {
         return true
     })
 
-    // send app close. Example: close all notification windows
-    app.on('window-all-closed', () => {
-        bus.emit("main-closed", mainWindow);
-    })
-
     return { mainWindow, splash };
 }
 
@@ -213,6 +215,10 @@ app.whenReady().then(createWindow);
 app.on('before-quit', () => {
     terminalManager.killProcessTree(true);
     terminalManager.cleanupInputHandler();
+    if (keyboardListener) {
+        v.removeListener(keyboardListener);
+        keyboardListener = null;
+    }
 });
 
 setInterval(() => {
@@ -220,10 +226,13 @@ setInterval(() => {
 }, 100)
 
 app.on('window-all-closed', () => {
+    bus.emit("main-closed", mainWindow);
     terminalManager.killProcessTree(true);
     terminalManager.cleanupInputHandler();
-
-    if (process.platform !== 'darwin') app.quit();
+    if (keyboardListener) {
+        v.removeListener(keyboardListener);
+        keyboardListener = null;
+    }
 
     const settings = readSettings()
 
@@ -236,4 +245,6 @@ app.on('window-all-closed', () => {
             writeSettings({ app: { workSecondsSession: Math.round(workSeconds * 10) / 10 }})
         }
     }
+
+    if (process.platform !== 'darwin') app.quit();
 });

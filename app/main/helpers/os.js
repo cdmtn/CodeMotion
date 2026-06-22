@@ -64,7 +64,7 @@ async function readDirTree(rootPath, options = {}) {
 
             entries.sort((a, b) => {
                 if (a.type === b.type) {
-                    return a.name.localeCompare(b.name);
+                    return a.name.localeCompare(b.name) || 0;
                 }
                 if (a.type === 'dir') return -1;
                 if (b.type === 'dir') return 1;

@@ -1,6 +1,4 @@
-const { ipcMain } = require("electron")
-const { getExt, isFileExists, createSandboxConsole } = require("../../tools")
-const path = require("path")
+const { getExt, isFileExists, createSandboxConsole, resolveSandboxPath } = require("../../tools")
 
 function callback(data) {
     const audioFilePath = data.selfArgs[0]
@@ -32,7 +30,7 @@ function callback(data) {
     if (speed < 0.5) speed = 1
 
     if(aviableExts.includes(fileExt)) {
-        const fullAudioPath = path.join(extPath, audioFilePath)
+        const fullAudioPath = resolveSandboxPath(extPath, audioFilePath)
         const isAudioFound = isFileExists(fullAudioPath)
 
         if(!isAudioFound) {

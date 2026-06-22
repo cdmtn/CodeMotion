@@ -1,4 +1,4 @@
-const { ipcMain, app } = require('electron');
+const { ipcMain, app, safeStorage } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const { LOCAL_FILE_PATH } = require("./main/helpers/paths.js")
@@ -139,7 +139,14 @@ async function verifyToken(token) {
 
 function saveToken(tokenData) {
     try {
-        fs.writeFileSync(tokenFile, JSON.stringify(tokenData, null, 2));
+        const raw = JSON.stringify(tokenData);
+        if (safeStorage.isEncryptionAvailable()) {
+            const encrypted = safeStorage.encryptString(raw);
+            fs.writeFileSync(tokenFile, encrypted);
+        } else {
+            console.warn('[Auth] safeStorage is not available, falling back to plaintext token storage');
+            fs.writeFileSync(tokenFile, raw);
+        }
         return true;
     } catch (error) {
         console.error('Error saving token:', error);
@@ -149,11 +156,20 @@ function saveToken(tokenData) {
 
 function loadToken() {
     try {
-        if (fs.existsSync(tokenFile)) {
-            const data = fs.readFileSync(tokenFile, 'utf-8');
-            return JSON.parse(data);
+        if (!fs.existsSync(tokenFile)) {
+            return null;
         }
-        return null;
+        const buffer = fs.readFileSync(tokenFile);
+        const text = buffer.toString('utf-8');
+        // Legacy plaintext fallback: files starting with '{' were written unencrypted
+        if (text.trimStart().startsWith('{')) {
+            return JSON.parse(text);
+        }
+        if (safeStorage.isEncryptionAvailable()) {
+            const decrypted = safeStorage.decryptString(buffer);
+            return JSON.parse(decrypted);
+        }
+        return JSON.parse(text);
     } catch (error) {
         console.error('Error loading token:', error);
         return null;
@@ -372,7 +388,9 @@ ipcMain.handle("set-non-account-mode", async (_, value = true) => {
     data.nonAccountMode = value
 
     try {
-        fs.writeFileSync(LOCAL_FILE_PATH, JSON.stringify(data, null, 4), "utf-8")
+        const tempPath = LOCAL_FILE_PATH + ".tmp"
+        fs.writeFileSync(tempPath, JSON.stringify(data, null, 4), "utf-8")
+        fs.renameSync(tempPath, LOCAL_FILE_PATH)
         return { ok: true }
     } catch (e) {
         return { ok: false }

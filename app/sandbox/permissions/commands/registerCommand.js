@@ -10,7 +10,7 @@ function callback(data) {
     })
 
     if (/\s/g.test(input.name)) {
-        throw new Error(`The command cannot contain spaces. Use characters such as "-", "_", etc., instead. Example: ${data.name.replaceAll(/\s/g, "-")}`)
+        throw new Error(`The command cannot contain spaces. Use characters such as "-", "_", etc., instead. Example: ${input.name.replaceAll(/\s/g, "-")}`)
     }
     if (input.name.startsWith("-")) {
         throw new Error(`A command name cannot begin with a hyphen (-) when registering a command, because commands that start with this character may be reserved by the program`)

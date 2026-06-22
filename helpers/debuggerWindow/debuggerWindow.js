@@ -5,9 +5,20 @@ const bus = require("../eventBus.js")
 const { getAppIcon } = require("../../app/main/helpers/requests.js")
 const { ASSETS_PATH } = require("../../app/main/helpers/paths.js")
 
+let debuggerWindow = null
+
+ipcMain.on("debugger-data", (event, data) => {
+    if (debuggerWindow && !debuggerWindow.isDestroyed()) {
+        debuggerWindow.webContents.send("debug-event", {
+            data,
+            time: Date.now()
+        })
+    }
+})
+
 async function createDebuggerWindow(mainWindow, title = "Debugger") {
     const overlayIconPath = path.join(ASSETS_PATH, "media", "debugger_icon.png")
-    const appIcon = await getAppIcon()
+    const appIcon = getAppIcon()
 
     const win = new BrowserWindow({
         width: 800,
@@ -35,7 +46,6 @@ async function createDebuggerWindow(mainWindow, title = "Debugger") {
     }
 
     debuggerWindow = win
-    debuggerWindow.name = "debuggerWindow"
 
     win.on("closed", () => {
         debuggerWindow = null
@@ -44,19 +54,10 @@ async function createDebuggerWindow(mainWindow, title = "Debugger") {
     ipcMain.on("debugger-ready", (event) => {
         mainWindow.webContents.send("debugger-ready")
         bus.emit("debugger-ready", event.sender);
-
-        ipcMain.on("debugger-data", (event, data) => {
-            if (debuggerWindow && !debuggerWindow.isDestroyed()) {
-                debuggerWindow.webContents.send("debug-event", {
-                    data,
-                    time: Date.now()
-                })
-            }
-        })
     })
 
     ipcMain.on('close-window', () => {
-        if (debuggerWindow) {
+        if (debuggerWindow && !debuggerWindow.isDestroyed()) {
             debuggerWindow.close();
         }
     });

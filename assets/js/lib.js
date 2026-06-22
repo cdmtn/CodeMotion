@@ -292,12 +292,14 @@ export function handlePopups() {
 
                 const isOpen = !popupContent.classList.contains("hidden");
 
-                popups.forEach(p => p.querySelector(".popup-content").classList.add("hidden"));
-                popups.forEach(p => p.querySelector(".popup-title").classList.remove("active"));
+                popups.forEach(p => {
+                    p.querySelector(".popup-content").classList.add("hidden");
+                    p.querySelector(".popup-title").classList.remove("active");
+                });
 
                 if (!isOpen) {
                     popupContent.classList.remove("hidden");
-                    popupTitle.classList.add("active")
+                    popupTitle.classList.add("active");
                 }
 
                 clickedInsidePopup = true;
@@ -305,7 +307,7 @@ export function handlePopups() {
 
             if (e.target.closest(".popup-content__item") && popup.contains(e.target)) {
                 popupContent.classList.add("hidden");
-                popupTitle.classList.remove("active")
+                popupTitle.classList.remove("active");
                 clickedInsidePopup = true;
             }
 

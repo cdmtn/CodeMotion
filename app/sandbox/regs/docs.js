@@ -1,5 +1,5 @@
 const { ipcMain } = require("electron")
-const { checkFields, saveReadFile } = require("../tools")
+const { checkFields, saveReadFile, resolveSandboxPath } = require("../tools")
 const path = require("path")
 
 const bus = require("../../../helpers/eventBus")
@@ -22,7 +22,7 @@ ipcMain.on("docs-register", async (event, data) => {
     let documentationProperties = {}
 
     if (configPath) {
-        let configContent = saveReadFile(path.join(extPath, configPath + ".json"), true)
+        let configContent = saveReadFile(resolveSandboxPath(extPath, configPath + ".json"), true)
         configContent = JSON.parse(configContent)
 
         const docPropertiesKey = "__$props__"

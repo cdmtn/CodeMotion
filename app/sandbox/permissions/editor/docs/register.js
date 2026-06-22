@@ -1,5 +1,4 @@
-const { checkFields, saveReadFile } = require("../../../tools")
-const path = require("path")
+const { checkFields, saveReadFile, resolveSandboxPath } = require("../../../tools")
 
 function callback(data) {
     const configPath = data.selfArgs[0]
@@ -8,7 +7,7 @@ function callback(data) {
     let documentationProperties = {}
 
     if (configPath) {
-        let configContent = saveReadFile(path.join(extPath, configPath + ".json"), true)
+        let configContent = saveReadFile(resolveSandboxPath(extPath, configPath + ".json"), true)
         configContent = JSON.parse(configContent)
 
         const docPropertiesKey = "__$props__"

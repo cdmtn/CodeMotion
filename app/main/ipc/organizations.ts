@@ -30,7 +30,7 @@ ipcMain.handle('get-org-data-from-api', async (_: IpcMainInvokeEvent, orgID: num
             return { success: false, msg: data.result }
         }
     } catch (error) {
-        return { success: false, msg: error }
+        return { success: false, msg: error instanceof Error ? error.message : String(error) }
     }
 })
 ipcMain.handle('remove-org', async (_: IpcMainInvokeEvent, orgID: number) => {
@@ -55,7 +55,7 @@ ipcMain.handle('remove-org', async (_: IpcMainInvokeEvent, orgID: number) => {
             return { success: false, msg: data.result }
         }
     } catch (error) {
-        return { success: false, msg: error }
+        return { success: false, msg: error instanceof Error ? error.message : String(error) }
     }
 })
 ipcMain.handle('join-org', async (_: IpcMainInvokeEvent, inviteCode: string) => {
@@ -67,7 +67,8 @@ ipcMain.handle('join-org', async (_: IpcMainInvokeEvent, inviteCode: string) => 
         const response = await fetch(`${API}/organizations/joinOrg.php`, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${userToken}`
+                'Authorization': `Bearer ${userToken}`,
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 "invite_code": inviteCode
@@ -82,6 +83,6 @@ ipcMain.handle('join-org', async (_: IpcMainInvokeEvent, inviteCode: string) => 
             return { success: false, msg: data.result }
         }
     } catch (error) {
-        return { success: false, msg: error }
+        return { success: false, msg: error instanceof Error ? error.message : String(error) }
     }
 })

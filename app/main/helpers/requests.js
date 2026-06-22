@@ -143,8 +143,8 @@ function getPackageData() {
         return {};
     }
 }
-async function getAppIcon() {
-    const settings = await readSettings()
+function getAppIcon() {
+    const settings = readSettings()
 
     if ("app" in settings) {
         if ("icon" in settings.app) {
@@ -183,12 +183,11 @@ async function readFileContent(filePath, encoding = 'utf8') {
         ? filePath
         : path.join(app.getAppPath(), filePath);
 
-    const abs = path.resolve(base, filePath);
-    const data = await fsPromise.readFile(abs, { encoding: encoding === null ? undefined : encoding });
+    const data = await fsPromise.readFile(base, { encoding: encoding === null ? undefined : encoding });
     return data;
 }
 function updateLocalAppData(newData) {
-    const filePath = path.join(__dirname, "local.json");
+    const filePath = LOCAL_FILE_PATH;
 
     let currentData = {};
     if (fs.existsSync(filePath)) {
