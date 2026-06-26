@@ -136,6 +136,8 @@ contextBridge.exposeInMainWorld('electron', {
                     ipcRenderer.on("extension-create-element", (event: any, data: object) => callback(data)),
                 onMod: (callback: any) => 
                     ipcRenderer.on("extension-mod-element", (event: any, data: object) => callback(data)),
+                sendTo: (data: object) => 
+                    ipcRenderer.send("extension-send-element", data)
             }
         },
         editor: {

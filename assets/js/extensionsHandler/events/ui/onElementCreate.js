@@ -21,7 +21,7 @@ export function onElementCreate(data) {
         wrapper.classList.add("extension-elements__wrapper")
         wrapper.id = context
 
-        document.body.appendChild(wrapper)
+        document.body.prepend(wrapper)
 
         apply(wrapper)
     }
