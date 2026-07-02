@@ -268,6 +268,11 @@
                     "description": "Павялічвае таўшчыню шрыфту ва ўсёй праграме"
                 },
 
+                "restoreFolder": {
+                    "title": "Restore last folder",
+                    "description": "Automatically reopen the last opened folder when the app starts"
+                },
+
                 "theme": {
                     "title": "Тэма",
                     "description": "Змяніць тэму праграмы"

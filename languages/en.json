@@ -269,6 +269,11 @@
                     "description": "Increases font weight across the application"
                 },
 
+                "restoreFolder": {
+                    "title": "Restore last folder",
+                    "description": "Automatically reopen the last opened folder when the app starts"
+                },
+
                 "theme": {
                     "title": "Theme",
                     "description": "Change application theme"

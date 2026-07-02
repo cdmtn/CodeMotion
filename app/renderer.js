@@ -178,6 +178,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         ExplorerSidebar.toggleWidth()
     })
 
+    // restore last folder on startup
+    if (settings?.app?.restoreFolder !== false && settings?.app?.lastFolder) {
+        const lastFolder = settings.app.lastFolder
+        try {
+            await window.electron.readDirTree(lastFolder, { maxDepth: 0 })
+            openFolder({
+                pathRoot: lastFolder,
+                filesPanel: filesPanel,
+                addToHistory: addToHistory,
+                pathContext: pathContext,
+                settings: settings
+            })
+        } catch (e) {}
+    }
+
     // Main
 
     if (localData.nonAccountMode) {

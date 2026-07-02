@@ -92,7 +92,8 @@ function ensureSettingsJson() {
                 "devMode": false,
                 "splashScreen": true,
                 "uiScale": 1,
-                "language": "en"
+                "language": "en",
+                "restoreFolder": true
             },
             "editor": {
                 "smoothScroll": true

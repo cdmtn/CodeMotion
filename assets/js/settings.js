@@ -57,6 +57,7 @@ export async function handleSettings(settingsObject) {
             uiScale: document.querySelector("#setting_uiScale"),
 
             coloredTabs: document.querySelector("#setting_coloredTabs"),
+            restoreFolder: document.querySelector("#setting_restoreFolder"),
         }
     )
 
@@ -99,6 +100,11 @@ export async function handleSettings(settingsObject) {
     settingsSelectors.coloredTabs.addEventListener("click", (e) => {
         let t = e.target
         Setting.coloredTabs(t.checked)
+    })
+
+    settingsSelectors.restoreFolder.addEventListener("click", (e) => {
+        let t = e.target
+        Setting.restoreFolder(t.checked)
     })
 
     settingsSelectors.editorTextSize.addEventListener("change", (e) => {
@@ -223,6 +229,7 @@ export async function handleSettings(settingsObject) {
         if("reduceMotion" in settingsObject.app) Setting.reduceMotion(settingsObject.app.reduceMotion, false)
         if("uiScale" in settingsObject.app) Setting.uiScale(settingsObject.app.uiScale, false, false)
         if("language" in settingsObject.app) Setting.language(settingsObject.app.language, false)
+        if("restoreFolder" in settingsObject.app) Setting.restoreFolder(settingsObject.app.restoreFolder, false)
     }
 }
 
@@ -393,6 +400,13 @@ export class Setting {
 
         if(set) {
             await window.electron.setSettings({ editor: { coloredTabs: value }})
+        }
+    }
+    static async restoreFolder(value, set = true) {
+        settingsSelectors.restoreFolder.checked = value
+
+        if(set) {
+            await window.electron.setSettings({ app: { restoreFolder: value }})
         }
     }
 }

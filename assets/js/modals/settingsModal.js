@@ -71,6 +71,12 @@ export async function getSettingsModal({ platform }) {
                                 id: "setting_boldFont"
                             },
                             {
+                                type: "switch",
+                                title: lgls("application.restoreFolder.title"),
+                                description: lgls("application.restoreFolder.description"),
+                                id: "setting_restoreFolder"
+                            },
+                            {
                                 type: "placeholder",
                                 title: lgls("application.theme.title"),
                                 description: lgls("application.theme.description"),

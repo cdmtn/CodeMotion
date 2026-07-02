@@ -89,6 +89,8 @@ export async function openFolder({ pathRoot, filesPanel, addToHistory, pathConte
             }
         );
 
+        window.electron.setSettings({ app: { lastFolder: pathRoot } })
+
         initializeFolderToggle(filesPanel, { pathContext, settings });
         initializeExplorerContextMenu(filesPanel, { tabsByPath, recentlyClosed, pathContext, settings });
 

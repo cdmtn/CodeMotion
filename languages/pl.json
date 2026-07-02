@@ -268,6 +268,11 @@
                     "description": "Zwiększa wagę czcionki w całej aplikacji"
                 },
 
+                "restoreFolder": {
+                    "title": "Restore last folder",
+                    "description": "Automatically reopen the last opened folder when the app starts"
+                },
+
                 "theme": {
                     "title": "Motyw",
                     "description": "Zmień motyw aplikacji"
