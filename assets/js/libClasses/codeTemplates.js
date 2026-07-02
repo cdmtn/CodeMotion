@@ -25,7 +25,7 @@ export class _CodeTemplates {
                     <title>%{{ Document-Title }}</title>
                 </head>
                 <body>
-                    
+                \t
                 </body>
                 </html>`
             },
@@ -43,7 +43,7 @@ export class _CodeTemplates {
                     <script src="script.js" defer></script>
                 </head>
                 <body>
-
+                \t
                 </body>
                 </html>
                 `

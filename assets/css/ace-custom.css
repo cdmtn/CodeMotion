@@ -7,6 +7,7 @@
     --color-string: #ffc17a;
     --color-special-operator: #ff6fcb;
     --color-default: #8dbeff;
+    --color-operator: #428cff;
     --color-keyword: rgb(255 107 107);
     --color-other: #c960a8;
 }
@@ -253,7 +254,7 @@
 }
 
 .ace_operator {
-    color: var(--color-keyword)
+    color: var(--color-operator)
 }
 .ace_punctuation.ace_operator {
     color: inherit!important;
