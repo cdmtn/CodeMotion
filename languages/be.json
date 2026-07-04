@@ -317,7 +317,11 @@
 
             "fileWindow": {
                 "title": "Каляровыя ўкладкі",
-                "description": "Ніжняя частка актыўнай укладкі будзе падсвечвацца колерам мовы"
+                "description": "Ніжняя частка актыўнай укладкі будзе падсвечвацца колерам мовы",
+                "confirmClose": {
+                    "title": "Confirm on close",
+                    "description": "Show a confirmation dialog when closing a tab with unsaved changes"
+                }
             }
         },
 
@@ -350,6 +354,14 @@
                 "description": "Гэта дзеянне нельга адмяніць. Пасля выхаду вам давядзецца ўвайсці зноў"
             },
             "buttonConfirm": "Выйсці"
+        },
+
+        "closeConfirm": {
+            "title": "Unsaved changes",
+            "message": "Are you sure you want to close \"%{file}\"?",
+            "description": "Unsaved changes will be lost",
+            "yes": "Yes, close",
+            "save": "Save and close"
         }
     },
 

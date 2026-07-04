@@ -318,7 +318,11 @@
 
             "fileWindow": {
                 "title": "Colored tabs",
-                "description": "The bottom part of the active tab will glow in the color of the language"
+                "description": "The bottom part of the active tab will glow in the color of the language",
+                "confirmClose": {
+                    "title": "Confirm on close",
+                    "description": "Show a confirmation dialog when closing a tab with unsaved changes"
+                }
             }
         },
 
@@ -351,6 +355,14 @@
                 "description": "This action cannot be undone. If you do this now, you will have to log in again"
             },
             "buttonConfirm": "Logout"
+        },
+
+        "closeConfirm": {
+            "title": "Unsaved changes",
+            "message": "Are you sure you want to close \"%{file}\"?",
+            "description": "Unsaved changes will be lost",
+            "yes": "Yes, close",
+            "save": "Save and close"
         },
 
         "templates": {

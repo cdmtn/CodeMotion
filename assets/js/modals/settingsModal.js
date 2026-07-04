@@ -203,6 +203,12 @@ export async function getSettingsModal({ platform }) {
                                 description: "Displays the X close button on editor tabs",
                                 id: "setting_tabShowClose",
                                 disabled: true
+                            },
+                            {
+                                type: "switch",
+                                title: lgls("fileWindow.confirmClose.title"),
+                                description: lgls("fileWindow.confirmClose.description"),
+                                id: "setting_confirmCloseTab"
                             }
                         ]
                     }

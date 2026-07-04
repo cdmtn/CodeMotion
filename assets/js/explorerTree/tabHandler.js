@@ -51,6 +51,7 @@ import { triggerAceChanged, triggerAceClicked } from "./triggers.js"
 import { TopWindowList, destroyAllTopWindowLists } from "../topWindowHandler/topWindowList.js"
 import { setEditorContext } from "./helpers/setEditorContext.js"
 import { Modal } from "../modalsHandler/engine.js"
+import { electronAPI } from "../global.js"
 
 export const recentlyClosed = new Map();
 export const tabsByPath = new Map();
@@ -901,10 +902,16 @@ export async function openTab(path, content, extension, name, pathContext, isNew
         ev.preventDefault();
         activateTab(tab);
     });
-    tab.querySelector("#tab-close").addEventListener("click", (ev) => {
+    tab.querySelector("#tab-close").addEventListener("click", async (ev) => {
         ev.stopPropagation();
         ev.preventDefault();
-        closeTab(path);
+        const isModified = tab.classList.contains("not-saved");
+        const settings = await window.electron.readSettings();
+        if (isModified && settings?.editor?.confirmCloseTab !== false) {
+            showCloseConfirmModal(path, editor);
+        } else {
+            closeTab(path);
+        }
     });
     editor.session.on('change', async () => {
         tab.classList.add("not-saved");
@@ -933,6 +940,104 @@ bus.addEventListener("on-setting-colored-tabs", (data) => {
         }
     })
 })
+
+async function showCloseConfirmModal(path, editor) {
+    const gls = await GLS.init();
+    const fileName = path.split(/[\\/]/).pop();
+
+    const modal = Modal.create({
+        id: "closeConfirmModal",
+        name: "closeConfirmModal",
+        modalClassList: ["window"],
+        size: "mini",
+        title: gls.get("modals.closeConfirm.title"),
+
+        content: [
+            {
+                type: "row",
+                gap: 15,
+                classList: ['background'],
+                items: [
+                    {
+                        type: "placeholder",
+                        title: gls.get("modals.closeConfirm.message", { file: fileName }),
+                        description: gls.get("modals.closeConfirm.description")
+                    },
+                    {
+                        type: "container",
+                        id: "closeConfirmButtons"
+                    },
+                    {
+                        type: "button",
+                        id: "closeConfirmSave",
+                        title: gls.get("modals.closeConfirm.save"),
+                        container: "#closeConfirmButtons"
+                    },
+                    {
+                        type: "button",
+                        id: "closeConfirmYes",
+                        title: gls.get("modals.closeConfirm.yes"),
+                        container: "#closeConfirmButtons",
+                        class: "danger"
+                    },
+                    {
+                        type: "button",
+                        id: "closeConfirmNo",
+                        title: gls.get("cancel"),
+                        container: "#closeConfirmButtons",
+                        class: "secondary"
+                    }
+                ]
+            }
+        ]
+    });
+
+    const modalEl = modal.el;
+    const saveBtn = modalEl.querySelector("#closeConfirmSave");
+    const yesBtn = modalEl.querySelector("#closeConfirmYes");
+    const noBtn = modalEl.querySelector("#closeConfirmNo");
+
+    yesBtn.addEventListener("click", () => {
+        modal.close();
+        modal.destroy();
+        closeTab(path);
+    });
+
+    noBtn.addEventListener("click", () => {
+        modal.close();
+        modal.destroy();
+    });
+
+    saveBtn.addEventListener("click", async () => {
+        const rec = tabsByPath.get(path);
+        if (rec) {
+            const isNew = rec.new;
+            if (isNew) {
+                const saveNewFileRes = await electronAPI.askToSaveNewFile({
+                    filename: path,
+                    content: rec.editor.getValue()
+                });
+                if (saveNewFileRes.success) {
+                    const newPath = saveNewFileRes.path;
+                    const newName = newPath.split(/[\\/]/).pop();
+                    rec.new = false;
+                    rec.tabEl.classList.remove("not-saved");
+                    updateTabPath(path, newPath, newName);
+                }
+            } else {
+                const saveStatus = await window.electron.saveFile(path, rec.editor.getValue());
+                if (saveStatus.success) {
+                    rec.tabEl.classList.remove("not-saved");
+                }
+            }
+        }
+        modal.close();
+        modal.destroy();
+        closeTab(path);
+    });
+
+    modal.open();
+}
 
 export function closeTab(path) {
     const rec = tabsByPath.get(path);

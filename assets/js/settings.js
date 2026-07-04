@@ -57,6 +57,7 @@ export async function handleSettings(settingsObject) {
             uiScale: document.querySelector("#setting_uiScale"),
 
             coloredTabs: document.querySelector("#setting_coloredTabs"),
+            confirmCloseTab: document.querySelector("#setting_confirmCloseTab"),
             restoreFolder: document.querySelector("#setting_restoreFolder"),
         }
     )
@@ -100,6 +101,11 @@ export async function handleSettings(settingsObject) {
     settingsSelectors.coloredTabs.addEventListener("click", (e) => {
         let t = e.target
         Setting.coloredTabs(t.checked)
+    })
+
+    settingsSelectors.confirmCloseTab.addEventListener("click", (e) => {
+        let t = e.target
+        Setting.confirmCloseTab(t.checked)
     })
 
     settingsSelectors.restoreFolder.addEventListener("click", (e) => {
@@ -217,6 +223,7 @@ export async function handleSettings(settingsObject) {
         if("smoothScroll" in settingsObject.editor) Setting.editorSmoothScroll(settingsObject.editor.smoothScroll, false, false)
         if("pythonRunnerMethod" in settingsObject.editor) Setting.pythonRunnerMethod(settingsObject.editor.pythonRunnerMethod, false)
         if("coloredTabs" in settingsObject.editor) Setting.coloredTabs(settingsObject.editor.coloredTabs, false)
+        if("confirmCloseTab" in settingsObject.editor) Setting.confirmCloseTab(settingsObject.editor.confirmCloseTab, false)
     }
     if(settingsObject.ui) {
         if("useSystemFont" in settingsObject.ui) Setting.useSystemFonts(settingsObject.ui.useSystemFont, false)
@@ -407,6 +414,13 @@ export class Setting {
 
         if(set) {
             await window.electron.setSettings({ app: { restoreFolder: value }})
+        }
+    }
+    static async confirmCloseTab(value, set = true) {
+        settingsSelectors.confirmCloseTab.checked = value
+
+        if(set) {
+            await window.electron.setSettings({ editor: { confirmCloseTab: value }})
         }
     }
 }

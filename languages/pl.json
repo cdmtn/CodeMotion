@@ -317,7 +317,11 @@
 
             "fileWindow": {
                 "title": "Kolorowe karty",
-                "description": "Dolna część aktywnej karty będzie podświetlana w kolorze języka"
+                "description": "Dolna część aktywnej karty będzie podświetlana w kolorze języka",
+                "confirmClose": {
+                    "title": "Confirm on close",
+                    "description": "Show a confirmation dialog when closing a tab with unsaved changes"
+                }
             }
         },
 
@@ -350,6 +354,14 @@
                 "description": "Tej akcji nie można cofnąć. Jeśli zrobisz to teraz, będziesz musiał zalogować się ponownie"
             },
             "buttonConfirm": "Wyloguj"
+        },
+
+        "closeConfirm": {
+            "title": "Unsaved changes",
+            "message": "Are you sure you want to close \"%{file}\"?",
+            "description": "Unsaved changes will be lost",
+            "yes": "Yes, close",
+            "save": "Save and close"
         }
     },
 
