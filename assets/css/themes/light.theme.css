@@ -34,8 +34,11 @@ body[theme="light"] {
     --color-class: #218f6b;
     --color-number: #3c4fff;
     --color-boolean: #7205ff;
-    --color-string: #b57026;
+    --color-string: #b43620;
     --color-keyword: #8d36c1;
+    --color-const: #3060b7;
+    --color-operator: #424fff;
+    --color-template-literal-wrapper: #2a34b6;
 }
 
 body[theme="light"] .code-tab.not-saved::after {
@@ -47,4 +50,8 @@ body[theme="light"] .explorer-elements .file::after {
 }
 body[theme="light"] .explorer-elements .file.active {
     background: #00000012;
+}
+
+body[theme="light"] .ace_marker-layer .ace_active-line {
+    background: #bcbcbc2e;
 }

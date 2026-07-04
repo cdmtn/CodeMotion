@@ -10,6 +10,8 @@
     --color-operator: #428cff;
     --color-keyword: rgb(255 107 107);
     --color-other: #c960a8;
+    --color-template-literal-wrapper: #29a9ff;
+    --color-character: var(--color-const);
 }
 
 .ace_boolean,
@@ -284,4 +286,17 @@
     display: flex!important;
     opacity: 0;
     pointer-events: none;
+}
+
+.ace_paren.ace_lparen:not(.ace_func),
+.ace_paren.ace_rparen:not(.ace_func) {
+    color: var(--color-template-literal-wrapper)
+}
+
+.ace_function_argument {
+    color: var(--function-argument)
+}
+
+.ace_character {
+    color: var(--color-character)
 }

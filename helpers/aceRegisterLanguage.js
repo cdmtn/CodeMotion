@@ -46,14 +46,21 @@ export function registerAceLanguage(id, config = {}) {
 
                 const customRules = rules
 
-                if (customRules && customRules.start && customRules.start.length > 0) {
-                    if (this.$rules && this.$rules.start) {
-                        this.$rules.start.unshift(...customRules.start)
-                    } else if (this.$rules) {
-                        this.$rules.start = [...customRules.start, ...(this.$rules.start || [])]
+                if (!this.$rules) this.$rules = {}
+
+                Object.keys(customRules || {}).forEach((stateName) => {
+                    const stateRules = customRules[stateName]
+                    if (!stateRules || !stateRules.length) return
+
+                    if (stateName === "start" && this.$rules.start && this.$rules.start.length) {
+                        this.$rules.start.unshift(...stateRules)
                     } else {
-                        this.$rules = customRules
+                        this.$rules[stateName] = stateRules
                     }
+                })
+
+                if (typeof this.normalizeRules === "function") {
+                    this.normalizeRules()
                 }
             }
 

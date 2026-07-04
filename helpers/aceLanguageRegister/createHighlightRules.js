@@ -1,3 +1,14 @@
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+
+const normalizeStateRule = (r) => {
+    if (r.include) return { include: r.include }
+    if (r.defaultToken) return { defaultToken: r.defaultToken }
+    const rule = { regex: r.regex, token: r.token }
+    if (r.push) rule.push = r.push
+    if (r.next) rule.next = r.next
+    return rule
+}
+
 export function createHighlightRules(config = {}) {
     const rules = []
 
@@ -56,6 +67,13 @@ export function createHighlightRules(config = {}) {
         })
     }
 
+    if (config.characters) {
+        rules.push({
+            token: "character",
+            regex: config.characters
+        })
+    }
+
     if (config.variable) {
         rules.push({
             token: "variable",
@@ -66,10 +84,10 @@ export function createHighlightRules(config = {}) {
     if (config.custom) {
         config.custom.forEach(e => {
             if (e.regex && e.type) {
-                rules.push({
-                    token: e.type,
-                    regex: e.regex
-                })
+                const rule = { token: e.type, regex: e.regex }
+                if (e.push) rule.push = e.push
+                if (e.next) rule.next = e.next
+                rules.push(rule)
             }
         })
     }
@@ -109,13 +127,6 @@ export function createHighlightRules(config = {}) {
         })
     }
 
-    // if (config.uppercaseAsConstant) {
-    //     rules.push({
-    //         token: "constant.language",
-    //         regex: "(?<![A-Za-z0-9_])_*[A-Z][A-Z0-9_]*(?![A-Za-z0-9_])"
-    //     })
-    // }
-
     rules.push({
         token: function (value) {
             if (isUppercaseConstant && /^[A-Z]+$/.test(value)) return "constant.language"
@@ -132,5 +143,96 @@ export function createHighlightRules(config = {}) {
         regex: "\\b[a-zA-Z_$][a-zA-Z0-9_$]*\\b"
     })
 
-    return { start: rules }
+    const result = { start: rules }
+
+    if (config.states) {
+        Object.entries(config.states).forEach(([stateName, stateDef]) => {
+            if (Array.isArray(stateDef)) {
+                result[stateName] = stateDef.map(normalizeStateRule)
+                return
+            }
+
+            if (stateDef && stateDef.rules) {
+                result[stateName] = stateDef.rules.map(normalizeStateRule)
+
+                if (stateDef.enter && stateDef.enter.regex) {
+                    rules.push({
+                        token: stateDef.enter.token || stateName,
+                        regex: stateDef.enter.regex,
+                        push: stateName
+                    })
+                }
+            }
+        })
+    }
+
+    if (config.templateLiteral) {
+        const {
+            delimiter = "`",
+            interpStart = "${",
+            interpEnd = "}",
+            escape = "\\\\."
+        } = config.templateLiteral
+
+        rules.push({
+            token: "string",
+            regex: escapeRegex(delimiter),
+            push: "tstring"
+        })
+
+        result.tstring = [
+            { token: "constant.character.escape", regex: escape },
+            { token: "paren.lparen.interpolation", regex: escapeRegex(interpStart), push: "interpolation" },
+            { token: "string", regex: escapeRegex(delimiter), next: "pop" },
+            { defaultToken: "string" }
+        ]
+
+        result.interpolation = [
+            { token: "paren.rparen.interpolation", regex: escapeRegex(interpEnd), next: "pop" },
+            { include: "start" }
+        ]
+    }
+
+    if (config.highlightFunctionArguments) {
+        const typesList = types.length ? types.join("|") : null
+        const entries = []
+
+        if (config.highlightFunctionArguments === true) {
+            if (config.defineFunctionKeyword) {
+                entries.push({
+                    token: ["keyword", "text", "entity.name.type.function", "text", "paren.lparen.func"],
+                    regex: `(${config.defineFunctionKeyword})(\\s+)([a-zA-Z_$][a-zA-Z0-9_$]*)(\\s*)(\\()`
+                })
+            }
+        } else if (Array.isArray(config.highlightFunctionArguments)) {
+            entries.push(...config.highlightFunctionArguments)
+        } else if (typeof config.highlightFunctionArguments === "string") {
+            entries.push({ token: "paren.lparen.func", regex: config.highlightFunctionArguments })
+        }
+
+        entries.slice().reverse().forEach(e => {
+            rules.unshift({ token: e.token, regex: e.regex, push: "funcSignature" })
+        })
+
+        result.funcSignature = [
+            { token: "text", regex: ":\\s*(?=[A-Za-z_])", push: "typeExpr" },
+            { token: "text", regex: "," },
+            { token: "paren.rparen.func", regex: "\\)" },
+            { regex: "(?=\\{|=>)", next: "pop" },
+            { defaultToken: "text" }
+        ]
+
+        result.typeExpr = [
+            ...(typesList ? [{ token: "entity.name.class", regex: `\\b(${typesList})\\b` }] : []),
+            { token: "keyword.operator", regex: "\\|(?!\\|)" },
+            { token: "keyword.operator", regex: "\\[\\]" },
+            { token: "paren.lparen.generic", regex: "<", push: "typeExpr" },
+            { token: "paren.rparen.generic", regex: ">", next: "pop" },
+            { token: "entity.name.type.class", regex: "[a-zA-Z_$][a-zA-Z0-9_$]*" },
+            { regex: "\\s+" },
+            { regex: "(?=[,;=\\)\\{]|=>)", next: "pop" }
+        ]
+    }
+
+    return result
 }
