@@ -87,19 +87,12 @@ export class _TopBarElement {
         if (icon) icon.style.marginLeft = "0px"
         if (text) text.classList.remove("hidden")
 
-        el.style.maxWidth = "0px"
-        el.style.minWidth = "0px"
+        void el.offsetHeight
 
-        const width = el.scrollWidth
+        const targetWidth = el.scrollWidth
 
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                if (token !== this._animationToken) return
-
-                el.style.maxWidth = width + "px"
-                el.style.minWidth = width + "px"
-            })
-        })
+        el.style.maxWidth = targetWidth + "px"
+        el.style.minWidth = targetWidth + "px"
     }
 
     hide({ iconVisible = false } = {}) {
@@ -109,22 +102,16 @@ export class _TopBarElement {
 
         const token = ++this._animationToken
 
-        el.style.maxWidth = el.scrollWidth + "px"
+        if (!iconVisible) {
+            el.style.maxWidth = "0px"
+            el.style.minWidth = "0px"
+        } else {
+            el.style.maxWidth = "20px"
+            el.style.minWidth = "20px"
 
-        requestAnimationFrame(() => {
-            if (token !== this._animationToken) return
-
-            if (!iconVisible) {
-                el.style.maxWidth = "0px"
-                el.style.minWidth = "0px"
-            } else {
-                el.style.maxWidth = "20px"
-                el.style.minWidth = "20px"
-
-                if (icon) icon.style.marginLeft = "-5px"
-                if (text) text.classList.add("hidden")
-            }
-        })
+            if (icon) icon.style.marginLeft = "-5px"
+            if (text) text.classList.add("hidden")
+        }
     }
 
     on(event, callback) {

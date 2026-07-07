@@ -443,6 +443,7 @@ input~span {
 }
 .topbar-center .topbar-center__image-icon {
     width: 14px;
+    transition: margin-left .4s;
 }
 .topbar-center .topbar-center__text.hidden {
     display: block!important;
