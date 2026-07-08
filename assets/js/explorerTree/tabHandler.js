@@ -26,6 +26,7 @@ import {
 import { BottomWindow, closeAllWindows } from "../handlers/BottomWindowHandler.js"
 import { initJSSH } from "../../../ace/plugins/languageSyntaxEnhance.js"
 import { enableSmoothScroll } from "../../plugins/aceSmoothScroller/index.js"
+import { Setting } from "../settings.js"
 import {
     setCurrentLanguage,
     setColumn,
@@ -750,6 +751,15 @@ export async function openTab(path, content, extension, name, pathContext, isNew
             enableSmoothScroll(editor)
         }
     }
+
+    editor.container.addEventListener('wheel', (e) => {
+        if (!e.ctrlKey && !e.metaKey) return
+        e.preventDefault()
+        e.stopPropagation()
+        const px = parseFloat(getComputedStyle(document.body).getPropertyValue('--editor-font-size'))
+        const next = Math.min(200, Math.max(50, Math.round(px / 15 * 100) + (e.deltaY < 0 ? 5 : -5)))
+        Setting.editorTextSize(next)
+    }, { passive: false, capture: true })
 
     const languageContextName = fileNameInfo != false ? `${fileNameInfo.name} (${fileNameInfo.mode.toUpperCase()})` : language.name
     setCurrentLanguage(languageContextName, { editor: editor })
