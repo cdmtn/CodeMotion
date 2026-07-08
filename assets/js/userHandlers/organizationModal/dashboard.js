@@ -222,6 +222,10 @@ export function dashboardModalHandle({ userOrgs, element, orgModal }) {
                     inviteCode.textContent = code
 
                     editButtons.classList.add("disabled")
+
+                    setTimeout(() => {
+                       editButtons.classList.remove("disabled") 
+                    }, 300000)
                 }
                 else {
                     createNotify(
