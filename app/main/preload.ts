@@ -42,6 +42,7 @@ contextBridge.exposeInMainWorld('electron', {
     getOrgDataFromAPI: (orgid: number) => ipcRenderer.invoke("get-org-data-from-api", orgid),
     removeOrg: (orgid: number) => ipcRenderer.invoke("remove-org", orgid),
     joinOrg: (inviteCode: string) => ipcRenderer.invoke("join-org", inviteCode),
+    resetOrgInviteCode: (orgid: number) => ipcRenderer.invoke("reset-org-invite-code", orgid),
 
     close: () => ipcRenderer.send("close"),
     minimize: () => ipcRenderer.send("minimize"),

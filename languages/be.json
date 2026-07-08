@@ -199,6 +199,14 @@
                 "createdAt": {
                     "title": "Створана"
                 },
+                "edit": {
+                    "title": "Organization edit",
+                    "description": "Set up your organization's information",
+
+                    "resetInviteCode": {
+                        "title": "Reset invite code"
+                    }
+                },
                 "dangerZone": {
                     "switch": {
                         "title": "Дазволіць небяспечныя дзеянні",

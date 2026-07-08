@@ -199,6 +199,14 @@
                 "createdAt": {
                     "title": "Data utworzenia"
                 },
+                "edit": {
+                    "title": "Organization edit",
+                    "description": "Set up your organization's information",
+
+                    "resetInviteCode": {
+                        "title": "Reset invite code"
+                    }
+                },
                 "dangerZone": {
                     "switch": {
                         "title": "Włącz niszczące działania",

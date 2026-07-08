@@ -369,6 +369,13 @@ input~span {
     justify-content: flex-start;
     padding: 0px;
 }
+.topbar-center.topbar-item__clickable {
+    cursor: pointer;
+    transition: .4s;
+}
+.topbar-center.topbar-item__clickable:hover {
+    opacity: .5;
+}
 .topbar-center span {
     transition: .4s;
     font-weight: var(--default-font-weight);

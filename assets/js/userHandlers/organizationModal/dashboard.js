@@ -46,9 +46,35 @@ export function dashboardModalObject({ lgls }) {
                         description: "--",
                         classList: ["placeholder-bigdata"]
                     },
+
                     {
                         type: "divider"
                     },
+
+
+                    {
+                        type: "placeholder",
+                        id: "dashboardOrgEditZoneTitle",
+                        title: lgls("dashboard.edit.title"),
+                        description: lgls("dashboard.edit.description")
+                    },
+                    {
+                        type: "container",
+                        id: "dashboardOrgEditZoneButtons",
+                        disabled: true
+                    },
+                    {
+                        type: "button",
+                        title: lgls("dashboard.edit.resetInviteCode.title"),
+                        id: "dashboardOrgEditResetInvite",
+                        container: "#dashboardOrgEditZoneButtons"
+                    },
+
+
+                    {
+                        type: "divider"
+                    },
+                    
                     {
                         type: "switch",
                         id: "dashboardOrgDangerZoneSwitch",
@@ -109,6 +135,9 @@ export function dashboardModalHandle({ userOrgs, element, orgModal }) {
     const inviteCode = element.querySelector("#dashboardOrgInviteCode .modal-category__item-desc")
     const createdAt = element.querySelector("#dashboardOrgCreatedAt .modal-category__item-desc")
 
+    const editButtons = element.querySelector("#dashboardOrgEditZoneButtons")
+    const editResetInvite = element.querySelector("#dashboardOrgEditResetInvite")
+
     const dangerZoneSwitch = element.querySelector("#dashboardOrgDangerZoneSwitch")
     const dangerZoneTitle = element.querySelector("#dashboardOrgDangerZoneTitle")
 
@@ -148,11 +177,15 @@ export function dashboardModalHandle({ userOrgs, element, orgModal }) {
                 dangerZoneTitle.classList.add("hidden")
                 dangerZoneSwitch.closest(".modal-category__item").classList.add("hidden")
                 buttonsContainer.classList.add("hidden")
+
+                editButtons.classList.add("disabled")
             }
             else {
                 dangerZoneTitle.classList.remove("hidden")
                 dangerZoneSwitch.closest(".modal-category__item").classList.remove("hidden")
                 buttonsContainer.classList.remove("hidden")
+
+                editButtons.classList.remove("disabled")
             }
 
             // remove btn handler
@@ -178,6 +211,31 @@ export function dashboardModalHandle({ userOrgs, element, orgModal }) {
                 orgModal.unDisableCurrent()
             }
             // 
+            // resend code btn handler
+            editResetInvite.onclick = async () => {
+                orgModal.disableCurrent()
+
+                const resetOrgInviteCodeRes = await window.electron.resetOrgInviteCode(data.id)
+
+                if (resetOrgInviteCodeRes.success) {
+                    const code = resetOrgInviteCodeRes.msg.invite_code
+                    inviteCode.textContent = code
+
+                    editButtons.classList.add("disabled")
+                }
+                else {
+                    createNotify(
+                        {
+                            type: "danger",
+                            icon: "close",
+                            title: "Organization invite code reset error",
+                            content: String(resetOrgInviteCodeRes.msg)
+                        }
+                    )
+                }
+
+                orgModal.unDisableCurrent()
+            }
         }
 
         isOrganizationsSelected = true

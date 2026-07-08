@@ -121,6 +121,10 @@ export function onElementMod(data, modules = {}) {
         if (topbarElementInstance.instances.has(idifiedID)) {
             const topbarItem = topbarElementInstance.instances.get(idifiedID)
 
+            if(value == "click") {
+                topbarItem.item.classList.add("topbar-item__clickable")
+            }
+
             requestAnimationFrame(() => {
                 topbarItem.on(value, () => {
                     sendToElement(id, "onEventTriggered", { eventName: value })
