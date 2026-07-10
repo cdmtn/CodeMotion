@@ -47,8 +47,33 @@ function notifyError({ name, content }) {
     })
 }
 
+function renderExtensionsModal(properties) {
+    Modal.destroy("installedExtensions")
+
+    const extensionsAllBtn = document.querySelector("#extensionsAll")
+    const items = properties == undefined ? [{ type: "centered", icon: "extension" }] : properties
+
+    const installedExtensionsModal = Modal.create({
+        id: "installedExtensions",
+        name: "Installed Extensions",
+        modalClassList: ["window"],
+        title: "Installed extensions",
+
+        content: [
+            {
+                type: "row",
+                classList: ["background"],
+                items: items
+            },
+        ]
+    })
+
+    installedExtensionsModal.bind(extensionsAllBtn)
+}
+
 export async function initExtensions() {
     handleExtensionEvents()
+    renderExtensionsModal()
 
     const extensionsRequest = await window.electron.requestExtensions()
     const extensionsDir = await window.electron.getExtensionsDir()
@@ -65,7 +90,6 @@ export async function initExtensions() {
         if (!extensionRequest.success) {
             notifyError({ name: name, content: extensionRequest.result })
             sendDebugError(`(Extension) ${name}: load error. ${extensionRequest.result}`)
-            return
         }
 
         let extensionFinalContent = ""
@@ -78,7 +102,6 @@ export async function initExtensions() {
         if (!extensionPackageCheck.success) {
             notifyError({ name: name, content: extensionPackageCheck.msg })
             sendDebugError(`(Extension) ${name}: package.json error. ${extensionPackageCheck.msg}`)
-            return
         }
 
         let version = extensionPackage.version
@@ -114,14 +137,12 @@ export async function initExtensions() {
 
         if(!Array.isArray(activeOn)) {
             sendDebugError(`${name}: activeOn key in package.json must be array`)
-            return
         }
 
         let extensionMainFileContentRes = await window.electron.readFile(`/${name}/${main}.js`, extensionsDir)
 
         if (!extensionMainFileContentRes.success) {
             notifyError({ name: displayName, content: extensionMainFileContentRes.result })
-            return
         }
 
         sendDebugMarking()
@@ -264,22 +285,7 @@ export async function initExtensions() {
         }
     }
 
-    const installedExtensionsModal = Modal.create({
-        id: "installedExtensions",
-        name: "Installed Extensions",
-        modalClassList: ["window"],
-        title: "Installed extensions",
-
-        content: [
-            {
-                type: "row",
-                classList: ["background"],
-                items: installedExtensionModalData
-            },
-        ]
-    })
-
-    installedExtensionsModal.bind(document.querySelector("#extensionsAll"))
+    renderExtensionsModal(installedExtensionModalData)
 }
 
 function createInstalledExtensionsModalTemplate({ title, subtitle, description, image, permissions, path }) {
