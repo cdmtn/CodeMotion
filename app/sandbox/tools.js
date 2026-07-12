@@ -1,4 +1,4 @@
-const { net, nativeImage } = require("electron")
+const { net, nativeImage, app } = require("electron")
 const fs = require("fs")
 const path = require("path")
 
