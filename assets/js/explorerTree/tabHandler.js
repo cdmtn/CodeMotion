@@ -58,6 +58,7 @@ import { closeConfirmModal } from "../modals/closeConfirm.js"
 
 ace.require("ace/ext/language_tools");
 ace.require("ace/ext/beautify");
+ace.config.setModuleUrl("ace/mode/gomod", "../app/main/tools/go/gomod-mode.js");
 
 export const recentlyClosed = new Map();
 export const tabsByPath = new Map();

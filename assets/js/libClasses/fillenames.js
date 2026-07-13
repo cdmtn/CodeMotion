@@ -32,7 +32,7 @@ export class _Filenames {
             name: "GO Mod File",
             icon: "gomod",
             iconExt: "svg",
-            mode: "go",
+            mode: "gomod",
             color: "#eecb80"
         }
     }
