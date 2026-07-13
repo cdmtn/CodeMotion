@@ -30,6 +30,7 @@ body[theme="light"] {
     --switch-checkbox: #d1d1d1;
     --link-color: #4165f1;
 
+    --color-default: #3770bc;
     --color-function: #ff641d;
     --color-class: #218f6b;
     --color-number: #3c4fff;

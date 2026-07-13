@@ -56,6 +56,9 @@ import { Modal } from "../modalsHandler/engine.js"
 import { electronAPI } from "../global.js"
 import { closeConfirmModal } from "../modals/closeConfirm.js"
 
+ace.require("ace/ext/language_tools");
+ace.require("ace/ext/beautify");
+
 export const recentlyClosed = new Map();
 export const tabsByPath = new Map();
 
@@ -659,9 +662,6 @@ export async function openTab(path, content, extension, name, pathContext, isNew
     pane.className = "code";
     pane.id = id;
     editorWrapper.appendChild(pane);
-
-    ace.require("ace/ext/language_tools");
-    ace.require("ace/ext/beautify");
 
     let language = Languages.get(extension)
     let languageIcon = await Languages.getIconPath(extension)

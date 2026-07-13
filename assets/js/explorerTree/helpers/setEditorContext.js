@@ -209,7 +209,7 @@ export async function setEditorContext(properties = {}, { editor, language, upda
         const goParser = new GoParser()
         const ast = await window.electron.golangAST(editor.getValue())
         const row = editor.getCursorPosition().row + 1
-        
+
         const chain = goParser.getContextChain(ast, row)
         goParser.renderContext(chain)
     }

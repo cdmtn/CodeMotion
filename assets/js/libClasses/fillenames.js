@@ -27,6 +27,13 @@ export class _Filenames {
             iconExt: "svg",
             mode: "json",
             color: "#ff2828"
+        },
+        "go.mod": {
+            name: "GO Mod File",
+            icon: "gomod",
+            iconExt: "svg",
+            mode: "go",
+            color: "#eecb80"
         }
     }
 
