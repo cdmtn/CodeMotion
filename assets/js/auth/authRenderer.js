@@ -64,7 +64,7 @@ export function unDisableButtons() {
     }
     if (emailInput) {
         emailInput.parentElement.removeAttribute("disabled", true)
-        emailInput.setAttremoveAttributeribute("disabled", true)
+        emailInput.removeAttribute("disabled", true)
     }
     if (codeInput) {
         codeInput.parentElement.removeAttribute("disabled", true)
