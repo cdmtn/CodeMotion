@@ -74,7 +74,7 @@ const codeToolsWrapper = document.querySelector("#code-tools")
 const templateChooseCodeTool = document.querySelector("#code-tools_template-choose")
 
 async function bindCodeTools({ editor, extension }) {
-    const gls = await GLS.init()
+    const gls = GLS.initLocal()
     const placeholderRegex = /%\{\{\s*([a-zA-Z0-9_-]+)\s*\}\}/gm;
     const oldInstance = TopWindowList.get("chooseTemplate")
 
@@ -813,7 +813,8 @@ export async function openTab(path, content, extension, name, pathContext, isNew
             editor: editor,
             language: language,
             updateEditorData: updateEditorData,
-            path: path
+            path: path,
+            settings: settings
         })
 
         triggerAceChanged({ editor: editor, extension: extension, language: language })
@@ -838,7 +839,8 @@ export async function openTab(path, content, extension, name, pathContext, isNew
             editor: editor,
             language: language,
             updateEditorData: updateEditorData,
-            path: path
+            path: path,
+            settings: settings
         })
     });
 
@@ -1002,7 +1004,7 @@ bus.addEventListener("on-setting-colored-tabs", (data) => {
 })
 
 async function showCloseConfirmModal(path, editor) {
-    const gls = await GLS.init();
+    const gls = GLS.initLocal();
     const fileName = path.split(/[\\/]/).pop();
 
     const modal = closeConfirmModal(
@@ -1105,12 +1107,13 @@ export function closeTab(path) {
     }
 }
 
-export function reopenLastClosed() {
+export async function reopenLastClosed() {
     if (!recentlyClosed.size) return;
-    const [path, state] = [...recentlyClosed.entries()].sort((a, b) => b[1].when - a[1].when)[0];
+    const [path, state, settings] = [...recentlyClosed.entries()].sort((a, b) => b[1].when - a[1].when)[0];
     const extension = (path.split(".").pop() || "").toLowerCase();
     const name = path.split(/[\\/]/).pop();
-    openTab(path, state.content, extension, name);
+
+    openTab(path, state.content, extension, name, path, false, settings);
 }
 
 export function activateTab(tabEl) {

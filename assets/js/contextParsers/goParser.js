@@ -10,102 +10,154 @@ export class GoParser {
     traverse(node, row, chain) {
         if (!node || typeof node !== "object") return;
 
-        if (node.loc && row >= node.loc.start.line && row <= node.loc.end.line) {
-            switch (node.type) {
-                case "FunctionDeclaration": {
-                    const name   = node.id?.name || "anonymous";
-                    const params = this.formatParams(node.params);
-                    const ret    = node.returnType ? ` → ${node.returnType}` : "";
-                    chain.push({
-                        icon:  "function",
-                        label: `${name}(${params})${ret}`,
-                        class: "function",
-                    });
-                    break;
-                }
+        const inRange = node.loc &&
+            row >= node.loc.start.line &&
+            row <= node.loc.end.line;
 
-                case "MethodDeclaration": {
-                    const name     = node.id?.name || "anonymous";
-                    const params   = this.formatParams(node.params);
-                    const ret      = node.returnType ? ` → ${node.returnType}` : "";
-                    const receiver = node.receiver ? `${node.receiver} ` : "";
-                    chain.push({
-                        icon:  "function",
-                        label: `${receiver}${name}(${params})${ret}`,
-                        class: "method",
-                    });
-                    break;
-                }
-
-                case "StructDeclaration":
-                    chain.push({
-                        icon:  "category",
-                        label: node.id?.name || "struct",
-                        class: "class",
-                    });
-                    break;
-
-                case "InterfaceDeclaration":
-                    chain.push({
-                        icon:  "contract",
-                        label: node.id?.name || "interface",
-                        class: "class",
-                    });
-                    break;
-
-                case "TypeAlias":
-                    chain.push({
-                        icon:  "data_object",
-                        label: node.id?.name || "type",
-                        class: "variable",
-                    });
-                    break;
-
-                case "VariableDeclaration": {
-                    const names = node.names ||
-                        (node.declarations || []).flatMap(d => d.names || []);
-                    if (names.length > 0) {
-                        chain.push({
-                            icon:  "data_object",
-                            label: names.join(", "),
-                            class: "variable",
-                        });
-                    }
-                    break;
-                }
-
-                case "ConstDeclaration": {
-                    const names = (node.declarations || []).flatMap(d => d.names || []);
-                    if (names.length > 0) {
-                        chain.push({
-                            icon:  "pin",
-                            label: names.join(", "),
-                            class: "variable",
-                        });
-                    }
-                    break;
-                }
-
-                case "CallExpression":
-                    if (node.calleeName) {
-                        chain.push({
-                            icon:  "deployed_code",
-                            label: node.calleeName,
-                            class: "object",
-                        });
-                    }
-                    break;
-
-                case "TypeGroup":
-                    break;
-            }
+        if (inRange) {
+            const item = this.nodeToChainItem(node, row);
+            if (item) chain.push(item);
         }
 
-        for (const key of ["body", "declarations", "methods", "fields"]) {
+        this.recurse(node, row, chain);
+    }
+
+    nodeToChainItem(node, row) {
+        switch (node.type) {
+            case "FunctionDeclaration": {
+                const params = this.formatParams(node.params);
+                const ret = node.returnType ? ` → ${node.returnType}` : "";
+                return {
+                    icon: "function",
+                    label: `${node.id?.name || "anonymous"}(${params})${ret}`,
+                    class: "function",
+                };
+            }
+
+            case "MethodDeclaration": {
+                const params = this.formatParams(node.params);
+                const ret = node.returnType ? ` → ${node.returnType}` : "";
+                const receiver = node.receiver?.typeName ? `(${node.receiver.typeName}) ` : "";
+                return {
+                    icon: "function",
+                    label: `${receiver}${node.id?.name || "anonymous"}(${params})${ret}`,
+                    class: "method",
+                };
+            }
+
+            case "StructDeclaration":
+                return {
+                    icon: "category",
+                    label: node.id?.name || "struct",
+                    class: "class",
+                };
+
+            case "StructField": {
+                const names = (node.names || []).join(", ");
+                const type = node.fieldType || "";
+                const tag = node.tag ? ` \`${node.tag}\`` : "";
+                return {
+                    icon: "data_object",
+                    label: `${names}  ${type}${tag}`,
+                    class: "variable",
+                };
+            }
+
+            case "InterfaceDeclaration":
+                return {
+                    icon: "contract",
+                    label: node.id?.name || "interface",
+                    class: "class",
+                };
+
+            case "InterfaceMethod": {
+                const params = this.formatParams(node.params);
+                const ret = node.returnType ? ` → ${node.returnType}` : "";
+                return {
+                    icon: "function",
+                    label: `${node.id?.name || ""}(${params})${ret}`,
+                    class: "method",
+                };
+            }
+
+            case "InterfaceEmbed":
+                return {
+                    icon: "input",
+                    label: node.id?.name || "",
+                    class: "class",
+                };
+
+            case "TypeAlias":
+                return {
+                    icon: "data_object",
+                    label: node.aliasFor
+                        ? `${node.id?.name} = ${node.aliasFor}`
+                        : (node.id?.name || "type"),
+                    class: "variable",
+                };
+
+            case "ShortVarDeclaration": {
+                const names = (node.names || []).join(", ");
+                const call = (node.values || []).find(v => v?.type === "CallExpression");
+                const suffix = call ? ` := ${call.calleeName}` : " :=";
+                return {
+                    icon: "data_object",
+                    label: names + suffix,
+                    class: "variable",
+                };
+            }
+
+            case "VariableDeclaration": {
+                const names = (node.names || [])
+                    .concat((node.declarations || []).flatMap(d => d.names || []));
+                if (!names.length) return null;
+                return {
+                    icon: "data_object",
+                    label: names.join(", "),
+                    class: "variable",
+                };
+            }
+
+            case "ConstDeclaration": {
+                const names = (node.declarations || []).flatMap(d => d.names || []);
+                if (!names.length) return null;
+                return {
+                    icon: "pin",
+                    label: names.join(", "),
+                    class: "variable",
+                };
+            }
+
+            case "CallExpression":
+                return node.calleeName ? {
+                    icon: "deployed_code",
+                    label: node.calleeName,
+                    class: "object",
+                } : null;
+
+            case "IfStatement":
+                return { icon: "alt_route", label: "if", class: "object" };
+
+            case "ForStatement":
+                return { icon: "loop", label: "for", class: "object" };
+
+            case "GoStatement":
+                return { icon: "rocket", label: "go " + (node.call?.calleeName || ""), class: "function" };
+
+            case "DeferStatement":
+                return { icon: "hourglass_empty", label: "defer " + (node.call?.calleeName || ""), class: "function" };
+
+            default:
+                return null;
+        }
+    }
+
+    recurse(node, row, chain) {
+        for (const key of ["body", "declarations", "methods", "fields", "values", "call"]) {
             const val = node[key];
             if (Array.isArray(val)) {
                 val.forEach(v => this.traverse(v, row, chain));
-            } else if (val && typeof val === "object" && val.type) {
+            } else if (val && typeof val === "object" && val.loc) {
                 this.traverse(val, row, chain);
             }
         }

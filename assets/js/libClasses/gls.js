@@ -7,13 +7,7 @@ export class _GLS {
         this.currentLang = currentLang
     }
 
-    static async init(language) {
-        const settings = await readSettings()
-        const baseLanguages = await window.electron.getAllLanguagesJSON()
-
-        const registry = { ...baseLanguages }
-        const currentLang = language ?? settings?.app?.language
-
+    static _create(registry, currentLang) {
         const gls = new _GLS(registry, currentLang)
 
         bus.addEventListener("extension-localization-register", (event) => {
@@ -24,6 +18,22 @@ export class _GLS {
         })
 
         return gls
+    }
+
+    static async init(language) {
+        const settings = await readSettings()
+        const baseLanguages = await window.electron.getAllLanguagesJSON()
+
+        const registry = { ...baseLanguages }
+        const currentLang = language ?? settings?.app?.language
+
+        return this._create(registry, currentLang)
+    }
+    static initLocal() {
+        const registry = JSON.parse(localStorage.getItem("gls") ?? "{}")
+        const currentLang = localStorage.getItem("gls.current")
+
+        return this._create(registry, currentLang)
     }
 
     setLanguage(lang) {

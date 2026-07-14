@@ -59,6 +59,8 @@ export async function handleSettings(settingsObject) {
             coloredTabs: document.querySelector("#setting_coloredTabs"),
             confirmCloseTab: document.querySelector("#setting_confirmCloseTab"),
             restoreFolder: document.querySelector("#setting_restoreFolder"),
+
+            goContextParser: document.querySelector("#setting_go_context_parser"),
         }
     )
 
@@ -96,6 +98,14 @@ export async function handleSettings(settingsObject) {
 
         renderIcon(`../assets/media/app-icons/${icon}`, appIconCodeNormalize, appIconCode)
     })
+    // 
+
+    // context parsers
+    settingsSelectors.goContextParser.addEventListener("click", (e) => {
+        let t = e.target
+        Setting.goContextParser(t.checked)
+    })
+
     // 
 
     settingsSelectors.coloredTabs.addEventListener("click", (e) => {
@@ -224,6 +234,8 @@ export async function handleSettings(settingsObject) {
         if("pythonRunnerMethod" in settingsObject.editor) Setting.pythonRunnerMethod(settingsObject.editor.pythonRunnerMethod, false)
         if("coloredTabs" in settingsObject.editor) Setting.coloredTabs(settingsObject.editor.coloredTabs, false)
         if("confirmCloseTab" in settingsObject.editor) Setting.confirmCloseTab(settingsObject.editor.confirmCloseTab, false)
+
+        if("goContextParser" in settingsObject.editor) Setting.goContextParser(settingsObject.editor.goContextParser, false)
     }
     if(settingsObject.ui) {
         if("useSystemFont" in settingsObject.ui) Setting.useSystemFonts(settingsObject.ui.useSystemFont, false)
@@ -421,6 +433,13 @@ export class Setting {
 
         if(set) {
             await window.electron.setSettings({ editor: { confirmCloseTab: value }})
+        }
+    }
+    static async goContextParser(value, set = true) {
+        settingsSelectors.goContextParser.checked = value
+
+        if(set) {
+            await window.electron.setSettings({ editor: { goContextParser: value }})
         }
     }
 }

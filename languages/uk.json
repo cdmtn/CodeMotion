@@ -273,6 +273,7 @@
 
             "editor": {
                 "editorLabel": "Редактор",
+                "contextsLabel": "Контексти",
 
                 "builtInPythonCausePlatformNote": "{{platformNotSupported}}. Буде використано вбудоване середовище Python",
 
@@ -293,6 +294,13 @@
                     "select": {
                         "builtIn": "Вбудований в IDE",
                         "userDefined": "Встановлений користувачем"
+                    }
+                },
+
+                "contexts": {
+                    "go": {
+                        "title": "Парсер GOLang",
+                        "description": "Чи слід GOLang парсити файл для контексту?"
                     }
                 }
             },

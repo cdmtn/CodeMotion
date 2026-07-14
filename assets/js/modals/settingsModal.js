@@ -254,6 +254,23 @@ export async function getSettingsModal({ platform }) {
                                 note: platform == "win32" ? gls.get("modals.needToReloadNote") : `${lgls("editor.builtInPythonCausePlatformNote", { platform: platform.toUpperCase() })}`
                             }
                         ]
+                    },
+                    {
+                        type: "category",
+                        label: lgls("editor.contextsLabel"),
+                        items: []
+                    },
+                    {
+                        type: "row",
+                        classList: ["background"],
+                        items: [
+                            {
+                                type: "switch",
+                                title: lgls("editor.contexts.go.title"),
+                                description: lgls("editor.contexts.go.description"),
+                                id: "setting_go_context_parser"
+                            },
+                        ]
                     }
                 ]
             }

@@ -59,6 +59,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     ace.config.set("workerPath", "../ace/src-noconflict");
 
     const gls = await GLS.init()
+    
+    localStorage.setItem("gls.current", gls.currentLang)
+    localStorage.setItem("gls", JSON.stringify(gls.registry))
 
     document.querySelectorAll("[gls]").forEach(e => {
         e.textContent = gls.get(e.getAttribute("gls"))
@@ -112,7 +115,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const fileDragDrop = new DragDrop(document.querySelector(".code-wrapper"))
     fileDragDrop.onDrop(({ content, name, extension }) => {
-        openTab(name, content, extension, name, undefined, true)
+        openTab(name, content, extension, name, undefined, true, { gls: gls })
     })
 
     // 
@@ -387,7 +390,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             tabsByPath: tabsByPath,
             recentlyClosed: recentlyClosed,
             pathContext: pathContext,
-            settings: settings
+            settings: settings,
+            gls: gls
         }
     );
 

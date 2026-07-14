@@ -277,6 +277,7 @@
 
             "editor": {
                 "editorLabel": "Редактор",
+                "contextsLabel": "Контексты",
 
                 "builtInPythonCausePlatformNote": "{{platformNotSupported}}. Будет использоваться встроенная среда Python",
 
@@ -297,6 +298,13 @@
                     "select": {
                         "builtIn": "Встроен в IDE",
                         "userDefined": "Установлен пользователем"
+                    }
+                },
+
+                "contexts": {
+                    "go": {
+                        "title": "Парсер GOLang",
+                        "description": "Парсить ли GOLang файл для контекста?"
                     }
                 }
             },

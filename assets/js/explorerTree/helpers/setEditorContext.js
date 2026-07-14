@@ -4,7 +4,7 @@ import { JSONParser } from "../../contextParsers/jsonParser.js"
 import { HTMLParser } from "../../contextParsers/htmlParser.js"
 import { CSSParser } from "../../contextParsers/cssParser.js"
 
-import { addRuntimeError } from "../../lib.js"
+import { addRuntimeError, GLS } from "../../lib.js"
 import { GoParser } from "../../contextParsers/goParser.js"
 
 const errors = new Map()
@@ -77,151 +77,156 @@ function clearErrors({ editor }) {
     editor.renderer.updateFull()
 }
 
-export async function setEditorContext(properties = {}, { editor, language, updateEditorData, path }) {
+export async function setEditorContext(properties = {}, { editor, language, updateEditorData, path, settings }) {
+    const gls = GLS.initLocal()
     const isErrorsUpdate = properties.errorsUpdate !== false
-
-    updateEditorData()
 
     clearTimeout(diagnosticTimer)
     const currentGen = ++generation
 
-    if (language.mode === "javascript") {
-        editor.getSession().setUseWorker(false)
+    const contextMap = {
+        javascript: async () => {
+            editor.getSession().setUseWorker(false)
 
-        diagnosticTimer = setTimeout(async () => {
-            const diagnostics = await window.electron.javascriptDiagnostic(editor.getValue())
+            diagnosticTimer = setTimeout(async () => {
+                const diagnostics = await window.electron.javascriptDiagnostic(editor.getValue())
 
-            if (currentGen !== generation) return
-            if (!isErrorsUpdate) return
+                if (currentGen !== generation) return
+                if (!isErrorsUpdate) return
 
-            clearErrors({
-                editor: editor
-            })
-
-            diagnostics.forEach(item => {
-                const range = new aceRange(
-                    item.line - 1,
-                    item.col,
-                    item.line - 1,
-                    999
-                )
-
-                errors.set(makeErrorKey(item, path), {
-                    range,
-                    annotation: {
-                        row: item.line - 1,
-                        column: item.col,
-                        text: item.message,
-                        type: "error"
-                    },
-                    markerId: null
+                clearErrors({
+                    editor: editor
                 })
 
-                addRuntimeError({
-                    msg: item.message,
-                    line: item.line,
-                    col: item.col,
-                    time: Math.floor(Date.now() / 1000)
-                })
-            })
+                diagnostics.forEach(item => {
+                    const range = new aceRange(
+                        item.line - 1,
+                        item.col,
+                        item.line - 1,
+                        999
+                    )
 
-            renderErrors({ editor: editor })
-        }, 500)
+                    errors.set(makeErrorKey(item, path), {
+                        range,
+                        annotation: {
+                            row: item.line - 1,
+                            column: item.col,
+                            text: item.message,
+                            type: "error"
+                        },
+                        markerId: null
+                    })
 
-        const jsParser = new JavascriptParser()
-        const ast = await window.electron.javascriptAST(editor.getValue())
-        const row = editor.getCursorPosition().row + 1
-
-        const chain = jsParser.getContextChain(ast, row)
-        jsParser.renderContext(chain)
-    }
-
-    else if (language.mode === "typescript") {
-        editor.getSession().setUseWorker(false)
-
-        diagnosticTimer = setTimeout(async () => {
-            const diagnostics = await window.electron.typescriptDiagnostic(editor.getValue())
-
-            if (currentGen !== generation) return
-            if (!isErrorsUpdate) return
-
-            clearErrors({
-                editor: editor
-            })
-
-            diagnostics.forEach(item => {
-                const range = new aceRange(
-                    item.line - 1,
-                    item.col,
-                    item.line - 1,
-                    999
-                )
-
-                errors.set(makeErrorKey(item, path), {
-                    range,
-                    annotation: {
-                        row: item.line - 1,
-                        column: item.col,
-                        text: item.message,
-                        type: "error"
-                    },
-                    markerId: null
+                    addRuntimeError({
+                        msg: item.message,
+                        line: item.line,
+                        col: item.col,
+                        time: Math.floor(Date.now() / 1000)
+                    })
                 })
 
-                addRuntimeError({
-                    msg: item.message,
-                    line: item.line,
-                    col: item.col,
-                    time: Math.floor(Date.now() / 1000)
+                renderErrors({ editor: editor })
+            }, 500)
+
+            const jsParser = new JavascriptParser()
+            const ast = await window.electron.javascriptAST(editor.getValue())
+            const row = editor.getCursorPosition().row + 1
+
+            const chain = jsParser.getContextChain(ast, row)
+            jsParser.renderContext(chain)
+        },
+        typescript: async () => {
+            editor.getSession().setUseWorker(false)
+
+            diagnosticTimer = setTimeout(async () => {
+                const diagnostics = await window.electron.typescriptDiagnostic(editor.getValue())
+
+                if (currentGen !== generation) return
+                if (!isErrorsUpdate) return
+
+                clearErrors({
+                    editor: editor
                 })
-            })
 
-            renderErrors({ editor: editor })
-        }, 500)
+                diagnostics.forEach(item => {
+                    const range = new aceRange(
+                        item.line - 1,
+                        item.col,
+                        item.line - 1,
+                        999
+                    )
 
-        const tsParser = new TypescriptParser()
-        const ast = await window.electron.typescriptAST(editor.getValue())
-        const row = editor.getCursorPosition().row + 1
+                    errors.set(makeErrorKey(item, path), {
+                        range,
+                        annotation: {
+                            row: item.line - 1,
+                            column: item.col,
+                            text: item.message,
+                            type: "error"
+                        },
+                        markerId: null
+                    })
 
-        const chain = tsParser.getContextChain(ast, row)
-        tsParser.renderContext(chain)
+                    addRuntimeError({
+                        msg: item.message,
+                        line: item.line,
+                        col: item.col,
+                        time: Math.floor(Date.now() / 1000)
+                    })
+                })
+
+                renderErrors({ editor: editor })
+            }, 500)
+
+            const tsParser = new TypescriptParser()
+            const ast = await window.electron.typescriptAST(editor.getValue())
+            const row = editor.getCursorPosition().row + 1
+
+            const chain = tsParser.getContextChain(ast, row)
+            tsParser.renderContext(chain)
+        },
+        json: () => {
+            const jsonParser = new JSONParser()
+            jsonParser.showJSONContext(editor, document.querySelector(".code-structure"))
+        },
+        html: () => {
+            const htmlParser = new HTMLParser()
+            htmlParser.showHTMLContext(editor, document.querySelector(".code-structure"))
+        },
+        css: () => {
+            const cssParser = new CSSParser()
+            const row = editor.getCursorPosition().row + 1
+
+            const chain = cssParser.getContextChain(editor.getValue(), row)
+            cssParser.renderContext(chain) 
+        },
+        golang: async () => {
+            const goParser = new GoParser()
+            const ast = await window.electron.golangAST(editor.getValue())
+            const row = editor.getCursorPosition().row + 1
+
+            const chain = goParser.getContextChain(ast, row)
+            goParser.renderContext(chain)
+        }
     }
 
-    else if (language.mode === "json") {
-        const jsonParser = new JSONParser()
-        jsonParser.showJSONContext(editor, document.querySelector(".code-structure"))
+    if("editor" in settings) {
+        if("goContextParser" in settings.editor && settings.editor.goContextParser == false) {
+            delete contextMap["golang"]
+        }
     }
 
-    else if (language.mode === "html") {
-        const htmlParser = new HTMLParser()
-        htmlParser.showHTMLContext(editor, document.querySelector(".code-structure"))
+    updateEditorData()
+
+    if(language.mode in contextMap) {
+        contextMap[language.mode]()
     }
-
-    else if (language.mode === "css") {
-        const cssParser = new CSSParser()
-        const row = editor.getCursorPosition().row + 1
-
-        const chain = cssParser.getContextChain(editor.getValue(), row)
-        cssParser.renderContext(chain)
-    }
-
-    else if (language.mode === "golang") {
-        const goParser = new GoParser()
-        const ast = await window.electron.golangAST(editor.getValue())
-        const row = editor.getCursorPosition().row + 1
-
-        const chain = goParser.getContextChain(ast, row)
-        goParser.renderContext(chain)
-    }
-
     else {
         editor.getSession().setUseWorker(true)
 
         const codeStructure = document.querySelector(".code-structure")
         if (codeStructure) {
-            codeStructure.textContent = `Context unavailable for ${language.name}`
+            codeStructure.textContent = gls.get("editor.nocontextFor", { name: language.name })
         }
     }
-
-    console.log(language.mode)
 }

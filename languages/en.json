@@ -131,7 +131,8 @@
     },
 
     "editor": {
-        "nocontext": "Context unavailable"
+        "nocontext": "Context unavailable",
+        "nocontextFor": "Context unavailable for %{name}"
     },
 
     "explorer": {
@@ -300,6 +301,7 @@
 
             "editor": {
                 "editorLabel": "Editor",
+                "contextsLabel": "Contexts",
 
                 "builtInPythonCausePlatformNote": "{{platformNotSupported}}. Built-in Python environment will be used",
 
@@ -320,6 +322,13 @@
                     "select": {
                         "builtIn": "Built into IDE",
                         "userDefined": "User installed"
+                    }
+                },
+
+                "contexts": {
+                    "go": {
+                        "title": "GOLang Context Parser",
+                        "description": "Should the context parser be enabled for GO?"
                     }
                 }
             },
