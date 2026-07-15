@@ -40,13 +40,14 @@ function ensureMenu() {
     menuEl.classList.add("context-menu", "hidden", "explorer-context-menu");
     document.body.appendChild(menuEl);
 
+    menuEl.addEventListener("contextmenu", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+    });
+
     document.addEventListener("click", hideMenu);
     document.addEventListener("keydown", (event) => {
         if (event.key === "Escape") hideMenu();
-    });
-    menuEl.addEventListener("contextmenu", (event) => {
-        event.preventDefault();
-        hideMenu();
     });
     window.addEventListener("blur", hideMenu);
 
@@ -54,16 +55,27 @@ function ensureMenu() {
 }
 
 function hideMenu() {
-    menuEl?.classList.add("hidden");
+    if (!menuEl || menuEl.classList.contains("hidden")) return;
+    menuEl.classList.add("closing");
+    const onEnd = () => {
+        menuEl.removeEventListener("transitionend", onEnd);
+        if (menuEl.classList.contains("closing")) {
+            menuEl.classList.add("hidden");
+        }
+    };
+    menuEl.addEventListener("transitionend", onEnd);
 }
 
-function addItem({ content, shortcut, disabled, action }) {
+function addItem({ content, shortcut, disabled, action, icon }) {
     const item = document.createElement("div");
     item.classList.add("context-menu__item");
     if (disabled) item.classList.add("disabled");
 
+    const iconHTML = icon ? `<span class="material-symbols-rounded">${icon}</span>` : "";
+
     item.innerHTML = `
-        <div class="context-menu__item-block no-icon">
+        <div class="context-menu__item-block ${icon ? "" : "no-icon"}">
+            ${iconHTML}
             <div class="content">${content}</div>
         </div>
         <div class="context-menu__item-block">
@@ -92,6 +104,10 @@ function showMenu(event, items) {
     const menu = ensureMenu();
     menu.innerHTML = "";
 
+    document.querySelectorAll(".context-menu").forEach(m => {
+        if (m !== menu) m.classList.add("hidden");
+    });
+
     for (const item of items) {
         if (item.type === "divider") {
             addDivider();
@@ -100,7 +116,13 @@ function showMenu(event, items) {
         }
     }
 
+    const wasHidden = menu.classList.contains("hidden");
     menu.classList.remove("hidden");
+    if (wasHidden) {
+        menu.classList.add("closing");
+        void menu.offsetWidth;
+        menu.classList.remove("closing");
+    }
 
     const edgeGap = 8;
     const maxLeft = window.innerWidth - menu.offsetWidth - edgeGap;
@@ -346,22 +368,22 @@ function fileItems(fileEl, context) {
     const targetDirPath = parentDirElement?.dataset.path || getDirname(filePath);
 
     return [
-        { content: "New File...", action: () => startCreateChild("file", targetDirPath, context, parentDirElement) },
-        { content: "New Folder...", action: () => startCreateChild("folder", targetDirPath, context, parentDirElement) },
+        { content: "New File...", icon: "note_add", action: () => startCreateChild("file", targetDirPath, context, parentDirElement) },
+        { content: "New Folder...", icon: "create_new_folder", action: () => startCreateChild("folder", targetDirPath, context, parentDirElement) },
         { type: "divider" },
-        { content: "Open With...", disabled: true },
-        { content: "Reveal in File Explorer", shortcut: "Shift+Alt+R", action: () => window.electron.revealInFileExplorer(filePath) },
-        { content: "Open in Integrated Terminal", action: () => openTerminal(filePath, false) },
+        { content: "Open With...", icon: "open_in_new", disabled: true },
+        { content: "Reveal in File Explorer", icon: "folder_open", shortcut: "Shift+Alt+R", action: () => window.electron.revealInFileExplorer(filePath) },
+        { content: "Open in Integrated Terminal", icon: "terminal", action: () => openTerminal(filePath, false) },
         { type: "divider" },
-        { content: "Cut", shortcut: "Ctrl+X", disabled: true },
-        { content: "Copy", shortcut: "Ctrl+C", disabled: true },
-        { content: "Paste", shortcut: "Ctrl+V", disabled: true },
+        { content: "Cut", icon: "content_cut", shortcut: "Ctrl+X", disabled: true },
+        { content: "Copy", icon: "content_copy", shortcut: "Ctrl+C", disabled: true },
+        { content: "Paste", icon: "content_paste", shortcut: "Ctrl+V", disabled: true },
         { type: "divider" },
-        { content: "Copy Path", shortcut: "Shift+Alt+C", action: () => copyText(filePath) },
-        { content: "Copy Relative Path", shortcut: "Ctrl+K Ctrl+Shift+C", action: () => copyText(relativePath(filePath, context.pathContext)) },
+        { content: "Copy Path", icon: "content_copy", shortcut: "Shift+Alt+C", action: () => copyText(filePath) },
+        { content: "Copy Relative Path", icon: "content_copy", shortcut: "Ctrl+K Ctrl+Shift+C", action: () => copyText(relativePath(filePath, context.pathContext)) },
         { type: "divider" },
-        { content: "Rename...", shortcut: "F2", action: () => renameTarget(filePath, fileEl) },
-        { content: "Delete", shortcut: "Delete", action: () => deleteTarget(filePath, fileEl, context) }
+        { content: "Rename...", icon: "edit", shortcut: "F2", action: () => renameTarget(filePath, fileEl) },
+        { content: "Delete", icon: "delete", shortcut: "Delete", action: () => deleteTarget(filePath, fileEl, context) }
     ];
 }
 
@@ -369,21 +391,21 @@ function folderItems(dirElement, context) {
     const dirPath = dirElement.dataset.path;
 
     return [
-        { content: "New File...", action: () => startCreateChild("file", dirPath, context, dirElement) },
-        { content: "New Folder...", action: () => startCreateChild("folder", dirPath, context, dirElement) },
-        { content: "Reveal in File Explorer", shortcut: "Shift+Alt+R", action: () => window.electron.revealInFileExplorer(dirPath) },
-        { content: "Open in Integrated Terminal", action: () => openTerminal(dirPath, true) },
+        { content: "New File...", icon: "note_add", action: () => startCreateChild("file", dirPath, context, dirElement) },
+        { content: "New Folder...", icon: "create_new_folder", action: () => startCreateChild("folder", dirPath, context, dirElement) },
+        { content: "Reveal in File Explorer", icon: "folder_open", shortcut: "Shift+Alt+R", action: () => window.electron.revealInFileExplorer(dirPath) },
+        { content: "Open in Integrated Terminal", icon: "terminal", action: () => openTerminal(dirPath, true) },
         { type: "divider" },
-        { content: "Find in Folder...", shortcut: "Shift+Alt+F", disabled: true },
+        { content: "Find in Folder...", icon: "search", shortcut: "Shift+Alt+F", disabled: true },
         { type: "divider" },
-        { content: "Cut", shortcut: "Ctrl+X", disabled: true },
-        { content: "Copy", shortcut: "Ctrl+C", disabled: true },
+        { content: "Cut", icon: "content_cut", shortcut: "Ctrl+X", disabled: true },
+        { content: "Copy", icon: "content_copy", shortcut: "Ctrl+C", disabled: true },
         { type: "divider" },
-        { content: "Copy Path", shortcut: "Shift+Alt+C", action: () => copyText(dirPath) },
-        { content: "Copy Relative Path", shortcut: "Ctrl+K Ctrl+Shift+C", action: () => copyText(relativePath(dirPath, context.pathContext)) },
+        { content: "Copy Path", icon: "content_copy", shortcut: "Shift+Alt+C", action: () => copyText(dirPath) },
+        { content: "Copy Relative Path", icon: "content_copy", shortcut: "Ctrl+K Ctrl+Shift+C", action: () => copyText(relativePath(dirPath, context.pathContext)) },
         { type: "divider" },
-        { content: "Rename...", shortcut: "F2", action: () => renameTarget(dirPath, dirElement) },
-        { content: "Delete", shortcut: "Delete", action: () => deleteTarget(dirPath, dirElement, context) }
+        { content: "Rename...", icon: "edit", shortcut: "F2", action: () => renameTarget(dirPath, dirElement) },
+        { content: "Delete", icon: "delete", shortcut: "Delete", action: () => deleteTarget(dirPath, dirElement, context) }
     ];
 }
 
@@ -391,13 +413,13 @@ function rootItems(context) {
     const rootPath = context.pathContext?.rootPath;
 
     return [
-        { content: "New File...", action: () => startCreateChild("file", rootPath, context) },
-        { content: "New Folder...", action: () => startCreateChild("folder", rootPath, context) },
+        { content: "New File...", icon: "note_add", action: () => startCreateChild("file", rootPath, context) },
+        { content: "New Folder...", icon: "create_new_folder", action: () => startCreateChild("folder", rootPath, context) },
         { type: "divider" },
-        { content: "Reveal in File Explorer", shortcut: "Shift+Alt+R", action: () => window.electron.revealInFileExplorer(rootPath) },
-        { content: "Open in Integrated Terminal", action: () => openTerminal(rootPath, true) },
+        { content: "Reveal in File Explorer", icon: "folder_open", shortcut: "Shift+Alt+R", action: () => window.electron.revealInFileExplorer(rootPath) },
+        { content: "Open in Integrated Terminal", icon: "terminal", action: () => openTerminal(rootPath, true) },
         { type: "divider" },
-        { content: "Copy Path", shortcut: "Shift+Alt+C", action: () => copyText(rootPath) }
+        { content: "Copy Path", icon: "content_copy", shortcut: "Shift+Alt+C", action: () => copyText(rootPath) }
     ];
 }
 
@@ -490,5 +512,11 @@ export function initializeExplorerContextMenu(container, context) {
     };
 
     container._explorerContextMenuHandler = handler;
-    container.addEventListener("contextmenu", handler);
+    container.addEventListener("mousedown", (event) => {
+        if (event.button !== 2) return;
+        handler(event);
+    });
+    container.addEventListener("contextmenu", (event) => {
+        event.preventDefault();
+    });
 }

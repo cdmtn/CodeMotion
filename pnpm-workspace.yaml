@@ -1,0 +1,5 @@
+allowBuilds:
+  electron: true
+  electron-winstaller: true
+  tree-sitter: true
+  tree-sitter-go: true

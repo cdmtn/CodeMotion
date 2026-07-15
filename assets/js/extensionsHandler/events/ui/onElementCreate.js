@@ -23,7 +23,7 @@ export function onElementCreate(data) {
         wrapper.classList.add("extension-elements__wrapper")
         wrapper.id = context
 
-        document.body.prepend(wrapper)
+        document.body.appendChild(wrapper)
 
         apply(wrapper)
     }

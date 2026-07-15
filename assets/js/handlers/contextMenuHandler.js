@@ -7,9 +7,12 @@ export class ContextMenu {
         context.id = idify(id)
         this.context = context
 
-        document.body.appendChild(context)
+        context.addEventListener("contextmenu", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
 
-        console.log(document.body)
+        document.body.appendChild(context)
 
         if(Object.keys(elements).length == 0) {
             Object.keys(elements).forEach(el => {
@@ -71,8 +74,36 @@ export class ContextMenu {
         this.context.appendChild(item)
 
         item.addEventListener("click", () => {
+            this._hide()
             func()
         })
+    }
+
+    _show(x, y) {
+        const menuW = this.context.offsetWidth || 250;
+        const menuH = this.context.offsetHeight || 300;
+        if (x + menuW > window.innerWidth) x = window.innerWidth - menuW - 5;
+        if (y + menuH > window.innerHeight) y = window.innerHeight - menuH - 5;
+        this.context.style.left = x + "px";
+        this.context.style.top = y + "px";
+        if (this.context.classList.contains("hidden")) {
+            this.context.classList.add("closing");
+            this.context.classList.remove("hidden");
+            void this.context.offsetWidth;
+            this.context.classList.remove("closing");
+        }
+    }
+
+    _hide() {
+        if (this.context.classList.contains("hidden")) return;
+        this.context.classList.add("closing");
+        const onEnd = () => {
+            this.context.removeEventListener("transitionend", onEnd);
+            if (this.context.classList.contains("closing")) {
+                this.context.classList.add("hidden");
+            }
+        };
+        this.context.addEventListener("transitionend", onEnd);
     }
 
     bindOn(scope) {
@@ -80,18 +111,52 @@ export class ContextMenu {
             this.scope = scope
             scope.addEventListener("contextmenu", (e) => {
                 e.preventDefault();
-                
-                this.context.style.left = e.clientX + "px";
-                this.context.style.top = e.clientY + "px";
-
-                setTimeout(() => {
-                    this.context.classList.remove("hidden")
-                }, 100)
+                this._show(e.clientX, e.clientY);
             });
 
             document.addEventListener("click", () => {
-                this.context.classList.add("hidden")
+                this._hide();
             });
         }
+    }
+
+    bindOnEditor(editor, editorContainer) {
+        this.scope = editorContainer;
+
+        this._showMenu = (x, y) => {
+            document.querySelectorAll(".context-menu").forEach(m => {
+                if (m !== this.context) m.classList.add("hidden");
+            });
+            this._show(x, y);
+        };
+
+        this._onDocMouseDown = (e) => {
+            if (e.button !== 2) return;
+            if (!editorContainer.contains(e.target)) return;
+            e.preventDefault();
+            this._showMenu(e.clientX, e.clientY);
+        };
+        document.addEventListener("mousedown", this._onDocMouseDown);
+
+        this._onNativeCtx = (e) => {
+            const domEvent = e.domEvent || e;
+            domEvent.preventDefault();
+        };
+        editor.on("nativecontextmenu", this._onNativeCtx);
+
+        this._onDocClick = (e) => {
+            if (e.button !== 0) return;
+            if (!this.context.contains(e.target)) {
+                this._hide();
+            }
+        };
+        document.addEventListener("mousedown", this._onDocClick);
+
+        this._onKey = (e) => {
+            if (e.key === "Escape") {
+                this._hide();
+            }
+        };
+        document.addEventListener("keydown", this._onKey);
     }
 }

@@ -1,32 +1,29 @@
 import { ContextMenu } from "./handlers/contextMenuHandler.js"
 import { normalizePath, parseTwemojiString, copyText } from "./lib.js"
 
-function isPathCommentIsCurrent(currentPath, commentPath) {
-    currentPath = normalizePath(currentPath)
-    commentPath = normalizePath(commentPath)
-
-    return currentPath.endsWith(commentPath)
-}
-
 let currentCodeContextMenu = null;
+let currentEditor = null;
 
 export function destroyCodeContextMenu() {
     if (currentCodeContextMenu) {
+        if (currentEditor && currentCodeContextMenu._onNativeCtx) {
+            currentEditor.off("nativecontextmenu", currentCodeContextMenu._onNativeCtx);
+        }
+        if (currentCodeContextMenu._onDocMouseDown) {
+            document.removeEventListener("mousedown", currentCodeContextMenu._onDocMouseDown);
+        }
+        if (currentCodeContextMenu._onDocClick) {
+            document.removeEventListener("mousedown", currentCodeContextMenu._onDocClick);
+        }
+        if (currentCodeContextMenu._onKey) {
+            document.removeEventListener("keydown", currentCodeContextMenu._onKey);
+        }
         if (currentCodeContextMenu.context && currentCodeContextMenu.context.parentNode) {
             currentCodeContextMenu.context.parentNode.removeChild(currentCodeContextMenu.context);
         }
-        if (currentCodeContextMenu.scope) {
-            currentCodeContextMenu.scope = null;
-        }
         currentCodeContextMenu = null;
+        currentEditor = null;
     }
-    
-    const allContextMenus = document.querySelectorAll(".context-menu:not(.hidden)");
-    allContextMenus.forEach(menu => {
-        if (menu.parentNode) {
-            menu.parentNode.removeChild(menu);
-        }
-    });
 }
 
 export async function initCodeContextMenu(currentPath, pathContext, editor) {
@@ -35,21 +32,84 @@ export async function initCodeContextMenu(currentPath, pathContext, editor) {
     const uniqueMenuId = "codeContextMenu_" + Math.random().toString(36).substr(2, 9);
     const codeContextMenu = new ContextMenu(uniqueMenuId)
     currentCodeContextMenu = codeContextMenu;
+    currentEditor = editor;
 
-    codeContextMenu.bindOn(editor.container)
+    codeContextMenu.bindOnEditor(editor, editor.container)
 
     codeContextMenu.add({
-        id: "copyLine", icon: "content_copy", content: "Copy line", shortcut: "Ctrl+C", func: () => {
-            let currentLine = editor.getSelectionRange().start.row
-            copyText(editor.session.getLine(currentLine))
+        id: "cut", icon: "content_cut", content: "Cut", shortcut: "Ctrl+X", func: () => {
+            const selected = editor.getSelectedText();
+            if (selected) {
+                copyText(selected);
+                editor.session.replace(editor.getSelectionRange(), "");
+            } else {
+                const row = editor.getCursorPosition().row;
+                copyText(editor.session.getLine(row));
+                editor.session.removeFullLines(row, row);
+            }
         }
     })
     codeContextMenu.add({
-        id: "copyAll", icon: "copy_all", content: "Copy all content", func: () => {
-            copyText(editor.getValue())
+        id: "copy", icon: "content_copy", content: "Copy", shortcut: "Ctrl+C", func: () => {
+            const selected = editor.getSelectedText();
+            if (selected) {
+                copyText(selected);
+            } else {
+                copyText(editor.session.getLine(editor.getCursorPosition().row));
+            }
+        }
+    })
+    codeContextMenu.add({
+        id: "paste", icon: "content_paste", content: "Paste", shortcut: "Ctrl+V", func: () => {
+            editor.commands.byName.paste.exec(editor);
         }
     })
     codeContextMenu.add({ type: "divider" })
 
-    codeContextMenu.on("open", (data) => { console.log(data.element) })
+    codeContextMenu.add({
+        id: "selectAll", icon: "select_all", content: "Select All", shortcut: "Ctrl+A", func: () => {
+            editor.selectAll();
+        }
+    })
+    codeContextMenu.add({
+        id: "duplicateLine", icon: "content_copy", content: "Duplicate Selection", shortcut: "Ctrl+Shift+D", func: () => {
+            editor.duplicateSelection();
+        }
+    })
+    codeContextMenu.add({
+        id: "deleteLine", icon: "delete", content: "Delete Line", shortcut: "Ctrl+D", func: () => {
+            editor.removeLines();
+        }
+    })
+    codeContextMenu.add({ type: "divider" })
+
+    codeContextMenu.add({
+        id: "undo", icon: "undo", content: "Undo", shortcut: "Ctrl+Z", func: () => {
+            editor.undo();
+        }
+    })
+    codeContextMenu.add({
+        id: "redo", icon: "redo", content: "Redo", shortcut: "Ctrl+Shift+Z", func: () => {
+            editor.redo();
+        }
+    })
+    codeContextMenu.add({ type: "divider" })
+
+    codeContextMenu.add({
+        id: "find", icon: "search", content: "Find", shortcut: "Ctrl+F", func: () => {
+            editor.commands.byName.find.exec(editor);
+        }
+    })
+    codeContextMenu.add({
+        id: "goToLine", icon: "tag", content: "Go to Line...", shortcut: "Ctrl+G", func: () => {
+            editor.commands.byName.gotoLine.exec(editor);
+        }
+    })
+    codeContextMenu.add({ type: "divider" })
+
+    codeContextMenu.add({
+        id: "toggleComment", icon: "code", content: "Toggle Comment", shortcut: "Ctrl+/", func: () => {
+            editor.toggleCommentLines();
+        }
+    })
 }
