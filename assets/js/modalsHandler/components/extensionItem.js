@@ -1,5 +1,5 @@
 import { generateAvatar, changeTagName } from "../../lib.js"
-import { valid } from "../engine.js"
+import { valid, validArray } from "../engine.js"
 
 export function renderExtensionItem(properties = {}) {
     const title = properties.title
@@ -78,9 +78,12 @@ export function renderExtensionItem(properties = {}) {
         buttons.forEach(btn => {
             const icon = valid(btn.icon) ?? "close"
             const callback = valid(btn.onclick) ?? false
+            const btnClassList = validArray(btn.classList) ?? []
 
             const btnEl = document.createElement("button")
             btnEl.classList.add("modal-extension__item-btn")
+
+            if(btnClassList.length > 0) btnEl.classList.add(...btnClassList)
             
             const btnIconEl = document.createElement("span")
             btnIconEl.classList.add("material-symbols-rounded")
@@ -89,11 +92,13 @@ export function renderExtensionItem(properties = {}) {
             btnEl.appendChild(btnIconEl)
 
             btnEl.addEventListener("click", () => {
-                callback(
-                    {
-                        element: wrapper
-                    }
-                )
+                if(typeof callback === "function") {
+                    callback(
+                        {
+                            element: wrapper
+                        }
+                    )
+                }
             })
 
             btnWrapper.appendChild(btnEl)

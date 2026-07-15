@@ -7,6 +7,7 @@ export function renderButton(properties = {}) {
     const container = properties.container
     const element = properties.element
     const btnClass = properties.class
+    const onclick = properties.onclick
 
     const button = document.createElement("button")
     button.id = id
@@ -16,6 +17,10 @@ export function renderButton(properties = {}) {
     if(classes.includes(btnClass)) button.classList.add(btnClass)
 
     if(!title) button.textContent = id
+
+    if(onclick && typeof onclick === "function") {
+        button.addEventListener("click", onclick)
+    }
 
     if(!container) {
         return button

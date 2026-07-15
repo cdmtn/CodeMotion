@@ -267,6 +267,7 @@ function contentItemsHandler(element, itemsData) {
             const title = valid(item.title) ?? false
             const container = valid(item.container) ?? false
             const btnClass = valid(item.class) ?? "default"
+            const onclick = valid(item.onclick) ?? false
 
             const buttonElement = renderButton(
                 {
@@ -274,7 +275,8 @@ function contentItemsHandler(element, itemsData) {
                     title: title,
                     container: container,
                     element: element,
-                    class: btnClass
+                    class: btnClass,
+                    onclick: onclick
                 }
             )
 
@@ -285,11 +287,13 @@ function contentItemsHandler(element, itemsData) {
         if (type == "container") {
             const id = valid(item.id) ?? false
             const classList = validArray(item.classList) ?? []
+            const html = valid(item.html) ?? false
 
             const containerElement = renderContainer(
                 {
                     id: id,
-                    classList: classList
+                    classList: classList,
+                    html: html
                 }
             )
 

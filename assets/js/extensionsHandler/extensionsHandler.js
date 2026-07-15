@@ -5,6 +5,7 @@ import { Modal } from "../modalsHandler/engine.js"
 import { bus } from "../bus.js"
 
 const installedExtensionModalData = []
+const extensionErrors = {}
 
 function checkPackage(object) {
     if (!object || Object.keys(object).length === 0) {
@@ -90,6 +91,21 @@ export async function initExtensions() {
         if (!extensionRequest.success) {
             notifyError({ name: name, content: extensionRequest.result })
             sendDebugError(`(Extension) ${name}: load error. ${extensionRequest.result}`)
+            if (!extensionErrors[name]) extensionErrors[name] = []
+            extensionErrors[name].push(extensionRequest.result)
+
+            installedExtensionModalData.push(
+                createInstalledExtensionsModalTemplate({
+                    title: name,
+                    subtitle: "Failed to load",
+                    description: "This extension could not be loaded.",
+                    image: name,
+                    permissions: new Set(),
+                    path: "",
+                    extensionName: name
+                })
+            )
+            continue
         }
 
         let extensionFinalContent = ""
@@ -102,6 +118,21 @@ export async function initExtensions() {
         if (!extensionPackageCheck.success) {
             notifyError({ name: name, content: extensionPackageCheck.msg })
             sendDebugError(`(Extension) ${name}: package.json error. ${extensionPackageCheck.msg}`)
+            if (!extensionErrors[name]) extensionErrors[name] = []
+            extensionErrors[name].push(extensionPackageCheck.msg)
+
+            installedExtensionModalData.push(
+                createInstalledExtensionsModalTemplate({
+                    title: name,
+                    subtitle: "Failed to load",
+                    description: "This extension has an invalid configuration.",
+                    image: name,
+                    permissions: new Set(),
+                    path: extensionPath,
+                    extensionName: name
+                })
+            )
+            continue
         }
 
         let version = extensionPackage.version
@@ -288,7 +319,82 @@ export async function initExtensions() {
     renderExtensionsModal(installedExtensionModalData)
 }
 
-function createInstalledExtensionsModalTemplate({ title, subtitle, description, image, permissions, path }) {
+function showExtensionErrors(extensionName) {
+    const errors = extensionErrors[extensionName] || []
+    if (errors.length === 0) return
+
+    const existing = document.getElementById("extensionErrorsPopup")
+    if (existing) existing.remove()
+
+    const wrapper = document.createElement("div")
+    wrapper.id = "extensionErrorsPopup"
+    wrapper.style.cssText = "position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.4);backdrop-filter:blur(4px);animation:fadeIn .15s ease"
+
+    const modal = document.createElement("div")
+    modal.className = "modal confirm"
+    modal.style.cssText = "background:var(--body-color);color:var(--text-color);position:relative;border-radius:15px;overflow:hidden;border:1px solid var(--block-divider-border-color);width:400px;height:auto;min-height:160px;max-height:350px;display:flex;flex-direction:column"
+
+    const body = document.createElement("div")
+    body.style.cssText = "flex:1;overflow-y:auto;padding:20px;padding-bottom:0"
+
+    const title = document.createElement("div")
+    title.className = "confirm-title"
+    title.textContent = `Errors — ${extensionName}`
+
+    const desc = document.createElement("div")
+    desc.className = "confirm-desc"
+
+    const errorList = document.createElement("div")
+    errorList.style.cssText = "margin-top:8px;display:flex;flex-direction:column;gap:6px"
+
+    errors.forEach((err, i) => {
+        const item = document.createElement("div")
+        item.className = "extension-error-item"
+        item.textContent = `${i + 1}. ${err}`
+        errorList.appendChild(item)
+    })
+
+    desc.appendChild(errorList)
+    body.appendChild(title)
+    body.appendChild(desc)
+
+    const btnWrapper = document.createElement("div")
+    btnWrapper.style.cssText = "display:flex;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid var(--block-divider-border-color)"
+
+    const btnStyle = "background:var(--block-divider-border-color);border:none;color:var(--text-color);padding:8px 12px;border-radius:5px;transition:.2s;cursor:pointer;font-family:inherit;font-size:13px"
+
+    const copyBtn = document.createElement("button")
+    copyBtn.textContent = "Copy"
+    copyBtn.style.cssText = btnStyle
+    copyBtn.addEventListener("click", () => {
+        navigator.clipboard.writeText(errors.join("\n"))
+        createNotify({ type: "success", icon: "check", title: "Errors copied to clipboard" })
+    })
+    copyBtn.addEventListener("mouseenter", () => { copyBtn.style.opacity = ".5" })
+    copyBtn.addEventListener("mouseleave", () => { copyBtn.style.opacity = "1" })
+
+    const closeBtn = document.createElement("button")
+    closeBtn.textContent = "Close"
+    closeBtn.style.cssText = btnStyle
+    closeBtn.addEventListener("click", () => wrapper.remove())
+    closeBtn.addEventListener("mouseenter", () => { closeBtn.style.opacity = ".5" })
+    closeBtn.addEventListener("mouseleave", () => { closeBtn.style.opacity = "1" })
+
+    btnWrapper.appendChild(copyBtn)
+    btnWrapper.appendChild(closeBtn)
+
+    modal.appendChild(body)
+    modal.appendChild(btnWrapper)
+    wrapper.appendChild(modal)
+
+    wrapper.addEventListener("click", (e) => {
+        if (e.target === wrapper) wrapper.remove()
+    })
+
+    document.body.appendChild(wrapper)
+}
+
+function createInstalledExtensionsModalTemplate({ title, subtitle, description, image, permissions, path, extensionName }) {
     const tags = []
 
     for (const p of permissions) {
@@ -298,6 +404,26 @@ function createInstalledExtensionsModalTemplate({ title, subtitle, description, 
         })
     }
 
+    const buttons = []
+
+    if (extensionName && extensionErrors[extensionName]) {
+        buttons.push({
+            icon: "error",
+            classList: ["text-danger"],
+            onclick: () => {
+                showExtensionErrors(extensionName)
+            }
+        })
+    }
+
+    buttons.push({
+        icon: "delete",
+        onclick: (data) => {
+            data.element.remove()
+            window.electron.removeByPath(path)
+        }
+    })
+
     const template = {
         type: "extensionItem",
         title: title,
@@ -305,15 +431,7 @@ function createInstalledExtensionsModalTemplate({ title, subtitle, description, 
         description: description,
         image: image,
         tags: tags,
-        buttons: [
-            {
-                icon: "delete",
-                onclick: (data) => {
-                    data.element.remove()
-                    window.electron.removeByPath(path)
-                }
-            }
-        ]
+        buttons: buttons
     }
 
     return template
