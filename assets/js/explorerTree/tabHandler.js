@@ -1142,6 +1142,7 @@ export function activateTab(tabEl) {
 
     bindEditorBtns(editor, { fileName: rec.fileName })
     bindCodeTools({ editor: editor, extension: rec.extension })
+    initCodeContextMenu(realPath, rec.pathContext, editor)
 
     document.querySelectorAll(".explorer-elements .file").forEach(file => {
         file.classList.toggle("active", file.getAttribute("data-path") === realPath);

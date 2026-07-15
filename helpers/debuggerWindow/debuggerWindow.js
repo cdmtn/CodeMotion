@@ -15,6 +15,7 @@ async function createDebuggerWindow(mainWindow, title = "Debugger") {
         title,
         icon: appIcon,
         resizable: false,
+        backgroundColor: "#0f0f0f",
         webPreferences: {
             contextIsolation: true,
             nodeIntegration: false,

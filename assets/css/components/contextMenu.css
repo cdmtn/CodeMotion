@@ -32,15 +32,20 @@
     backdrop-filter: blur(5px);
     border: 1px solid var(--context-border);
     border-radius: 10px;
-    transition: .2s;
+    transition: opacity .15s ease, filter .15s ease, left .1s ease, top .1s ease;
     opacity: 1;
+    filter: blur(0px);
     pointer-events: all;
     display: flex;
     flex-direction: column;
     gap: 5px;
 }
 .context-menu.hidden {
+    display: none;
+}
+.context-menu.closing {
     opacity: 0;
+    filter: blur(4px);
     pointer-events: none;
 }
 .context-menu .context-menu__item {

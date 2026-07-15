@@ -825,6 +825,10 @@ body.explorer-resizing {
 .ace_editor {
     font-family: var(--code-font);
     font-size: var(--editor-font-size);
+    background: var(--code-background);
+}
+.ace_editor .ace_gutter {
+    background: var(--code-background);
 }
 .ace-github-dark {
     background: var(--code-background);
@@ -1961,4 +1965,15 @@ body.explorer-resizing {
 .sidebar .sidebar-item .badge.default {
     background: var(--body-color);
     color: var(--text-color);
+}
+
+.extension-elements__wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: -1;
 }
