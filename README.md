@@ -33,7 +33,7 @@ with native tools for web developers
 [If you're new here, check out our beginner's guide](https://github.com/cdmtn-dev/codemotion-ide/wiki/%5BFOR-BEGINNERS%5D-How-do-I-build-an-app%3F)
 
 Prerequisites:
-- Node.js (v14 or higher)
+- Node.js (v20 or higher)
 - npm
 
 ```
