@@ -3,7 +3,7 @@ const { ipcMain } = require("electron");
 function loc(startLine, endLine) {
     return {
         start: { line: startLine, column: 0 },
-        end:   { line: endLine,   column: 0 },
+        end: { line: endLine, column: 0 },
     };
 }
 
