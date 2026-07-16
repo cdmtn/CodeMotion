@@ -46,6 +46,7 @@
         "@types/node": "^25.9.1",
         "electron": "^39.2.3",
         "electron-builder": "^26.15.3",
+        "tree-sitter-go": "^0.19.1",
         "typescript": "^6.0.3"
     },
     "dependencies": {
@@ -58,8 +59,7 @@
         "flashot": "^1.4.1",
         "node-global-key-listener": "^0.3.0",
         "node-gyp": "^12.4.0",
-        "tree-sitter": "^0.25.0",
-        "tree-sitter-go": "^0.25.0",
+        "web-tree-sitter": "^0.20.8",
         "ws": "^8.19.0"
     }
 }

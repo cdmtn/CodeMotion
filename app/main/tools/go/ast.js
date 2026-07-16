@@ -1,426 +1,302 @@
 const { ipcMain } = require("electron");
-const Parser = require("tree-sitter");
-const Go = require("tree-sitter-go");
 
-const parser = new Parser();
-parser.setLanguage(Go);
-
-function getLoc(node) {
+function loc(startLine, endLine) {
     return {
-        start: { line: node.startPosition.row + 1, column: node.startPosition.column },
-        end: { line: node.endPosition.row + 1, column: node.endPosition.column },
+        start: { line: startLine, column: 0 },
+        end:   { line: endLine,   column: 0 },
     };
 }
 
-function childByType(node, type) {
-    return node.children.find(c => c.type === type) || null;
-}
-
-function childrenByType(node, type) {
-    return node.children.filter(c => c.type === type);
-}
-
-function nodeText(node) {
-    return node ? node.text : "";
-}
-
-function extractType(node) {
-    if (!node) return null;
-    switch (node.type) {
-        case "type_identifier":
-        case "qualified_type": return node.text;
-        case "pointer_type": return "*" + extractType(node.children.find(c => c.type !== "*"));
-        case "slice_type": return "[]" + extractType(node.children.find(c => c.type !== "[" && c.type !== "]"));
-        case "array_type": {
-            const size = childByType(node, "int_literal");
-            const elem = node.children.find(c => c.type !== "[" && c.type !== "]" && c.type !== "int_literal");
-            return `[${nodeText(size)}]${extractType(elem)}`;
-        }
-        case "map_type": {
-            const key = node.children.find(c => c.type !== "map" && c.type !== "[" && c.type !== "]");
-            const val = node.children.slice(-1)[0];
-            return `map[${extractType(key)}]${extractType(val)}`;
-        }
-        case "channel_type": return "chan " + extractType(node.children.find(c => c.type !== "chan" && c.type !== "<-"));
-        case "interface_type": return "interface{}";
-        case "function_type": return "func(...)";
-        case "struct_type": return "struct{...}";
-        default: return node.text;
-    }
-}
-
-function extractTag(node) {
-    if (!node) return null;
-    if (node.type === "raw_string_literal") {
-        const content = childByType(node, "raw_string_literal_content");
-        return content ? content.text : null;
-    }
-    return null;
-}
-
-function extractCalleeName(node) {
-    if (!node) return "<...>";
-    if (node.type === "selector_expression") {
-        const obj = node.children[0];
-        const prop = node.children[2];
-        return `${nodeText(obj)}.${nodeText(prop)}`;
-    }
-    if (node.type === "identifier") return node.text;
-    return node.text || "<...>";
-}
-
-function convertSourceFile(node) {
-    return {
-        type: "Program",
-        loc: getLoc(node),
-        body: node.children.map(convertTopLevel).filter(Boolean),
-    };
-}
-
-function convertTopLevel(node) {
-    switch (node.type) {
-        case "package_clause": return convertPackage(node);
-        case "import_declaration": return convertImport(node);
-        case "function_declaration": return convertFunction(node);
-        case "method_declaration": return convertMethod(node);
-        case "type_declaration": return convertTypeDecl(node);
-        case "var_declaration": return convertVarDecl(node);
-        case "const_declaration": return convertConstDecl(node);
-        default: return null;
-    }
-}
-
-function convertPackage(node) {
-    const nameNode = childByType(node, "package_identifier");
-    return {
-        type: "PackageDeclaration",
-        id: { name: nodeText(nameNode) },
-        loc: getLoc(node),
-    };
-}
-
-function convertImport(node) {
-    const paths = [];
-
-    function collectSpec(spec) {
-        const alias = childByType(spec, "package_identifier") || childByType(spec, "dot") || childByType(spec, "blank_identifier");
-        const pathNode = childByType(spec, "interpreted_string_literal");
-        if (pathNode) {
-            const raw = nodeText(pathNode).replace(/^"|"$/g, "");
-            paths.push({ path: raw, alias: alias ? nodeText(alias) : null });
+function findClosingBrace(lines, startLine) {
+    let depth = 0;
+    let found = false;
+    for (let i = startLine - 1; i < lines.length; i++) {
+        for (const ch of lines[i]) {
+            if (ch === "{") { depth++; found = true; }
+            if (ch === "}") {
+                depth--;
+                if (found && depth === 0) return i + 1;
+            }
         }
     }
+    return lines.length;
+}
 
-    const specList = childByType(node, "import_spec_list");
-    if (specList) {
-        childrenByType(specList, "import_spec").forEach(collectSpec);
-    } else {
-        const spec = childByType(node, "import_spec");
-        if (spec) collectSpec(spec);
+function parseParams(raw) {
+    if (!raw || !raw.trim()) return [];
+    const params = [];
+    let depth = 0, current = "";
+    for (const ch of raw) {
+        if (ch === "(" || ch === "[") { depth++; current += ch; continue; }
+        if (ch === ")" || ch === "]") { depth--; current += ch; continue; }
+        if (ch === "," && depth === 0) { params.push(current.trim()); current = ""; continue; }
+        current += ch;
     }
+    if (current.trim()) params.push(current.trim());
 
-    return { type: "ImportDeclaration", paths, loc: getLoc(node) };
-}
-
-function convertFunction(node) {
-    const nameNode = childByType(node, "identifier");
-    const paramList = childByType(node, "parameter_list");
-    const block = childByType(node, "block");
-
-    return {
-        type: "FunctionDeclaration",
-        id: { name: nodeText(nameNode) },
-        params: convertParams(paramList),
-        returnType: extractReturnType(node),
-        loc: getLoc(node),
-        body: block ? convertBlock(block) : [],
-    };
-}
-
-function convertMethod(node) {
-    const paramLists = childrenByType(node, "parameter_list");
-    const receiver = paramLists[0] ? convertReceiver(paramLists[0]) : null;
-    const nameNode = childByType(node, "identifier") || childByType(node, "field_identifier");
-    const block = childByType(node, "block");
-
-    return {
-        type: "MethodDeclaration",
-        id: { name: nodeText(nameNode) },
-        receiver,
-        params: convertParams(paramLists[1] || null),
-        returnType: extractReturnType(node),
-        loc: getLoc(node),
-        body: block ? convertBlock(block) : [],
-    };
-}
-
-function convertReceiver(node) {
-    const decl = childByType(node, "parameter_declaration");
-    if (!decl) return { name: "", typeName: nodeText(node) };
-    const ident = childByType(decl, "identifier");
-    const typeNode = decl.children.find(c => c !== ident && c.type !== "," && c.type !== "(" && c.type !== ")");
-    return {
-        name: nodeText(ident),
-        typeName: extractType(typeNode),
-    };
-}
-
-function convertParams(node) {
-    if (!node) return [];
-    return childrenByType(node, "parameter_declaration")
-        .concat(childrenByType(node, "variadic_parameter_declaration"))
-        .map(p => {
-            const idents = p.children.filter(c => c.type === "identifier");
-            const isVariadic = p.type === "variadic_parameter_declaration";
-            const typeNode = p.children.find(c =>
-                c.type !== "identifier" && c.type !== "," && c.type !== "..." &&
-                c.type !== "(" && c.type !== ")"
-            );
-            return {
-                names: idents.map(nodeText),
-                paramType: (isVariadic ? "..." : "") + extractType(typeNode),
-            };
-        });
-}
-
-function extractReturnType(node) {
-    const children = node.children;
-    const blockIdx = children.findIndex(c => c.type === "block");
-    const after = blockIdx > -1 ? children.slice(0, blockIdx) : children;
-    const paramLists = after.filter(c => c.type === "parameter_list");
-    const lastPL = paramLists[paramLists.length - 1];
-    const lastPLIdx = lastPL ? after.indexOf(lastPL) : -1;
-    const retNodes = after.slice(lastPLIdx + 1).filter(c =>
-        c.type !== "func" && c.type !== "identifier" && c.type !== "field_identifier"
-    );
-    if (retNodes.length === 0) return null;
-    if (retNodes.length === 1 && retNodes[0].type === "parameter_list") {
-        return nodeText(retNodes[0]);
-    }
-    return retNodes.map(n => extractType(n) || nodeText(n)).join(", ").trim() || null;
-}
-
-function convertTypeDecl(node) {
-    const specs = childrenByType(node, "type_spec");
-    if (specs.length === 0) return null;
-    if (specs.length === 1) return convertTypeSpec(specs[0]);
-    return {
-        type: "TypeGroup",
-        loc: getLoc(node),
-        body: specs.map(convertTypeSpec).filter(Boolean),
-    };
-}
-
-function convertTypeSpec(node) {
-    const nameNode = childByType(node, "type_identifier");
-    const name = nodeText(nameNode);
-    const typeNode = node.children.find(c => c !== nameNode && c.type !== "=" && c.type !== "type_identifier");
-
-    if (!typeNode) return { type: "TypeAlias", id: { name }, loc: getLoc(node) };
-
-    if (typeNode.type === "struct_type") {
-        return {
-            type: "StructDeclaration",
-            id: { name },
-            fields: convertStructFields(typeNode),
-            loc: getLoc(node),
-        };
-    }
-
-    if (typeNode.type === "interface_type") {
-        return {
-            type: "InterfaceDeclaration",
-            id: { name },
-            methods: convertInterfaceBody(typeNode),
-            loc: getLoc(node),
-        };
-    }
-
-    return {
-        type: "TypeAlias",
-        id: { name },
-        aliasFor: extractType(typeNode),
-        loc: getLoc(node),
-    };
-}
-
-function convertStructFields(node) {
-    const fieldList = childByType(node, "field_declaration_list");
-    if (!fieldList) return [];
-
-    return childrenByType(fieldList, "field_declaration").map(f => {
-        const idents = f.children.filter(c => c.type === "field_identifier");
-        const typeNode = f.children.find(c =>
-            c.type !== "field_identifier" && c.type !== "," &&
-            c.type !== "raw_string_literal" && c.type !== "interpreted_string_literal"
-        );
-        const tagNode = f.children.find(c =>
-            c.type === "raw_string_literal" || c.type === "interpreted_string_literal"
-        );
-        return {
-            type: "StructField",
-            names: idents.map(nodeText),
-            fieldType: extractType(typeNode),
-            tag: extractTag(tagNode),
-            loc: getLoc(f),
-        };
+    return params.map(p => {
+        const variadic = p.startsWith("...");
+        const clean = variadic ? p.slice(3) : p;
+        const parts = clean.trim().split(/\s+/);
+        if (parts.length === 1) return { names: [], paramType: (variadic ? "..." : "") + parts[0] };
+        const typePart = parts[parts.length - 1];
+        const names = parts.slice(0, -1).map(n => n.replace(/,$/, ""));
+        return { names, paramType: (variadic ? "..." : "") + typePart };
     });
 }
 
-function convertInterfaceBody(node) {
-    const body = childByType(node, "interface_body") || node;
-    const methods = [];
+function parseReceiver(raw) {
+    if (!raw) return null;
+    const clean = raw.trim();
+    const parts = clean.split(/\s+/);
+    if (parts.length === 1) return { name: "", typeName: parts[0] };
+    return { name: parts[0], typeName: parts.slice(1).join(" ") };
+}
 
-    for (const child of body.children) {
-        if (child.type === "method_elem") {
-            const nameNode = childByType(child, "field_identifier");
-            const paramList = childByType(child, "parameter_list");
-            methods.push({
-                type: "InterfaceMethod",
-                id: { name: nodeText(nameNode) },
-                params: convertParams(paramList),
-                returnType: extractReturnType(child),
-                loc: getLoc(child),
-            });
+function parseReturnType(after) {
+    if (!after) return null;
+    const clean = after.trim().replace(/\{.*$/, "").trim();
+    return clean || null;
+}
+
+function parseImports(lines, body) {
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        const lineNum = i + 1;
+
+        const single = line.match(/^import\s+"([^"]+)"/);
+        if (single) {
+            body.push({ type: "ImportDeclaration", paths: [{ path: single[1], alias: null }], loc: loc(lineNum, lineNum) });
+            continue;
         }
-        if (child.type === "type_identifier") {
-            methods.push({
-                type: "InterfaceEmbed",
-                id: { name: nodeText(child) },
-                loc: getLoc(child),
+
+        if (line.match(/^import\s*\(/)) {
+            const paths = [];
+            let j = i + 1;
+            while (j < lines.length && !lines[j].trim().startsWith(")")) {
+                const l = lines[j].trim();
+                const m = l.match(/^(?:(\w+|\.|_)\s+)?"([^"]+)"/);
+                if (m) paths.push({ path: m[2], alias: m[1] || null });
+                j++;
+            }
+            body.push({ type: "ImportDeclaration", paths, loc: loc(lineNum, j + 1) });
+        }
+    }
+}
+
+function parseStructFields(lines, startLine, endLine) {
+    const fields = [];
+    for (let i = startLine; i < endLine - 1; i++) {
+        const line = lines[i].trim();
+        if (!line || line.startsWith("//") || line === "{" || line === "}") continue;
+        const m = line.match(/^([\w,\s]+?)\s+([\w\[\]*\.]+(?:\[[\w*\.]+\])?)\s*(`[^`]*`)?\s*$/);
+        if (m) {
+            const names = m[1].split(",").map(s => s.trim()).filter(Boolean);
+            fields.push({
+                type: "StructField",
+                names,
+                fieldType: m[2],
+                tag: m[3] ? m[3].slice(1, -1) : null,
+                loc: loc(i + 1, i + 1),
             });
         }
     }
+    return fields;
+}
 
+function parseInterfaceMethods(lines, startLine, endLine) {
+    const methods = [];
+    for (let i = startLine; i < endLine - 1; i++) {
+        const line = lines[i].trim();
+        if (!line || line.startsWith("//") || line === "{" || line === "}") continue;
+        const m = line.match(/^(\w+)\s*\(([^)]*)\)(.*)?$/);
+        if (m) {
+            methods.push({
+                type: "InterfaceMethod",
+                id: { name: m[1] },
+                params: parseParams(m[2]),
+                returnType: parseReturnType(m[3]),
+                loc: loc(i + 1, i + 1),
+            });
+            continue;
+        }
+        const embed = line.match(/^(\w+)$/);
+        if (embed) {
+            methods.push({ type: "InterfaceEmbed", id: { name: embed[1] }, loc: loc(i + 1, i + 1) });
+        }
+    }
     return methods;
 }
 
-function convertVarDecl(node) {
-    const specs = childrenByType(node, "var_spec");
-    return {
-        type: "VariableDeclaration",
-        kind: "var",
-        declarations: specs.map(s => {
-            const idents = s.children.filter(c => c.type === "identifier");
-            const typeNode = s.children.find(c =>
-                c.type !== "identifier" && c.type !== "=" &&
-                c.type !== "," && c.type !== "expression_list"
-            );
-            return {
-                type: "VariableDeclarator",
-                names: idents.map(nodeText),
-                varType: extractType(typeNode),
-                loc: getLoc(s),
-            };
-        }),
-        loc: getLoc(node),
-    };
-}
+function parseBlock(lines, startLine, endLine) {
+    const stmts = [];
+    for (let i = startLine; i < endLine - 1; i++) {
+        const line = lines[i].trim();
+        const lineNum = i + 1;
+        if (!line || line.startsWith("//")) continue;
 
-function convertConstDecl(node) {
-    const specs = childrenByType(node, "const_spec");
-    return {
-        type: "ConstDeclaration",
-        declarations: specs.map(s => ({
-            type: "ConstDeclarator",
-            names: s.children.filter(c => c.type === "identifier").map(nodeText),
-            loc: getLoc(s),
-        })),
-        loc: getLoc(node),
-    };
-}
+        // short var :=
+        const shortVar = line.match(/^([\w,\s]+?)\s*:=\s*(.+)$/);
+        if (shortVar) {
+            const names = shortVar[1].split(",").map(s => s.trim()).filter(Boolean);
+            const callMatch = shortVar[2].trim().match(/^([\w.]+)\s*\(/);
+            const values = callMatch
+                ? [{ type: "CallExpression", calleeName: callMatch[1] + "()", args: [], loc: loc(lineNum, lineNum) }]
+                : [];
+            stmts.push({ type: "ShortVarDeclaration", names, values, loc: loc(lineNum, lineNum) });
+            continue;
+        }
 
-function convertBlock(node) {
-    const stmtList = childByType(node, "statement_list");
-    const source = stmtList || node;
-    return source.children.map(convertStatement).filter(Boolean);
-}
+        // if / for
+        if (line.match(/^if\s+/)) {
+            const end = findClosingBrace(lines, lineNum);
+            stmts.push({ type: "IfStatement", loc: loc(lineNum, end), body: [] });
+            continue;
+        }
+        if (line.match(/^for[\s{]/)) {
+            const end = findClosingBrace(lines, lineNum);
+            stmts.push({ type: "ForStatement", loc: loc(lineNum, end), body: [] });
+            continue;
+        }
 
-function convertStatement(node) {
-    switch (node.type) {
-        case "short_var_declaration": return convertShortVar(node);
-        case "var_declaration": return convertVarDecl(node);
-        case "const_declaration": return convertConstDecl(node);
-        case "assignment_statement": return convertAssignment(node);
-        case "expression_statement": return convertExprStatement(node);
-        case "call_expression": return convertCallExpr(node);
-        case "if_statement": return convertIf(node);
-        case "for_statement": return convertFor(node);
-        case "return_statement": return { type: "ReturnStatement", loc: getLoc(node) };
-        case "go_statement": return { type: "GoStatement", call: convertCallExpr(childByType(node, "call_expression")), loc: getLoc(node) };
-        case "defer_statement": return { type: "DeferStatement", call: convertCallExpr(childByType(node, "call_expression")), loc: getLoc(node) };
-        case "block": return { type: "Block", loc: getLoc(node), body: convertBlock(node) };
-        default: return null;
+        // go / defer
+        const goStmt = line.match(/^go\s+([\w.]+)\s*\(/);
+        if (goStmt) {
+            stmts.push({ type: "GoStatement", call: { type: "CallExpression", calleeName: goStmt[1] + "()", args: [], loc: loc(lineNum, lineNum) }, loc: loc(lineNum, lineNum) });
+            continue;
+        }
+        const deferStmt = line.match(/^defer\s+([\w.]+)\s*\(/);
+        if (deferStmt) {
+            stmts.push({ type: "DeferStatement", call: { type: "CallExpression", calleeName: deferStmt[1] + "()", args: [], loc: loc(lineNum, lineNum) }, loc: loc(lineNum, lineNum) });
+            continue;
+        }
+
+        // call expression
+        const callStmt = line.match(/^([\w.]+)\s*\(/);
+        if (callStmt) {
+            stmts.push({ type: "CallExpression", calleeName: callStmt[1] + "()", args: [], loc: loc(lineNum, lineNum) });
+        }
     }
+    return stmts;
 }
 
-function convertShortVar(node) {
-    const leftList = node.children[0];
-    const rightList = node.children[2];
-    const names = leftList?.children.filter(c => c.type === "identifier").map(nodeText) || [];
-    const values = rightList?.children.filter(c => c.type !== ",").map(convertExprNode).filter(Boolean) || [];
-    return { type: "ShortVarDeclaration", names, values, loc: getLoc(node) };
-}
+function parse(code) {
+    const lines = code.split("\n");
+    const body = [];
 
-function convertAssignment(node) {
-    const leftList = node.children[0];
-    const names = leftList?.children
-        .filter(c => c.type === "identifier" || c.type === "selector_expression")
-        .map(nodeText) || [];
-    return { type: "AssignmentStatement", names, loc: getLoc(node) };
-}
-
-function convertExprStatement(node) {
-    const inner = node.children[0];
-    return inner ? convertExprNode(inner) : null;
-}
-
-function convertCallExpr(node) {
-    if (!node) return null;
-    const fnNode = node.children[0];
-    const callee = extractCalleeName(fnNode);
-    const argList = childByType(node, "argument_list");
-    const args = argList
-        ? argList.children
-            .filter(c => c.type !== "," && c.type !== "(" && c.type !== ")")
-            .map(convertExprNode).filter(Boolean)
-        : [];
-    return { type: "CallExpression", calleeName: callee + "()", args, loc: getLoc(node) };
-}
-
-function convertIf(node) {
-    const block = childByType(node, "block");
-    return { type: "IfStatement", loc: getLoc(node), body: block ? convertBlock(block) : [] };
-}
-
-function convertFor(node) {
-    const block = childByType(node, "block");
-    return { type: "ForStatement", loc: getLoc(node), body: block ? convertBlock(block) : [] };
-}
-
-function convertExprNode(node) {
-    if (!node) return null;
-    switch (node.type) {
-        case "call_expression": return convertCallExpr(node);
-        case "selector_expression": return { type: "SelectorExpression", text: node.text, loc: getLoc(node) };
-        case "identifier": return { type: "Identifier", name: node.text, loc: getLoc(node) };
-        case "interpreted_string_literal": return { type: "StringLiteral", value: node.text, loc: getLoc(node) };
-        case "int_literal":
-        case "float_literal": return { type: "NumericLiteral", value: node.text, loc: getLoc(node) };
-        default: return { type: node.type, text: node.text, loc: getLoc(node) };
+    const pkgMatch = lines[0]?.match(/^package\s+(\w+)/);
+    if (pkgMatch) {
+        body.push({ type: "PackageDeclaration", id: { name: pkgMatch[1] }, loc: loc(1, 1) });
     }
+
+    parseImports(lines, body);
+
+    for (let i = 0; i < lines.length; i++) {
+        const lineNum = i + 1;
+        const line = lines[i];
+
+        // method: func (recv) Name(params) ret {
+        const methodMatch = line.match(/^func\s+\(([^)]+)\)\s+(\w+)\s*\(([^)]*)\)(.*?)\s*\{?\s*$/);
+        if (methodMatch) {
+            const end = findClosingBrace(lines, lineNum);
+            body.push({
+                type: "MethodDeclaration",
+                id: { name: methodMatch[2] },
+                receiver: parseReceiver(methodMatch[1]),
+                params: parseParams(methodMatch[3]),
+                returnType: parseReturnType(methodMatch[4]),
+                loc: loc(lineNum, end),
+                body: parseBlock(lines, lineNum, end),
+            });
+            continue;
+        }
+
+        // function: func Name(params) ret {
+        const funcMatch = line.match(/^func\s+(\w+)\s*\(([^)]*)\)(.*?)\s*\{?\s*$/);
+        if (funcMatch) {
+            const end = findClosingBrace(lines, lineNum);
+            body.push({
+                type: "FunctionDeclaration",
+                id: { name: funcMatch[1] },
+                params: parseParams(funcMatch[2]),
+                returnType: parseReturnType(funcMatch[3]),
+                loc: loc(lineNum, end),
+                body: parseBlock(lines, lineNum, end),
+            });
+            continue;
+        }
+
+        // struct
+        const structMatch = line.match(/^type\s+(\w+)\s+struct\s*\{/);
+        if (structMatch) {
+            const end = findClosingBrace(lines, lineNum);
+            body.push({
+                type: "StructDeclaration",
+                id: { name: structMatch[1] },
+                fields: parseStructFields(lines, lineNum, end),
+                loc: loc(lineNum, end),
+            });
+            continue;
+        }
+
+        // interface
+        const ifaceMatch = line.match(/^type\s+(\w+)\s+interface\s*\{/);
+        if (ifaceMatch) {
+            const end = findClosingBrace(lines, lineNum);
+            body.push({
+                type: "InterfaceDeclaration",
+                id: { name: ifaceMatch[1] },
+                methods: parseInterfaceMethods(lines, lineNum, end),
+                loc: loc(lineNum, end),
+            });
+            continue;
+        }
+
+        // type alias
+        const typeAliasMatch = line.match(/^type\s+(\w+)\s+(?!=)([\w\[\]*]+(?:\[[\w*]+\])?)\s*$/);
+        if (typeAliasMatch && !line.includes("struct") && !line.includes("interface")) {
+            body.push({
+                type: "TypeAlias",
+                id: { name: typeAliasMatch[1] },
+                aliasFor: typeAliasMatch[2] || null,
+                loc: loc(lineNum, lineNum),
+            });
+            continue;
+        }
+
+        // var
+        const varMatch = line.match(/^var\s+(.+)/);
+        if (varMatch) {
+            const names = varMatch[1].split(/\s+/)[0].split(",").map(s => s.trim()).filter(Boolean);
+            body.push({
+                type: "VariableDeclaration",
+                kind: "var",
+                declarations: [{ type: "VariableDeclarator", names, loc: loc(lineNum, lineNum) }],
+                loc: loc(lineNum, lineNum),
+            });
+            continue;
+        }
+
+        // const
+        const constMatch = line.match(/^const\s+(.+)/);
+        if (constMatch) {
+            const names = constMatch[1].split(",").map(s => s.trim().split(/\s+/)[0]).filter(Boolean);
+            body.push({
+                type: "ConstDeclaration",
+                declarations: [{ type: "ConstDeclarator", names, loc: loc(lineNum, lineNum) }],
+                loc: loc(lineNum, lineNum),
+            });
+        }
+    }
+
+    return { type: "Program", loc: loc(1, lines.length), body };
 }
 
-function buildAST(code) {
+ipcMain.handle("golang-ast", (_, code) => {
     try {
-        const tree = parser.parse(code);
-        return convertSourceFile(tree.rootNode);
+        return parse(code);
     } catch (e) {
         console.error("Go AST parse error:", e);
         return { type: "Program", loc: null, body: [] };
     }
-}
-
-ipcMain.handle("golang-ast", (_, code) => {
-    return buildAST(code);
 });
