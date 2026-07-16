@@ -59,7 +59,7 @@
         "node-global-key-listener": "^0.3.0",
         "node-gyp": "^12.4.0",
         "tree-sitter": "^0.26.0",
-        "tree-sitter-go": "^0.26.0",
+        "tree-sitter-go": "^0.25.0",
         "ws": "^8.19.0"
     }
 }
