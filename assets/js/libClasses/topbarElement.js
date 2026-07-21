@@ -87,7 +87,9 @@ export class _TopBarElement {
         if (icon) icon.style.marginLeft = "0px"
         if (text) text.classList.remove("hidden")
 
-        void el.offsetHeight
+        const contentKey = (text ? text.textContent : "") + "|" + (icon ? (icon.src || icon.textContent) : "")
+        if (contentKey === this._lastContentKey) return
+        this._lastContentKey = contentKey
 
         const targetWidth = el.scrollWidth
 
