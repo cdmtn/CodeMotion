@@ -44,6 +44,11 @@ p, h1, h2, h3, h4, h5, h6 {
 .debug-item {
     display: flex;
     gap: 10px;
+    align-items: baseline;
+}
+.debug-item .debug-time {
+    padding-right: 6px;
+    white-space: nowrap;
 }
 .debug-item div:nth-child(3) {
     overflow: scroll;
@@ -86,16 +91,44 @@ important {
     left: 0;
     padding: 0px 20px;
 }
+.commands-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
 .commands input {
     background: #252525cc;
     backdrop-filter: blur(10px);
     border: 1px solid #ffffff0a;
     font-family: inherit;
     padding: 10px;
-    width: -webkit-fill-available;
+    flex: 1;
     border-radius: 10px;
     outline: none;
     color: white;
+}
+.commands button {
+    background: #252525cc;
+    backdrop-filter: blur(10px);
+    border: 1px solid #ffffff0a;
+    font-family: inherit;
+    font-size: 13px;
+    padding: 10px;
+    border-radius: 10px;
+    outline: none;
+    color: white;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .15s, opacity .15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.commands button:hover {
+    background: #333333cc;
+}
+.commands button:active {
+    opacity: .7;
 }
 
 .commands .commands-suggest {

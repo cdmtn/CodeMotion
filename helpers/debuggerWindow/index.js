@@ -3,6 +3,8 @@ import { parse, trimSpaces, createCommandRegex } from "./parse.js"
 
 const main = document.querySelector("#main")
 const commandInput = document.querySelector("#command")
+const btnCopy = document.querySelector("#btn-copy")
+const btnCopyFile = document.querySelector("#btn-copy-file")
 const time = `[${formatTimeHTML(Date.now())}]`
 window.electron.ready()
 
@@ -323,7 +325,7 @@ function formatTimeHTML(timestampMs) {
 function renderMsg(time, content, from = false) {
     const item = document.createElement("div")
     item.classList.add("debug-item")
-    item.innerHTML = `${from != false ? `<span class="from">${from}</span>` : ""} <div>${time}</div><div>${parse(content)}</div>`
+    item.innerHTML = `${from != false ? `<span class="from">${from}</span>` : ""}<div class="debug-time">${time}</div><div>${parse(content)}</div>`
 
     if (from != false) item.classList.add("foreign")
 
@@ -334,7 +336,7 @@ function renderMsg(time, content, from = false) {
 function renderError(time, content, from = false) {
     const item = document.createElement("div")
     item.classList.add("debug-item", "error")
-    item.innerHTML = `${from != false ? `<span class="from">${from}</span>` : ""} <div>${time}</div><div>${parse(content)}</div>`
+    item.innerHTML = `${from != false ? `<span class="from">${from}</span>` : ""}<div class="debug-time">${time}</div><div>${parse(content)}</div>`
 
     if (from != false) item.classList.add("foreign")
 
@@ -345,7 +347,7 @@ function renderError(time, content, from = false) {
 function renderWarn(time, content, from = false) {
     const item = document.createElement("div")
     item.classList.add("debug-item", "warn")
-    item.innerHTML = `${from != false ? `<span class="from">${from}</span>` : ""} <div>${time}</div><div>${parse(content)}</div>`
+    item.innerHTML = `${from != false ? `<span class="from">${from}</span>` : ""}<div class="debug-time">${time}</div><div>${parse(content)}</div>`
 
     if (from != false) item.classList.add("foreign")
 
@@ -443,5 +445,24 @@ commandInput.addEventListener("input", (event) => {
                 suggest.classList.add("hidden")
             })
         })
+    }
+})
+
+function getAllDebugLines() {
+    const items = main.querySelectorAll(".debug-item")
+    return Array.from(items).map(el => el.textContent.trim()).filter(t => t.length > 0).join("\n")
+}
+
+btnCopy.addEventListener("click", () => {
+    const text = getAllDebugLines()
+    if (text.length > 0) {
+        window.electron.copyText(text)
+    }
+})
+
+btnCopyFile.addEventListener("click", () => {
+    const text = getAllDebugLines()
+    if (text.length > 0) {
+        window.electron.copyAsFile(text)
     }
 })

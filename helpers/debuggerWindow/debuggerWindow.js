@@ -1,5 +1,7 @@
-const { BrowserWindow, nativeImage, app, ipcMain } = require("electron")
+const { BrowserWindow, nativeImage, app, ipcMain, clipboard } = require("electron")
 const path = require("path")
+const fs = require("fs")
+const { exec } = require("child_process")
 const bus = require("../eventBus.js")
 
 const { getAppIcon } = require("../../app/main/helpers/requests.js")
@@ -60,6 +62,29 @@ async function createDebuggerWindow(mainWindow, title = "Debugger") {
         if (debuggerWindow) {
             debuggerWindow.close();
         }
+    });
+
+    ipcMain.on('debugger-copy-text', (event, text) => {
+        clipboard.writeText(text)
+    });
+
+    ipcMain.on('debugger-copy-as-file', (event, text) => {
+        const now = new Date()
+        const pad = (n) => String(n).padStart(2, "0")
+        const datetime = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`
+        const filename = `Debugger-cdmtn-${datetime}.txt`
+        const tmpDir = app.getPath("temp")
+        const filePath = path.join(tmpDir, filename)
+
+        fs.writeFileSync(filePath, text, "utf-8")
+
+        const escaped = filePath.replace(/'/g, "''")
+        exec(
+            `powershell -NoProfile -Command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Clipboard]::SetFileDropList(@('${escaped}'))"`,
+            (err) => {
+                if (err) clipboard.writeText(text)
+            }
+        )
     });
 
     return win
