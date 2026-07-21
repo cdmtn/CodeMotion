@@ -8,7 +8,10 @@
         "build": "tsc",
         "start": "npm run build && electron .",
         "dist": "npm run build && electron-builder",
-        "dist-linux": "npm run build && electron-builder --linux"
+        "dist-linux": "npm run build && electron-builder --linux",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "test:coverage": "vitest run --coverage"
     },
     "build": {
         "appId": "com.codemotion",
@@ -47,7 +50,8 @@
         "electron": "^39.2.3",
         "electron-builder": "^26.15.3",
         "tree-sitter-go": "^0.19.1",
-        "typescript": "^6.0.3"
+        "typescript": "^6.0.3",
+        "vitest": "^4.1.10"
     },
     "dependencies": {
         "@babel/parser": "^7.29.7",
