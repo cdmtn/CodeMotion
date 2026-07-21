@@ -43,9 +43,15 @@ ipcMain.handle(
 
             const tempDir = path.join(app.getAppPath(), "temp")
 
+            // Caused by: embedded Python runtime ships as .exe
+            // On macOS/Linux this path is invalid and spawn fails silently.
+            // We select the correct binary name per platform, falling back
+            // to system-installed python3 when embedded is unavailable.
+            const pythonBinary = process.platform === 'win32' ? 'python.exe' : 'python3'
+
             const embeddedPy = app.isPackaged
-                ? path.join(process.resourcesPath, "runtime", "python", "python.exe")
-                : path.join(__dirname, "..", "runtime", "python", "python.exe")
+                ? path.join(process.resourcesPath, "runtime", "python", pythonBinary)
+                : path.join(__dirname, "..", "runtime", "python", pythonBinary)
 
             const cleanup = (): void => {
                 if (isTempFile && runPath && fs.existsSync(runPath)) {
@@ -120,7 +126,7 @@ ipcMain.handle(
                 })
 
                 if (!py && !useEmbed) {
-                    pyCommand = "py"
+                    pyCommand = process.platform === 'win32' ? 'py' : 'python3'
                     py = trySpawn(pyCommand, pyArgs, {
                         cwd: path.dirname(runPath)
                     })
@@ -159,7 +165,8 @@ ipcMain.handle(
                     clearTimeout(timeout)
 
                     if (!useEmbed && pyCommand === "python") {
-                        py = spawn("py", pyArgs, {
+                        const fallback = process.platform === 'win32' ? 'py' : 'python3'
+                        py = spawn(fallback, pyArgs, {
                             cwd: path.dirname(runPath)
                         })
                         return

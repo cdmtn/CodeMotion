@@ -10,8 +10,28 @@ class TerminalManager {
     }
 
     getShell() {
-        const isWindows = process.platform === 'win32';
-        return isWindows ? 'cmd.exe' : '/bin/bash';
+        // Caused by: macOS defaults to zsh since Catalina, users may
+        // configure fish, bash, or other shells. Hardcoding /bin/bash
+        // breaks terminal for non-bash users. We read $SHELL and
+        // validate the binary exists before using it.
+        
+        if (process.platform === 'win32') {
+            return 'cmd.exe';
+        }
+
+        const userShell = process.env.SHELL;
+
+        if (userShell && fs.existsSync(userShell)) {
+            return userShell;
+        }
+
+        for (const shell of ['/bin/zsh', '/bin/bash', '/bin/sh']) {
+            if (fs.existsSync(shell)) {
+                return shell;
+            }
+        }
+
+        return '/bin/sh';
     }
 
     validateWorkDir(cwd) {
