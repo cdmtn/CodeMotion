@@ -3,13 +3,26 @@ import {
     EditorView, keymap, lineNumbers, highlightActiveLine, 
     highlightActiveLineGutter
 } from "@codemirror/view";
-import { defaultKeymap, indentWithTab, history, historyKeymap } from "@codemirror/commands";
 import { 
     closeBrackets, autocompletion, completionKeymap, completeFromList, 
     acceptCompletion, completionStatus
 } from "@codemirror/autocomplete";
 import { indentUnit } from "@codemirror/language";
 import { linter, lintGutter, forceLinting } from "@codemirror/lint";
+
+// commands
+
+import { 
+    defaultKeymap, indentWithTab, history, historyKeymap,
+    selectAll, undo, redo, toggleComment 
+} from "@codemirror/commands";
+
+// 
+
+import {
+    openSearchPanel, closeSearchPanel, findNext,
+    findPrevious
+} from "@codemirror/search";
 
 import { vscodeDark, vscodeLight, atomone } from '@uiw/codemirror-themes-all';
 
@@ -153,9 +166,9 @@ window.CodeMirror = {
 
         const lintExtension = linter(() => diagnostics);
 
-        const view = new EditorView({
-            state: EditorState.create({
-                doc: options.value ?? "",
+        function createState(doc) {
+            return EditorState.create({
+                doc,
                 extensions: [
                     lintGutter(),
                     lintExtension,
@@ -164,7 +177,7 @@ window.CodeMirror = {
                     lineNumbers(),
                     highlightActiveLine(),
                     highlightActiveLineGutter(),
-                    
+
                     keymap.of([
                         {
                             key: "Tab",
@@ -173,32 +186,34 @@ window.CodeMirror = {
                         ...defaultKeymap,
                         ...historyKeymap
                     ]),
+
                     languageCompartment.of(Languages.javascript),
                     themeCompartment.of(Themes.vscodeDark),
-                    tabSizeCompartment.of(
-                        EditorState.tabSize.of(4)
-                    ),
+                    tabSizeCompartment.of(EditorState.tabSize.of(4)),
                     indentUnit.of("\t"),
 
                     closeBrackets(),
                     autocompletion(),
 
                     updateListener,
-                    
-                    // color comments
-                    colorComments, 
+
+                    colorComments,
                     colorCommentsTheme,
 
                     indentationMarkers({
                         colors: {
-                            light: '#00000017',
-                            dark: '#ffffff1a',
-                            activeLight: '#00000070',
-                            activeDark: '#ffffff33',
+                            light: "#00000017",
+                            dark: "#ffffff1a",
+                            activeLight: "#00000070",
+                            activeDark: "#ffffff33",
                         }
                     })
                 ]
-            }),
+            });
+        }
+
+        const view = new EditorView({
+            state: createState(options.value ?? ""),
             parent
         });
 
@@ -214,6 +229,18 @@ window.CodeMirror = {
             },
             setOnChange(cb) {
                 onChange = cb;
+            },
+
+            commands: {
+                selectAll,
+                undo,
+                redo,
+                openSearchPanel,
+                toggleComment
+            },
+
+            recreateState(doc) {
+                view.setState(createState(doc));
             }
         }
     },

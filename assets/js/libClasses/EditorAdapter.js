@@ -4,7 +4,7 @@ export class _EditorAdapter {
     constructor(
         { 
             view, languageCompartment, themeCompartment, tabSizeCompartment, setDiagnostics, 
-            setOnChange 
+            setOnChange, commands, recreateState
         }
     ) {
         this.instance = view
@@ -13,16 +13,32 @@ export class _EditorAdapter {
         this.tabSizeCompartment = tabSizeCompartment
         this.setDiagnosticsInternal = setDiagnostics;
         this.setOnChangeInternal = setOnChange;
+        this.commands = commands
+        this.recreateState = recreateState
 
         this.language = undefined
         this.theme = undefined
         this.tabSize = undefined
         this.listeners = {}
+
+        this.dom = view.dom
     }
 
-    // =========================
-    // Getters
-    // =========================
+    // 
+    // other
+    // 
+
+    openSearch() {
+        this.commands.openSearchPanel(this.instance)
+    }
+
+    resetUndoManager() {
+        this.recreateState(this.instance.state.doc.toString());
+    }
+
+    //
+    // getters
+    //
 
     getValue() {
         return this.instance.state.doc.toString()
@@ -59,13 +75,69 @@ export class _EditorAdapter {
         }
     }
 
+    // lines api
+
+    getCurrentLineText() {
+        const pos = this.instance.state.selection.main.head;
+        const line = this.instance.state.doc.lineAt(pos);
+
+        return line.text;
+    }
+
+    getLineText(row) {
+        return this.instance.state.doc.line(row + 1).text;
+    }
+
     currentLanguageId() {
         return this.language
     }
 
-    // =========================
-    // Setters
-    // =========================
+    removeFullLines(fromRow, toRow = fromRow) {
+        const doc = this.instance.state.doc;
+
+        fromRow = Math.max(0, fromRow);
+        toRow = Math.min(doc.lines - 1, toRow);
+
+        const fromLine = doc.line(fromRow + 1);
+        const toLine = doc.line(toRow + 1);
+
+        this.instance.dispatch({
+            changes: {
+                from: fromLine.from,
+                to: toLine.to < doc.length ? toLine.to + 1 : toLine.to
+            }
+        });
+    }
+
+    removeCurrentLine() {
+        const view = this.instance;
+        const { state } = view;
+
+        const line = state.doc.lineAt(state.selection.main.head);
+
+        view.dispatch({
+            changes: {
+                from: line.from,
+                to: line.to < state.doc.length ? line.to + 1 : line.to
+            }
+        });
+    }
+
+    replace(range, text) {
+        this.instance.dispatch({
+            changes: {
+                from: range.start,
+                to: range.end,
+                insert: text
+            }
+        });
+    }
+
+    // 
+
+    //
+    // setters
+    //
 
     setValue(value) {
         this.instance.dispatch({
@@ -152,22 +224,81 @@ export class _EditorAdapter {
         })
     }
 
-    resetUndoManager() {
-        // TODO
+    //
+    // commands
+    //
+
+    pasteContent(text) {
+        this.instance.dispatch(
+            this.instance.state.replaceSelection(text)
+        );
     }
 
-    // =========================
-    // Commands
-    // =========================
+    async pasteBufferContent() {
+        const text = await navigator.clipboard.readText();
 
-    addCommand(command) {
-        // TODO
-        // через keymap.of(...)
+        this.instance.dispatch(
+            this.instance.state.replaceSelection(text)
+        );
     }
 
-    // =========================
-    // Events
-    // =========================
+    selectAll() {
+        this.instance.focus();
+        this.commands.selectAll(this.instance)
+    }
+
+    duplicateSelection() {
+        const view = this.instance;
+        const { state } = view;
+        const { from, to, empty } = state.selection.main;
+
+        if (!empty) {
+            const text = state.doc.sliceString(from, to);
+
+            view.dispatch({
+                changes: {
+                    from: to,
+                    insert: text
+                },
+                selection: {
+                    anchor: to,
+                    head: to + text.length
+                }
+            });
+
+            return;
+        }
+
+        const line = state.doc.lineAt(from);
+
+        view.dispatch({
+            changes: {
+                from: line.to,
+                insert: "\n" + line.text
+            },
+            selection: {
+                anchor: from + line.length + 1,
+                head: from + line.length + 1
+            }
+        });
+    }
+
+    undo() {
+        this.commands.undo(this.instance)
+    }
+
+    redo() {
+        this.commands.redo(this.instance)
+    }
+
+    toggleCommentLine() {
+        this.instance.focus()
+        this.commands.toggleComment(this.instance)
+    }
+
+    //
+    // events
+    //
 
     onWheel(cb) {
         this.instance.scrollDOM.addEventListener("wheel", cb)

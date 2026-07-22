@@ -34,34 +34,34 @@ export async function initCodeContextMenu(currentPath, pathContext, editor) {
     currentCodeContextMenu = codeContextMenu;
     currentEditor = editor;
 
-    codeContextMenu.bindOnEditor(editor, editor.container)
+    codeContextMenu.bindOnEditor(editor, editor.dom)
 
     codeContextMenu.add({
-        id: "cut", icon: "content_cut", content: "Cut", shortcut: "Ctrl+X", func: () => {
+        id: "cut", icon: "content_cut", content: "Cut line", shortcut: "Ctrl+X", func: () => {
             const selected = editor.getSelectedText();
             if (selected) {
                 copyText(selected);
-                editor.session.replace(editor.getSelectionRange(), "");
+                editor.replace(editor.getSelectionRange(), "");
             } else {
                 const row = editor.getCursorPosition().row;
-                copyText(editor.session.getLine(row));
-                editor.session.removeFullLines(row, row);
+                copyText(editor.getLineText(row));
+                editor.removeFullLines(row, row);
             }
         }
     })
     codeContextMenu.add({
-        id: "copy", icon: "content_copy", content: "Copy", shortcut: "Ctrl+C", func: () => {
+        id: "copy", icon: "content_copy", content: "Copy line", shortcut: "Ctrl+C", func: () => {
             const selected = editor.getSelectedText();
             if (selected) {
                 copyText(selected);
             } else {
-                copyText(editor.session.getLine(editor.getCursorPosition().row));
+                copyText(editor.getLineText(editor.getCursorPosition().row));
             }
         }
     })
     codeContextMenu.add({
-        id: "paste", icon: "content_paste", content: "Paste", shortcut: "Ctrl+V", func: () => {
-            editor.commands.byName.paste.exec(editor);
+        id: "paste", icon: "content_paste", content: "Paste", shortcut: "Ctrl+V", func: async () => {
+            await editor.pasteBufferContent();
         }
     })
     codeContextMenu.add({ type: "divider" })
@@ -78,7 +78,7 @@ export async function initCodeContextMenu(currentPath, pathContext, editor) {
     })
     codeContextMenu.add({
         id: "deleteLine", icon: "delete", content: "Delete Line", shortcut: "Ctrl+D", func: () => {
-            editor.removeLines();
+            editor.removeCurrentLine();
         }
     })
     codeContextMenu.add({ type: "divider" })
@@ -97,19 +97,19 @@ export async function initCodeContextMenu(currentPath, pathContext, editor) {
 
     codeContextMenu.add({
         id: "find", icon: "search", content: "Find", shortcut: "Ctrl+F", func: () => {
-            editor.commands.byName.find.exec(editor);
+            editor.openSearch();
         }
     })
-    codeContextMenu.add({
-        id: "goToLine", icon: "tag", content: "Go to Line...", shortcut: "Ctrl+G", func: () => {
-            editor.commands.byName.gotoLine.exec(editor);
-        }
-    })
+    // codeContextMenu.add({
+    //     id: "goToLine", icon: "tag", content: "Go to Line...", shortcut: "Ctrl+G", func: () => {
+    //         editor.commands.byName.gotoLine.exec(editor);
+    //     }
+    // })
     codeContextMenu.add({ type: "divider" })
 
     codeContextMenu.add({
         id: "toggleComment", icon: "code", content: "Toggle Comment", shortcut: "Ctrl+/", func: () => {
-            editor.toggleCommentLines();
+            editor.toggleCommentLine();
         }
     })
 }

@@ -14,9 +14,9 @@ export class ContextMenu {
 
         document.body.appendChild(context)
 
-        if(Object.keys(elements).length == 0) {
-            Object.keys(elements).forEach(el => {
-                this.add(el)
+        if(Object.keys(elements).length > 0) {
+            Object.keys(elements).forEach(key => {
+                this.add(elements[key])
             })
         }
     }
@@ -38,13 +38,14 @@ export class ContextMenu {
     }
 
     removeItem(id) {
-        if(document.querySelector(`.context-menu__item[id="${id}"]`)) {
-            document.querySelector(`.context-menu__item[id="${id}"]`).remove()
+        const existing = this.context.querySelector(`.context-menu__item[id="${id}"]`)
+        if(existing) {
+            existing.remove()
         }
     }
 
     add({ id, content, icon, shortcut, func, type }) {
-        if(document.querySelector(`.context-menu__item[id="${id}"]`)) {
+        if(this.context.querySelector(`.context-menu__item[id="${id}"]`)) {
             return
         }
 
@@ -121,6 +122,7 @@ export class ContextMenu {
     }
 
     bindOnEditor(editor, editorContainer) {
+        console.log(editorContainer)
         this.scope = editorContainer;
 
         this._showMenu = (x, y) => {
@@ -139,18 +141,18 @@ export class ContextMenu {
         document.addEventListener("mousedown", this._onDocMouseDown);
 
         this._onNativeCtx = (e) => {
-            const domEvent = e.domEvent || e;
-            domEvent.preventDefault();
+            e.preventDefault();
         };
-        editor.on("nativecontextmenu", this._onNativeCtx);
+        const editorDom = editor.instance?.dom ?? editorContainer;
+        editorDom.addEventListener("contextmenu", this._onNativeCtx);
 
-        this._onDocClick = (e) => {
+        this._onDocMouseDownDismiss = (e) => {
             if (e.button !== 0) return;
             if (!this.context.contains(e.target)) {
                 this._hide();
             }
         };
-        document.addEventListener("mousedown", this._onDocClick);
+        document.addEventListener("mousedown", this._onDocMouseDownDismiss);
 
         this._onKey = (e) => {
             if (e.key === "Escape") {
