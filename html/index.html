@@ -84,8 +84,8 @@
 					<div class="popup-title" gls="popups.file.title">File</div>
 
 					<div class="popup-content hidden">
-						<div class="popup-content__item" id="open_folder">Open folder</div>
-						<div class="popup-content__item" id="close_folder">Close folder</div>
+						<div class="popup-content__item" id="open_folder" gls="popups.file.openFolder">Open folder</div>
+						<div class="popup-content__item" id="close_folder" gls="popups.file.closeFolder">Close folder</div>
 					</div>
 				</div>
 				<div class="popup" popup="tools">
@@ -298,10 +298,10 @@
                     </span>
                 </div>
                 <div class="code-footer__section">
-                    <span class="code-footer__section-btn visible-after-opened-folder" id="changeTabSize">Tab size: <span id="currentTabSize">0</span></span>
-                    <span class="visible-after-opened-folder"><span id="currentSymbols">0</span> Symb.</span>
-                    <span class="visible-after-opened-folder"><span id="currentCol">0</span> Col</span>
-                    <span class="visible-after-opened-folder">Line <span id="currentLine">0</span></span>
+                    <span class="code-footer__section-btn visible-after-opened-folder" id="changeTabSize"><span gls="editor.footer.tabSize">Tab size:</span> <span id="currentTabSize">0</span></span>
+                    <span class="visible-after-opened-folder"><span id="currentSymbols">0</span> <span gls="editor.footer.symbols">Symb.</span></span>
+                    <span class="visible-after-opened-folder"><span id="currentCol">0</span> <span gls="editor.footer.column">Col</span></span>
+                    <span class="visible-after-opened-folder"><span gls="editor.footer.line">Line</span> <span id="currentLine">0</span></span>
                     <span class="text-danger text-in-line visible-after-opened-folder" id="bottomErrors">
                         <span class="material-symbols-rounded">cancel</span>
                         <span id="errorCount">0</span>

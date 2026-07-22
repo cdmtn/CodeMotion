@@ -12,13 +12,16 @@
         "createdBy": "Stworzone przez %{name}",
         "description": "Środowisko programistyczne web",
         "closeBtn": "Zamknij",
-        "offlineBtn": "Zaloguj się bez konta"
+        "offlineBtn": "Zaloguj się bez konta",
+        "offlineMode": "Tryb offline"
     },
 
     "auth": {
         "register": {
             "title": "Rejestracja",
             "description": "Zarejestruj się za pomocą adresu e-mail i hasła",
+            "htmlDescription": "Zarejestruj się za pomocą PlusID, nazwy użytkownika i hasła",
+            "formTitle": "Rejestracja",
 
             "inputs": {
                 "username": "Nazwa użytkownika",
@@ -36,6 +39,7 @@
         "login": {
             "title": "Logowanie",
             "description": "Zaloguj się na swoje konto za pomocą adresu e-mail",
+            "htmlDescription": "Zaloguj się za pomocą nazwy użytkownika i hasła",
 
             "inputs": {
                 "email": "E-mail",
@@ -70,7 +74,8 @@
         "alreadyHaveAnAccount": "Masz już konto?",
         "howToRegOrganization": "Jak zarejestrować organizację",
         "registerNewAccount": "Zarejestruj nowe konto",
-        "skipAccountCreation": "Pomiń tworzenie konta"
+        "skipAccountCreation": "Pomiń tworzenie konta",
+        "recoveryLink": "Odzyskiwanie"
     },
 
     "errorPlaceholder": {
@@ -85,9 +90,15 @@
 
     "cancel": "Anuluj",
 
+    "common": {
+        "error": "Wystąpił błąd"
+    },
+
     "popups": {
         "file": {
-            "title": "Plik"
+            "title": "Plik",
+            "openFolder": "Otwórz folder",
+            "closeFolder": "Zamknij folder"
         },
         "tools": {
             "title": "Narzędzia",
@@ -120,6 +131,7 @@
         "errors": "Błędy",
         "project": "Dane projektu",
         "sidebar": "Przełącz pasek boczny",
+        "templates": "Szablony",
 
         "codeSnippet": "Zrób zrzut ekranu",
         "copy": "Kopiuj",
@@ -130,7 +142,14 @@
     },
 
     "editor": {
-        "nocontext": "Kontekst niedostępny"
+        "nocontext": "Kontekst niedostępny",
+        "nocontextFor": "Kontekst niedostępny dla %{name}",
+        "footer": {
+            "tabSize": "Rozmiar tabulacji:",
+            "symbols": "Znaki",
+            "column": "Kolumna",
+            "line": "Linia"
+        }
     },
 
     "explorer": {
@@ -200,11 +219,11 @@
                     "title": "Data utworzenia"
                 },
                 "edit": {
-                    "title": "Organization edit",
-                    "description": "Set up your organization's information",
+                    "title": "Edycja organizacji",
+                    "description": "Skonfiguruj informacje o swojej organizacji",
 
                     "resetInviteCode": {
-                        "title": "Reset invite code"
+                        "title": "Resetuj kod zaproszenia"
                     }
                 },
                 "dangerZone": {
@@ -277,8 +296,8 @@
                 },
 
                 "restoreFolder": {
-                    "title": "Restore last folder",
-                    "description": "Automatically reopen the last opened folder when the app starts"
+                    "title": "Przywróć ostatni folder",
+                    "description": "Automatycznie otwórz ostatnio otwarty folder przy starcie aplikacji"
                 },
 
                 "theme": {
@@ -299,6 +318,7 @@
 
             "editor": {
                 "editorLabel": "Edytor",
+                "contextsLabel": "Konteksty",
 
                 "builtInPythonCausePlatformNote": "{{platformNotSupported}}. Użyte zostanie wbudowane środowisko Python",
 
@@ -320,6 +340,13 @@
                         "builtIn": "Wbudowany w IDE",
                         "userDefined": "Zainstalowany przez użytkownika"
                     }
+                },
+
+                "contexts": {
+                    "go": {
+                        "title": "Parser GOLang",
+                        "description": "Czy parser kontekstu powinien być włączony dla GO?"
+                    }
                 }
             },
 
@@ -327,8 +354,8 @@
                 "title": "Kolorowe karty",
                 "description": "Dolna część aktywnej karty będzie podświetlana w kolorze języka",
                 "confirmClose": {
-                    "title": "Confirm on close",
-                    "description": "Show a confirmation dialog when closing a tab with unsaved changes"
+                    "title": "Potwierdzenie przy zamykaniu",
+                    "description": "Pokazuj dialog potwierdzenia przy zamykaniu karty z niezapisanymi zmianami"
                 }
             }
         },
@@ -365,11 +392,25 @@
         },
 
         "closeConfirm": {
-            "title": "Unsaved changes",
-            "message": "Are you sure you want to close \"%{file}\"?",
-            "description": "Unsaved changes will be lost",
-            "yes": "Yes, close",
-            "save": "Save and close"
+            "title": "Niezapisane zmiany",
+            "message": "Czy na pewno chcesz zamknąć \"%{file}\"?",
+            "description": "Niezapisane zmiany zostaną utracone",
+            "yes": "Tak, zamknij",
+            "save": "Zapisz i zamknij"
+        },
+
+        "templates": {
+            "placeholders": {
+                "title": "Wypełnij szablon",
+
+                "inner": {
+                    "title": "Szablon zawiera placeholdery",
+                    "description": "Wypełnij je poniżej lub pomiń ten krok",
+
+                    "confirmBtn": "Potwierdź",
+                    "skipBtn": "Pomiń"
+                }
+            }
         }
     },
 

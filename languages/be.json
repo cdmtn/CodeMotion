@@ -12,13 +12,16 @@
         "createdBy": "Створана %{name}",
         "description": "Асяроддзе, прызначанае для вэб-распрацоўкі",
         "closeBtn": "Закрыць",
-        "offlineBtn": "Увайсці без акаўнта"
+        "offlineBtn": "Увайсці без акаўнта",
+        "offlineMode": "Аўтаномны рэжым"
     },
 
     "auth": {
         "register": {
             "title": "Рэгістрацыя",
             "description": "Зарэгіструйцеся, указаўшы свой адрас электроннай пошты і пароль",
+            "htmlDescription": "Зарэгіструйцеся з дапамогай PlusID, імя карыстальніка і пароля",
+            "formTitle": "Рэгістрацыя",
 
             "inputs": {
                 "username": "Імя карыстальніка",
@@ -36,6 +39,7 @@
         "login": {
             "title": "Уваход",
             "description": "Увайдзіце ў свой уліковы запіс, указаўшы адрас электроннай пошты",
+            "htmlDescription": "Увайдзіце з дапамогай імя карыстальніка і пароля",
 
             "inputs": {
                 "email": "Пошта",
@@ -70,7 +74,8 @@
         "alreadyHaveAnAccount": "У вас ужо ёсць акаўнт?",
         "howToRegOrganization": "Як зарэгістраваць арганізацыю",
         "registerNewAccount": "Зарэгістраваць новы ўліковы запіс",
-        "skipAccountCreation": "Прапусціць стварэнне ўліковага запісу"
+        "skipAccountCreation": "Прапусціць стварэнне ўліковага запісу",
+        "recoveryLink": "Аднаўленне"
     },
 
     "errorPlaceholder": {
@@ -85,9 +90,15 @@
 
     "cancel": "Адмена",
 
+    "common": {
+        "error": "Адбылася памылка"
+    },
+
     "popups": {
         "file": {
-            "title": "Файл"
+            "title": "Файл",
+            "openFolder": "Адкрыць папку",
+            "closeFolder": "Закрыць папку"
         },
         "tools": {
             "title": "Інструменты",
@@ -120,6 +131,7 @@
         "errors": "Памылкі",
         "project": "Даныя праекта",
         "sidebar": "Пераключыць бакавую панэль",
+        "templates": "Шаблоны",
 
         "codeSnippet": "Зрабіць скрыншот",
         "copy": "Капіяваць",
@@ -130,7 +142,14 @@
     },
 
     "editor": {
-        "nocontext": "Кантэкст недаступны"
+        "nocontext": "Кантэкст недаступны",
+        "nocontextFor": "Кантэкст недаступны для %{name}",
+        "footer": {
+            "tabSize": "Памер табуляцыі:",
+            "symbols": "Сімв.",
+            "column": "Колонка",
+            "line": "Радок"
+        }
     },
 
     "explorer": {
@@ -200,11 +219,11 @@
                     "title": "Створана"
                 },
                 "edit": {
-                    "title": "Organization edit",
-                    "description": "Set up your organization's information",
+                    "title": "Рэдагаванне арганізацыі",
+                    "description": "Наладзьце інфармацыю пра вашу арганізацыю",
 
                     "resetInviteCode": {
-                        "title": "Reset invite code"
+                        "title": "Скінуць код запрашэння"
                     }
                 },
                 "dangerZone": {
@@ -277,8 +296,8 @@
                 },
 
                 "restoreFolder": {
-                    "title": "Restore last folder",
-                    "description": "Automatically reopen the last opened folder when the app starts"
+                    "title": "Аднавіць апошнюю папку",
+                    "description": "Аўтаматычна адкрываць апошнюю папку пры запуску праграмы"
                 },
 
                 "theme": {
@@ -299,6 +318,7 @@
 
             "editor": {
                 "editorLabel": "Рэдактар",
+                "contextsLabel": "Кантэксты",
 
                 "builtInPythonCausePlatformNote": "{{platformNotSupported}}. Будзе выкарыстоўвацца ўбудаванае асяроддзе Python",
 
@@ -320,6 +340,13 @@
                         "builtIn": "Убудаваны ў IDE",
                         "userDefined": "Усталяваны карыстальнікам"
                     }
+                },
+
+                "contexts": {
+                    "go": {
+                        "title": "Парсер GOLang",
+                        "description": "Ці трэба парсіць GOLang файл для кантэксту?"
+                    }
                 }
             },
 
@@ -327,8 +354,8 @@
                 "title": "Каляровыя ўкладкі",
                 "description": "Ніжняя частка актыўнай укладкі будзе падсвечвацца колерам мовы",
                 "confirmClose": {
-                    "title": "Confirm on close",
-                    "description": "Show a confirmation dialog when closing a tab with unsaved changes"
+                    "title": "Пацверджанне пры закрыцці",
+                    "description": "Паказваць дыялог пацверджання пры закрыцці ўкладкі з незахаванымі зменамі"
                 }
             }
         },
@@ -365,11 +392,25 @@
         },
 
         "closeConfirm": {
-            "title": "Unsaved changes",
-            "message": "Are you sure you want to close \"%{file}\"?",
-            "description": "Unsaved changes will be lost",
-            "yes": "Yes, close",
-            "save": "Save and close"
+            "title": "Незахаваныя змены",
+            "message": "Вы ўпэўнены, што хочаце закрыць \"%{file}\"?",
+            "description": "Незахаваныя змены будуць страчаны",
+            "yes": "Так, закрыць",
+            "save": "Захаваць і закрыць"
+        },
+
+        "templates": {
+            "placeholders": {
+                "title": "Запоўніце шаблон",
+
+                "inner": {
+                    "title": "Шабlon утрымлівае плейсхолдеры",
+                    "description": "Запоўніце іх ніжэй або прапусціце гэты крок",
+
+                    "confirmBtn": "Пацвердзіць",
+                    "skipBtn": "Прапусціць"
+                }
+            }
         }
     },
 
