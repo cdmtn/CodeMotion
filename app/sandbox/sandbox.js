@@ -123,6 +123,15 @@ ipcMain.handle("run-extension", async (event, code, permissions, meta) => {
     let allCSSVariables = meta.allCSSVariables != undefined ? meta.allCSSVariables : []
 
     function createAPI(permissions) {
+        const os = require("os")
+        const platformRaw = os.platform()
+        const platformMap = {
+            win32: "windows",
+            darwin: "macos",
+            linux: "linux",
+            freebsd: "freebsd"
+        }
+
         const app = {
             name: extensionName,
             permissions: permissions,
@@ -130,7 +139,19 @@ ipcMain.handle("run-extension", async (event, code, permissions, meta) => {
             path: extensionPath,
             isDev: isDev,
             CSSVariables: allCSSVariables,
-            isPackaged: isPackaged
+            isPackaged: isPackaged,
+            os: {
+                platform: platformMap[platformRaw] || platformRaw,
+                platformRaw: platformRaw,
+                arch: os.arch(),
+                release: os.release(),
+                hostname: os.hostname(),
+                cpus: os.cpus().length,
+                totalMemory: os.totalmem(),
+                freeMemory: os.freemem(),
+                homeDir: os.homedir(),
+                tmpDir: os.tmpdir()
+            }
         };
 
         function setNestedProperty(obj, path, value) {

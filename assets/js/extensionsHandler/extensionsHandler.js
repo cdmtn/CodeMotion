@@ -7,17 +7,112 @@ import { bus } from "../bus.js"
 const installedExtensionModalData = []
 const extensionErrors = {}
 
+const RISKY_PERMISSIONS = [
+    "shell.run",
+    "shell.exec",
+    "shell.kill",
+    "window.create",
+    "window.close"
+]
+
+function hasRiskyPermissions(permissions) {
+    return permissions.filter(p => RISKY_PERMISSIONS.includes(p))
+}
+
+function showRiskyPermissionWarning({ displayName, name, riskyPerms }) {
+    return new Promise((resolve) => {
+        const modal = Modal.create({
+            id: "riskyPermissionWarning",
+            name: "Risky Permissions",
+            title: "Risky Permissions Detected",
+            modalClassList: ["window"],
+            size: "mini",
+            content: [
+                {
+                    type: "row",
+                    classList: ["modal-content"],
+                    items: [
+                        {
+                            type: "container",
+                            id: "perm-warning-body",
+                            html: `
+                                <div class="confirm-desc" style="margin-bottom:12px">You are launching an <b>unverified</b> extension that uses risky permissions:<br><b>${displayName}</b> <span style="opacity:.5">(${name})</span></div>
+                                <div style="background:var(--block-divider-border-color);border-radius:8px;padding:10px 14px;margin:10px 0;font-size:12px;font-family:'JetBrains Mono',monospace">Uses: ${riskyPerms.join(", ")}</div>
+                                <div style="font-size:11px;opacity:.45;line-height:1.5">You can disable this warning in Settings &gt; Extensions.</div>
+                                <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+                                    <button class="modal-button default" id="perm-warning-no">No, disable it</button>
+                                    <button class="modal-button default" id="perm-warning-yes">Yes, enable it</button>
+                                </div>
+                            `
+                        }
+                    ]
+                }
+            ]
+        })
+
+        modal.open()
+
+        const noBtn = modal.el.querySelector("#perm-warning-no")
+        const yesBtn = modal.el.querySelector("#perm-warning-yes")
+
+        if (noBtn) noBtn.addEventListener("click", () => {
+            modal.close()
+            modal.destroy()
+            resolve(false)
+        })
+        if (yesBtn) yesBtn.addEventListener("click", () => {
+            modal.close()
+            modal.destroy()
+            resolve(true)
+        })
+    })
+}
+
+const VALID_PLATFORMS = ["windows", "win", "macos", "mac", "linux", "lin", "all"]
+const PLATFORM_ALIASES = { win: "windows", mac: "macos", lin: "linux", win32: "windows", darwin: "macos" }
+
+function normalizePlatform(p) {
+    return PLATFORM_ALIASES[p] || p
+}
+
+function isPlatformCompatible(platformArray, currentPlatform) {
+    const normalized = platformArray.map(normalizePlatform)
+    const normalizedCurrent = normalizePlatform(currentPlatform)
+    if (normalized.includes("all")) return true
+    return normalized.includes(normalizedCurrent)
+}
+
 function checkPackage(object) {
     if (!object || Object.keys(object).length === 0) {
         return { success: false, msg: "File missing or empty" }
     }
 
-    const requireFields = ["version", "name", "displayName", "main", "permissions", "description", "activeOn"]
+    const requireFields = ["version", "name", "displayName", "main", "permissions", "description", "activeOn", "platform"]
 
     for (const f of requireFields) {
         if (!(f in object)) {
             return { success: false, msg: `Missing field: ${f}` }
         }
+    }
+
+    const platform = object.platform
+
+    if (typeof platform === "string") {
+        if (!VALID_PLATFORMS.includes(platform)) {
+            return { success: false, msg: `Invalid platform "${platform}". Valid: ${VALID_PLATFORMS.join(", ")}` }
+        }
+        object.platform = [platform]
+    } else if (Array.isArray(platform)) {
+        if (platform.length === 0) {
+            return { success: false, msg: "Field 'platform' must be a non-empty array" }
+        }
+        for (const p of platform) {
+            if (!VALID_PLATFORMS.includes(p)) {
+                return { success: false, msg: `Invalid platform "${p}". Valid: ${VALID_PLATFORMS.join(", ")}` }
+            }
+        }
+    } else {
+        return { success: false, msg: "Field 'platform' must be a string or array" }
     }
 
     return { success: true, msg: "All fine" }
@@ -83,6 +178,7 @@ export async function initExtensions() {
 
     const names = extensionsRequest.result
     const settings = await window.electron.readSettings()
+    const currentPlatform = await window.electron.getPlatform()
 
     // PROCEED EACH EXT
     for (const name of names) {
@@ -255,8 +351,13 @@ export async function initExtensions() {
             }
         }
         
-        // 
-        
+        // platform check
+        const extPlatforms = Array.isArray(extensionPackage.platform) ? extensionPackage.platform : [extensionPackage.platform]
+        if (!isPlatformCompatible(extPlatforms, currentPlatform)) {
+            sendDebugWarn(`${name}: skipped — not compatible with ${currentPlatform} (supports: ${extPlatforms.join(", ")})`)
+            continue
+        }
+
         // activation events
         const activeOnEvents = {
             load: () => true,
@@ -295,6 +396,25 @@ export async function initExtensions() {
         // 
         
         async function runExtension() {
+            const riskyPerms = hasRiskyPermissions(permissionsArray)
+
+            if (riskyPerms.length > 0) {
+                const disableWarning = settings?.extensions?.disableRiskyPermissionWarning === true
+
+                if (!disableWarning) {
+                    const approved = await showRiskyPermissionWarning({
+                        displayName: displayName,
+                        name: name,
+                        riskyPerms: riskyPerms
+                    })
+
+                    if (!approved) {
+                        sendDebugWarn(`${name}: extension disabled by user (risky permissions declined)`)
+                        return
+                    }
+                }
+            }
+
             const runResult = await window.electron.runExtension(
                 extensionMainFileContentRes.result,
                 permissionsArray,

@@ -273,6 +273,29 @@ export async function getSettingsModal({ platform }) {
                         ]
                     }
                 ]
+            },
+            {
+                name: "Extensions",
+                icon: "extension",
+                content: [
+                    {
+                        type: "category",
+                        label: "Security",
+                        items: []
+                    },
+                    {
+                        type: "row",
+                        classList: ["background"],
+                        items: [
+                            {
+                                type: "switch",
+                                title: "Disable risky permission warning",
+                                description: "Skips the warning modal for extensions with risky permissions and auto-enables them",
+                                id: "setting_disableRiskyPermissionWarning"
+                            }
+                        ]
+                    }
+                ]
             }
         ]
     })

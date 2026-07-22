@@ -80,18 +80,14 @@ export class _TopBarElement {
         const icon = el.querySelector("#icon")
         const text = el.querySelector(".topbar-center__text")
 
-        const token = ++this._animationToken
-
         el.classList.remove("hidden")
 
         if (icon) icon.style.marginLeft = "0px"
         if (text) text.classList.remove("hidden")
 
-        const contentKey = (text ? text.textContent : "") + "|" + (icon ? (icon.src || icon.textContent) : "")
-        if (contentKey === this._lastContentKey) return
-        this._lastContentKey = contentKey
-
-        const targetWidth = el.scrollWidth
+        const container = el.querySelector(".topbar-center__row")
+        const targetWidth = container ? container.scrollWidth : el.scrollWidth
+        void el.offsetHeight
 
         el.style.maxWidth = targetWidth + "px"
         el.style.minWidth = targetWidth + "px"

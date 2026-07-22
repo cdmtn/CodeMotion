@@ -60,6 +60,8 @@ export async function handleSettings(settingsObject) {
             restoreFolder: document.querySelector("#setting_restoreFolder"),
 
             goContextParser: document.querySelector("#setting_go_context_parser"),
+
+            disableRiskyPermissionWarning: document.querySelector("#setting_disableRiskyPermissionWarning"),
         }
     )
 
@@ -103,6 +105,11 @@ export async function handleSettings(settingsObject) {
     settingsSelectors.goContextParser.addEventListener("click", (e) => {
         let t = e.target
         Setting.goContextParser(t.checked)
+    })
+
+    settingsSelectors.disableRiskyPermissionWarning.addEventListener("click", (e) => {
+        let t = e.target
+        Setting.disableRiskyPermissionWarning(t.checked)
     })
 
     // 
@@ -248,6 +255,9 @@ export async function handleSettings(settingsObject) {
         if("uiScale" in settingsObject.app) Setting.uiScale(settingsObject.app.uiScale, false, false)
         if("language" in settingsObject.app) Setting.language(settingsObject.app.language, false)
         if("restoreFolder" in settingsObject.app) Setting.restoreFolder(settingsObject.app.restoreFolder, false)
+    }
+    if(settingsObject.extensions) {
+        if("disableRiskyPermissionWarning" in settingsObject.extensions) Setting.disableRiskyPermissionWarning(settingsObject.extensions.disableRiskyPermissionWarning, false)
     }
 }
 
@@ -439,6 +449,13 @@ export class Setting {
 
         if(set) {
             await window.electron.setSettings({ editor: { goContextParser: value }})
+        }
+    }
+    static async disableRiskyPermissionWarning(value, set = true) {
+        settingsSelectors.disableRiskyPermissionWarning.checked = value
+
+        if(set) {
+            await window.electron.setSettings({ extensions: { disableRiskyPermissionWarning: value }})
         }
     }
 }
