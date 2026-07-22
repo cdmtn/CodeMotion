@@ -115,11 +115,13 @@ function callback(data) {
 
         if(type == "image") {
             properties["src"] = (srcPath) => {
-                if(!allowedImageFormats.includes(srcPath.split(".").pop())) {
+                const srcBase = srcPath.split("?")[0]
+                if(!allowedImageFormats.includes(srcBase.split(".").pop())) {
                     c.error(`[${type}:src] This image format is not supported. Supported formats: ${allowedImageFormats.join(", ")}`)
                 }
 
-                const p = path.join(extPath, srcPath)
+                const query = srcPath.includes("?") ? "?" + srcPath.split("?")[1] : ""
+                const p = path.join(extPath, srcBase) + query
 
                 mainSender.send("extension-mod-element", genObj({
                     type: "setSrc",
@@ -133,10 +135,12 @@ function callback(data) {
         if(type == "topbarItem") {
             properties["setup"] = (properties = {}) => {
                 if("image" in properties) {
-                    if(!allowedImageFormats.includes(properties.image.split(".").pop())) {
+                    const imgBase = properties.image.split("?")[0]
+                    const imgQuery = properties.image.includes("?") ? "?" + properties.image.split("?")[1] : ""
+                    if(!allowedImageFormats.includes(imgBase.split(".").pop())) {
                         c.error(`[${type}:setup:image] This image format is not supported. Supported formats: ${allowedImageFormats.join(", ")}`)
                     }
-                    properties.image = path.join(extPath, properties.image)
+                    properties.image = path.join(extPath, imgBase) + imgQuery
                 }
 
                 mainSender.send("extension-mod-element", genObj({
