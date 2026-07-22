@@ -69,7 +69,7 @@ function showRiskyPermissionWarning({ displayName, name, riskyPerms }) {
 }
 
 const VALID_PLATFORMS = ["windows", "win", "macos", "mac", "linux", "lin", "all"]
-const PLATFORM_ALIASES = { win: "windows", mac: "macos", lin: "linux" }
+const PLATFORM_ALIASES = { win: "windows", mac: "macos", lin: "linux", win32: "windows", darwin: "macos" }
 
 function normalizePlatform(p) {
     return PLATFORM_ALIASES[p] || p
@@ -77,8 +77,9 @@ function normalizePlatform(p) {
 
 function isPlatformCompatible(platformArray, currentPlatform) {
     const normalized = platformArray.map(normalizePlatform)
+    const normalizedCurrent = normalizePlatform(currentPlatform)
     if (normalized.includes("all")) return true
-    return normalized.includes(currentPlatform)
+    return normalized.includes(normalizedCurrent)
 }
 
 function checkPackage(object) {
