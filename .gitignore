@@ -3,6 +3,7 @@ extensions/
 json/
 dist/
 build/
+codemirror/node_modules
 *.log
 .env
 package-lock.json

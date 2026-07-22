@@ -14,7 +14,8 @@ export class _Languages {
             icon: "js",
             iconExt: "svg",
             mode: "javascript",
-            color: "#f7df1e"
+            color: "#f7df1e",
+
         },
         ts: {
             name: "TypeScript",
@@ -34,7 +35,7 @@ export class _Languages {
             name: "SCSS",
             icon: "scss",
             iconExt: "svg",
-            mode: "scss",
+            mode: "sass",
             color: "#cf649a"
         },
         php: {
@@ -209,7 +210,7 @@ export class _Languages {
             name: "PowerShell",
             icon: "ps",
             iconExt: "svg",
-            mode: "powershell",
+            mode: "text",
             color: "#012456"
         },
         png: {
@@ -328,14 +329,14 @@ export class _Languages {
             name: "WebAssembly",
             icon: "wasm",
             iconExt: "svg",
-            mode: "wasm",
+            mode: "wast",
             color: "#3856ff"  
         },
         java: {
             name: "Java",
             icon: "java",
             iconExt: "svg",
-            mode: "wasm",
+            mode: "java",
             color: "#f03b3b"  
         },
         kt: {
@@ -360,7 +361,7 @@ export class _Languages {
             color: "#a51212" 
         }
     }
-    
+
     static addContext(name, value) {
         this.contexts[name] = value
     }

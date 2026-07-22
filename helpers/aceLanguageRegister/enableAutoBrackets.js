@@ -58,7 +58,7 @@ export function enableAutoBrackets(languageId, editor) {
         return originalRemove.call(this, direction)
     }
 
-    editor.commands.addCommand({
+    editor.addCommand({
         name: "autoBracketNewline",
         bindKey: { win: "Enter", mac: "Enter" },
         exec: function(ed) {

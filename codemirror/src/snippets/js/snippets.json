@@ -1,0 +1,594 @@
+{
+  "arrayMerge": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["am"],
+    "body": ["[...${0:array}]"],
+    "description": "Shallow-copy a single array (clone) or multiple arrays (merge) to a new array literal via the spread operator."
+  },
+
+  "uniq": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["uniq"],
+    "body": ["[...new Set(${0:array})]"],
+    "description": "Creates a duplicate-free version of an array."
+  },
+
+  "range": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["range"],
+    "body": ["[...Array(${0:length}).keys()]"],
+    "description": "An array containing a sequence of numbers from 0 up to, but not including, length."
+  },
+
+  "forEach": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["foreach"],
+    "body": ["${1:array}.forEach((${2}) => {", "  $0", "});"],
+    "description": "Array.prototype.forEach() method."
+  },
+
+  "map": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["map"],
+    "body": ["${1:array}.map((${2:element}) => {", "  $0", "});"],
+    "description": "Array.prototype.map() method."
+  },
+
+  "reduce": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["reduce"],
+    "body": ["${1:array}.reduce((${2:accumulator}, ${3:currentValue}) => {", "  $0", "}$4);"],
+    "description": "Array.prototype.reduce() method."
+  },
+
+  "reduceRight": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["reduceright"],
+    "body": ["${1:array}.reduceRight((${2:accumulator}, ${3:currentValue}) => {", "  $0", "}$4);"],
+    "description": "Array.prototype.reduceRight() method."
+  },
+
+  "filter": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["filter"],
+    "body": ["${1:array}.filter((${2:element}) => {", "  $0", "});"],
+    "description": "Array.prototype.filter() method."
+  },
+
+  "find": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["find"],
+    "body": ["${1:array}.find((${2:element}) => {", "  $0", "});"],
+    "description": "Array.prototype.find() method."
+  },
+
+  "findIndex": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["findindex"],
+    "body": ["${1:array}.findIndex((${2:element}) => {", "  $0", "});"],
+    "description": "Array.prototype.findIndex() method."
+  },
+
+  "some": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["some"],
+    "body": ["${1:array}.some((${2:element}) => {", "  $0", "});"],
+    "description": "Array.prototype.some() method."
+  },
+
+  "every": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["every"],
+    "body": ["${1:array}.every((${2:element}) => {", "  $0", "});"],
+    "description": "Array.prototype.every() method."
+  },
+
+  "flatMap": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["flatmap"],
+    "body": ["${1:array}.flatMap((${2:element}) => {", "  $0", "});"],
+    "description": "Array.prototype.flatMap() method."
+  },
+
+  "constAssignment": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["ca"],
+    "body": ["const ${1:name} = $0"],
+    "description": "Const assignment."
+  },
+
+  "letAssignment": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["la"],
+    "body": ["let ${1:name} = $0"],
+    "description": "Let assignment."
+  },
+
+  "constAssignmentDestructuring": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["cad"],
+    "body": ["const { ${0:key} } = ${1:object};"],
+    "description": "Const object destructuring assignment."
+  },
+
+  "letAssignmentDestructuring": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["lad"],
+    "body": ["let { ${0:key} } = ${1:object};"],
+    "description": "Let object destructuring assignment."
+  },
+
+  "class": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["cs"],
+    "body": [
+      "class ${1:${TM_FILEPATH/.*[\\/\\\\]([^\\/\\\\]+)[\\/\\\\]index\\.[jt]s$|.*[\\/\\\\](.*?)(?:\\.[^.]*)$/$1$2/}} {",
+      "  $0",
+      "}",
+      "",
+      "export default ${1: ${TM_FILEPATH/.*[\\/\\\\]([^\\/\\\\]+)[\\/\\\\]index\\.[jt]s$|.*[\\/\\\\](.*?)(?:\\.[^.]*)$/$1$2/}};"
+    ],
+    "description": "Class exported as default and named after the file (if file is not named index, in which case the class is named after the parent folder)."
+  },
+
+  "classExtends": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["cse"],
+    "body": [
+      "class ${1:${TM_FILEPATH/.*[\\/\\\\]([^\\/\\\\]+)[\\/\\\\]index\\.[jt]s$|.*[\\/\\\\](.*?)(?:\\.[^.]*)$/$1$2/}} extends ${2:SuperClass} {",
+      "  $0",
+      "}",
+      "",
+      "export default ${1: ${TM_FILEPATH/.*[\\/\\\\]([^\\/\\\\]+)[\\/\\\\]index\\.[jt]s$|.*[\\/\\\\](.*?)(?:\\.[^.]*)$/$1$2/}};"
+    ],
+    "description": "Subclass exported as default and named after the file (if file is not named index, in which case the class is named after the parent folder)."
+  },
+
+  "constructor": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["ctr"],
+    "body": ["constructor($1) {", "  super($2);", "  $0", "}"],
+    "description": "Class constructor."
+  },
+
+  "method": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["met"],
+    "body": ["${1:name}($2) {", "  $0", "}"],
+    "description": "Class method."
+  },
+
+  "if": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["if"],
+    "body": ["if (${1:condition}) {", "  $0", "}"],
+    "description": "If statement."
+  },
+
+  "else": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["el"],
+    "body": ["else {", "  $0", "}"],
+    "description": "Else statement."
+  },
+
+  "elseIf": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["ei"],
+    "body": ["else if (${1:condition}) {", "  $0", "}"],
+    "description": "Else-if statement."
+  },
+
+  "ternary": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["ter"],
+    "body": ["${1:condition} ? ${2:expressionIfTrue} : ${0:expressionIfFalse}"],
+    "description": "Ternary operator."
+  },
+
+  "switch": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["switch"],
+    "body": [
+      "switch (${1:key}) {",
+      "  case ${2:value}:",
+      "    $0",
+      "    break;",
+      "",
+      "  default:",
+      "    break;",
+      "}"
+    ],
+    "description": "Switch statement."
+  },
+
+  "case": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["case"],
+    "body": ["case ${1:value}:", "  $0", "  break;"],
+    "description": "Case clause."
+  },
+
+  "consoleLog": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["cl"],
+    "body": ["console.log(${0});"],
+    "description": "Console log."
+  },
+
+  "consoleLogReturn": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["clr"],
+    "body": [" console.log(${0}) ||"],
+    "description": "Console log. Appended by the logical OR operator (for convenient logging in front of an arrow function's implicit return value)."
+  },
+
+  "consoleError": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["ce"],
+    "body": ["console.error(${0});"],
+    "description": "Console error."
+  },
+
+  "consoleWarn": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["cw"],
+    "body": ["console.warn(${0});"],
+    "description": "Console warn."
+  },
+
+  "consoleLogClipboard": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["clc"],
+    "body": ["console.log({ $CLIPBOARD });${0}"],
+    "description": "Console log the value you have copied to your clipboard, inside of an object (for an automatic label)."
+  },
+
+  "consoleLogMessage": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["clm"],
+    "body": ["console.log('${0}');"],
+    "description": "Console log message."
+  },
+
+  "consoleLogMessageReturn": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["clmr"],
+    "body": [" console.log('${0}') ||"],
+    "description": "Console log message. Appended by the logical OR operator (for convenient logging in front of an arrow function's implicit return value)."
+  },
+
+  "consoleLogObject": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["clo"],
+    "body": ["console.log({ ${0} });"],
+    "description": "Console log an object, in which variables can be inserted (for automatic labels)."
+  },
+
+  "consoleLogObjectReturn": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["clor"],
+    "body": [" console.log({ ${0} }) ||"],
+    "description": "Console log an object, in which variables can be inserted (for automatic labels). Appended by the logical OR operator (for convenient logging in front of an arrow function's implicit return value)."
+  },
+
+  "consoleLogGroup": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["clg"],
+    "body": [
+      "// ====== LOG START ======",
+      "console.log('\\n');",
+      "console.group('Log');",
+      "console.log(${1});",
+      "console.groupEnd();",
+      "console.log('\\n');",
+      "// ====== LOG END ======",
+      "${0}"
+    ],
+    "description": "Console log, wrapped in a formatted and styled console group."
+  },
+
+  "consoleLogAnalysis": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["cla"],
+    "body": [
+      "// ====== LOG START ======",
+      "const logStandardDetails = (key, value) => {",
+      "  console.group('value');",
+      "  console.log(value);",
+      "  console.groupEnd();",
+      "  console.group('type');",
+      "  console.log(typeof value);",
+      "  console.groupEnd();",
+      "  console.group('count');",
+      "  console.count(key);",
+      "  console.groupEnd();",
+      "  console.group('trace');",
+      "  console.trace();",
+      "  console.groupEnd();",
+      "}",
+      "",
+      "const logObjectDetails = (value) => {",
+      "  let logValue = value;",
+      "  let isCircularStructure = false;",
+      "",
+      "  try {",
+      "    // Snapshot of log-time value, rather than current (potentially-mutated) value.",
+      "    logValue = JSON.parse(JSON.stringify(value));",
+      "  } catch (error) {",
+      "    // Handle values that can't be converted to JSON (e.g.window).",
+      "    isCircularStructure = true;",
+      "  }",
+      "",
+      "  console.group('log-time value (before any potential mutations)');",
+      "",
+      "  if (isCircularStructure) {",
+      "    console.log('Not determined (object is a circular structure).');",
+      "  } else {",
+      "    console.log(logValue);",
+      "  }",
+      "",
+      "  console.groupEnd();",
+      "  console.group('table');",
+      "  console.table(logValue);",
+      "  console.groupEnd();",
+      "}",
+      "",
+      "const logDetails = (key, value) => {",
+      "  logStandardDetails(key, value);",
+      "  ",
+      "  if (typeof value === 'object' && value !== null) {",
+      "    logObjectDetails(value);",
+      "  }",
+      "}",
+      "",
+      "const logAllValues = () => {",
+      "  Object.entries({ ${1} }).forEach(([key, value]) => {",
+      "    console.groupCollapsed(`%c\\${key}`, 'color: blue;');",
+      "    logDetails(key, value)",
+      "    console.groupEnd();",
+      "  });",
+      "}",
+      "",
+      "console.log('\\n');",
+      "console.group('Log');",
+      "logAllValues()",
+      "console.groupEnd();",
+      "console.log('\\n');",
+      "// ====== LOG END ======",
+      "${0}"
+    ],
+    "description": "Console log an object, in which variables can be inserted. Includes value, type, count, and trace for all values. Includes log-time value and table for objects. Wrapped in a formatted and styled console group."
+  },
+
+  "tryCatch": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["tc"],
+    "body": ["try {", "  $0", "} catch (error) {", "", "}"],
+    "description": "Try-catch statement."
+  },
+
+  "tryCatchFinally": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["tcf"],
+    "body": ["try {", "  $0", "} catch (error) {", "", "} finally {", "", "}"],
+    "description": "Try-catch-finally statement."
+  },
+
+  "tryFinally": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["tf"],
+    "body": ["try {", "  $0", "} finally {", "", "}"],
+    "description": "Try-finally statement."
+  },
+
+  "throwError": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["te"],
+    "body": ["throw new ${1|Error,TypeError,RangeError|}(${0});"],
+    "description": "Throw error object exception."
+  },
+
+  "function": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["function"],
+    "body": ["function ${1:name}($2) {", "  $0", "}"],
+    "description": "Named function declaration."
+  },
+
+  "arrowFunction": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["af"],
+    "body": ["($1) => $0"],
+    "description": "Anonymous arrow function expression."
+  },
+
+  "jsonParse": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["jp"],
+    "body": ["JSON.parse(${1:json})$0"],
+    "description": "JSON.parse() method."
+  },
+
+  "jsonStringify": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["js"],
+    "body": ["JSON.stringify(${1:value})$0"],
+    "description": "JSON.stringify() method."
+  },
+
+  "doWhile": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["dowhile"],
+    "body": ["do {", "  $0", "} while (${1:condition});"],
+    "description": "Do-while loop."
+  },
+
+  "while": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["while"],
+    "body": ["while (${1:condition}) {", "  $0", "}"],
+    "description": "While loop."
+  },
+
+  "for": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["for"],
+    "body": [
+      "for (let ${1:index} = 0; $1 < ${2:array}.length; $1++) {",
+      "  const ${3:element} = $2[$1];",
+      "  $0",
+      "}"
+    ],
+    "description": "For loop."
+  },
+
+  "forIn": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["forin"],
+    "body": [
+      "for (const ${1:key} in ${2:object}) {",
+      "  if ($2.hasOwnProperty($1)) {",
+      "    const ${3:element} = $2[$1];",
+      "    $0",
+      "  }",
+      "}"
+    ],
+    "description": "For-in loop."
+  },
+
+  "forOf": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["forof"],
+    "body": ["for (const ${1:iterator} of ${2:object}) {", "  $0", "}"],
+    "description": "For-of loop."
+  },
+
+  "useStrict": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["use"],
+    "body": ["'use strict';$0"],
+    "description": "Use strict statement."
+  },
+
+  "import": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["imp"],
+    "body": ["import ${0:module} from '${1}';"],
+    "description": "Import module."
+  },
+
+  "exportDefault": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["expd"],
+    "body": ["export default $0"],
+    "description": "Default export."
+  },
+
+  "export": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["exp"],
+    "body": ["export $0"],
+    "description": "Named export."
+  },
+
+  "objectMerge": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["om"],
+    "body": ["{ ...${0:object} }"],
+    "description": "Shallow-copy a single object (clone) or multiple objects (merge) to a new object literal via the spread operator. Similar to the Object.assign() method, but has the added benefit of not allowing for shallow mutations."
+  },
+
+  "objectEntries": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["oe"],
+    "body": ["Object.entries(${0:object})"],
+    "description": "Object.entries() method."
+  },
+
+  "objectFromEntries": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["ofe"],
+    "body": ["Object.fromEntries(${0:iterable})"],
+    "description": "Object.fromEntries() method."
+  },
+
+  "objectKeys": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["ok"],
+    "body": ["Object.keys(${0:object})"],
+    "description": "Object.keys() method."
+  },
+
+  "objectValues": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["ov"],
+    "body": ["Object.values(${0:object})"],
+    "description": "Object.values() method."
+  },
+
+  "return": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["ret"],
+    "body": ["return $0"],
+    "description": "Return statement."
+  },
+
+  "returnMultiline": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["retm"],
+    "body": ["return (", "  $0", ");"],
+    "description": "Return statement for multiline expression that includes complex values (e.g. JSX)."
+  },
+
+  "setTimeout": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["st"],
+    "body": ["setTimeout(() => {", "  $0", "}, ${1:delay});"],
+    "description": "setTimeout() method."
+  },
+
+  "setInterval": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["si"],
+    "body": ["setInterval(() => {", "  $0", "}, ${1:delay});"],
+    "description": "setInterval() method."
+  },
+
+  "typeof": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["to"],
+    "body": [
+      "typeof ${0:operand} === '${1|bigint,boolean,function,number,object,string,symbol,undefined|}'"
+    ],
+    "description": "typeof operator."
+  },
+
+  "instanceof": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["io"],
+    "body": ["${1:object} instanceof ${0:constructor}"],
+    "description": "instanceof operator."
+  },
+
+  "arrayIsArray": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["aia"],
+    "body": ["Array.isArray(${0:value})"],
+    "description": "Array.isArray() method."
+  },
+
+  "isPlainObject": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["isPlainObject"],
+    "body": ["typeof ${0:value} === 'object' && !Array.isArray(${0:value}) && ${0:value} !== null"],
+    "description": "Check if value is a plain object."
+  },
+
+  "isNil": {
+    "scope": "javascript,typescript,javascriptreact,typescriptreact",
+    "prefix": ["isNil"],
+    "body": ["typeof ${0:value} === 'undefined' || ${0:value} === null"],
+    "description": "Check if value is null or undefined."
+  }
+}

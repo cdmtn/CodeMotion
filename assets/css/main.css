@@ -5,6 +5,7 @@
 @import url("xterm-custom.css");
 @import url("editor/screenshot.css");
 @import url("extensions/elementWrapper.css");
+@import url("codemirror.css");
 
 :root {
     --body-color: #141414;

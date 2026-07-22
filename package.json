@@ -6,7 +6,8 @@
     "main": "app/dist/main.js",
     "scripts": {
         "build": "tsc",
-        "start": "npm run build && electron .",
+        "start": "npm run cdbuild && npm run build && electron .",
+        "cdbuild": "cd codemirror && npm run build",
         "dist": "npm run build && electron-builder",
         "dist-linux": "npm run build && electron-builder --linux"
     },
@@ -15,6 +16,7 @@
         "productName": "CodeMotion",
         "files": [
             "ace/**/*",
+            "codemirror/**/*",
             "app/**/*",
             "assets/**/*",
             "helpers/**/*",

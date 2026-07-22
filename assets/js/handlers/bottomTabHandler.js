@@ -19,7 +19,7 @@ export async function setCurrentLanguage(langName, properties = {}) {
 
         aviableLanguageNames.push({
             name: lang.name,
-            id: lang.mode,
+            id: key,
             secondary: key,
             icon
         })
@@ -29,7 +29,7 @@ export async function setCurrentLanguage(langName, properties = {}) {
 
     changeLanguageList.on("click", (data) => {
         document.querySelectorAll("#currentLang").forEach(e => {
-            properties.editor.session.setMode(`ace/mode/${data.id}`)
+            properties.editor.setLanguage(data.id)
             e.textContent = data.name
         })
     })
@@ -129,7 +129,7 @@ export function disableErrors(editor) {
 
     runtimeErrors.classList.add("disabled")
 
-    editor.session.setOption("useWorker", false);
+    editor.setOption("useWorker", false);
 }
 export function enableErrors(editor) {
     bottomErrors.classList.remove("hidden")
@@ -137,5 +137,5 @@ export function enableErrors(editor) {
 
     runtimeErrors.classList.remove("disabled")
 
-    editor.session.setOption("useWorker", true);
+    editor.setOption("useWorker", true);
 }

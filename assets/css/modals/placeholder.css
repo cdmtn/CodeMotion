@@ -4,4 +4,5 @@
 .modal-category__item.placeholder-bigdata .modal-category__item-desc {
     font-size: 20px;
     opacity: 1;
+    user-select: all;
 }

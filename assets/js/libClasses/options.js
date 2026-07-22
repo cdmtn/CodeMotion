@@ -15,8 +15,8 @@ export class _Options {
         optionsElement.innerHTML = `
             <div class="options-selector">
                 <p id="current"></p>
-            </div>
-            <div class="options-selector__items hidden"></div>
+           </div>
+       <div class="options-selector__items hidden"></div>
         `;
 
         this.id = id;

@@ -263,7 +263,8 @@ export async function initExtensions() {
 
             language: (name, onActivate) => {
                 const handler = (data) => {
-                    const mode = data.detail.editor.session.$modeId.split("ace/mode/")[1]
+                    const mode = data.detail.editor.getCurrentLanguage().split("ace/mode/")[1]
+                    console.log(mode)
 
                     if (mode === name) {
                         onActivate()

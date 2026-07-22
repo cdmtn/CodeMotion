@@ -21,10 +21,10 @@ import {
     dedent,
     GLS,
     fitAceHeight,
-    setAppTitle
+    setAppTitle,
+    EditorAdapter
 } from "../lib.js"
 import { BottomWindow, closeAllWindows } from "../handlers/BottomWindowHandler.js"
-import { initJSSH } from "../../../ace/plugins/languageSyntaxEnhance.js"
 import { enableSmoothScroll } from "../../plugins/aceSmoothScroller/index.js"
 import { Setting } from "../settings.js"
 import {
@@ -43,9 +43,6 @@ import { minifyJS, minifyCSS } from "../handlers/minifyHandlers.js"
 import { initCodeContextMenu, destroyCodeContextMenu } from "../codeContextMenu.js"
 import { enableSave, disableSave } from "../../../app/renderer.js"
 import { bus, sendEvent } from "../bus.js"
-
-import { FindNoUsages } from "../editor/noUsagesFinder.js"
-import { ColorComments } from "../editor/colorComments.js"
 
 import { renderPyMsgSuccess, renderPyMsgErr } from "../terminalRenderer/PyRuntimeHandler.js"
 
@@ -233,13 +230,7 @@ export function updateTabPath(oldPath, newPath, newName) {
 
 export class themeEditors {
     static current = {}
-
-    static themes = {
-        default: "github_dark",
-        light: "clouds",
-        "contrast-dark": "tomorrow_night_bright",
-        terminal: "tomorrow_night_bright"
-    }
+    static themes = window.CodeMirror.ThemeParents
 
     constructor(editor) {
         this.editor = editor
@@ -256,18 +247,18 @@ export class themeEditors {
     }
 
     apply(id) {
-        this.editor.setTheme(`ace/theme/${themeEditors.themes[id]}`)
+        this.editor.setTheme(themeEditors.themes[id])
     }
 }
 
 function addThemeModificator(editor) {
     function proccess(theme) {
         if (themeEditors.has(theme)) {
-            loadAceModule(`theme-${themeEditors.themes[theme]}`)
-            editor.setTheme(`ace/theme/${themeEditors.themes[theme]}`)
+            editor.setTheme(themeEditors.themes[theme])
+
             themeEditors.current = {
                 name: theme,
-                ace: themeEditors.themes[theme]
+                codemirror: themeEditors.themes[theme]
             }
         }
     }
@@ -332,7 +323,7 @@ function initializeGlobalButtons(settings = {}) {
         if (!rec) return;
 
         let value = rec.editor.getValue()
-        rec.editor.session.setValue(minifyJS(value))
+        rec.editor.setValue(minifyJS(value))
     }
     const jsMinifyBtn = document.querySelector("#js-minify");
     if (jsMinifyBtn) {
@@ -346,7 +337,7 @@ function initializeGlobalButtons(settings = {}) {
         if (!rec) return;
 
         let value = rec.editor.getValue()
-        rec.editor.session.setValue(minifyCSS(value))
+        rec.editor.setValue(minifyCSS(value))
     }
     const cssMinifyBtn = document.querySelector("#css-minify");
     if (cssMinifyBtn) {
@@ -575,7 +566,7 @@ function initializeChangeTabSizeButton(settings) {
         const rec = tabsByPath.get(currentPath);
         if (!rec) return;
 
-        rec.editor.session.setTabSize(size)
+        rec.editor.setTabSize(size)
         setTabSize(size)
     }
 
@@ -670,7 +661,14 @@ export async function openTab(path, content, extension, name, pathContext, isNew
     let fileNameInfo = Filenames.get(name)
     let fileNameInfoIcon = await Filenames.getIconPath(name)
 
-    const editor = ace.edit(id);
+    const codeMirrorView = window.CodeMirror.create(
+        document.getElementById(id),
+        {
+            value: content
+        }
+    )
+
+    const editor = new EditorAdapter(codeMirrorView);
 
     addThemeModificator(editor)
 
@@ -700,7 +698,7 @@ export async function openTab(path, content, extension, name, pathContext, isNew
     initializeChangeTabSizeButton(settings)
     updateVisibleOnElements(extension, language)
 
-    editor.session.setMode(`ace/mode/${fileNameInfo == false ? language.mode : fileNameInfo.mode}`);
+    editor.setLanguage(fileNameInfo == false ? extension : fileNameInfo.mode);
     editor.setOptions({
         enableBasicAutocompletion: false,
         enableSnippets: true,
@@ -709,7 +707,6 @@ export async function openTab(path, content, extension, name, pathContext, isNew
         cursorStyle: "smooth",
         fixedWidthGutter: true
     });
-    editor.getSession().setUseWorker(true)
 
     window.electron.triggers.sendFileOpened(
         {
@@ -753,7 +750,7 @@ export async function openTab(path, content, extension, name, pathContext, isNew
         }
     }
 
-    editor.container.addEventListener('wheel', (e) => {
+    editor.onWheel((e) => {
         if (!e.ctrlKey && !e.metaKey) return
         e.preventDefault()
         e.stopPropagation()
@@ -765,76 +762,42 @@ export async function openTab(path, content, extension, name, pathContext, isNew
     const languageContextName = fileNameInfo != false ? `${fileNameInfo.name} (${fileNameInfo.mode.toUpperCase()})` : language.name
     setCurrentLanguage(languageContextName, { editor: editor })
 
-    // install color comments
-    ColorComments.install(editor)
-
     if (tabsByPath.has(path)) {
         activateTab(tabsByPath.get(path).tabEl);
         return;
     }
 
     function updateEditorData() {
-        let cursor = editor.getCursorPosition()
-        let editorValue = editor.getValue()
-        let editorSession = editor.getSession()
+        const cursor = editor.getCursorPosition();
+        const editorValue = editor.getValue();
 
-        let line = cursor.row
-        let col = cursor.column
+        setColumn(cursor.column + 1);
+        setLine(cursor.row + 1);
 
-        setColumn(col + 1)
-        setLine(line + 1)
+        setSymbols(editorValue.length);
+        setErrors(editor.getAnnotations());
 
-        setSymbols(editorValue.length)
-        setErrors(editorSession.getAnnotations())
-
-        if(editorValue.trim().length > 0) {
-            codeToolsWrapper.classList.add("hidden")
-        }
-        else {
-            codeToolsWrapper.classList.remove("hidden")
-        }
+        codeToolsWrapper.classList.toggle(
+            "hidden",
+            editorValue.trim().length > 0
+        );
     }
 
-    ace.config.loadModule(`ace/mode/${language.mode}`, () => {
-        if (language.mode === "javascript") {
-            initJSSH(editor)
-        }
-        else {
-            enableErrors(editor)
-        }
-    });
-
-    editor.renderer.on("afterRender", () => {
+    editor.onAfterRender(() => {
         bindCodeTools({ editor: editor, extension: extension })
     })
 
-    editor.session.on('change', async () => {
-        await setEditorContext({}, {
-            editor: editor,
-            language: language,
-            updateEditorData: updateEditorData,
-            path: path,
-            settings: settings
-        })
+    editor.onChangeCursor(triggerCursorChanged)
 
-        triggerAceChanged({ editor: editor, extension: extension, language: language })
-
-        // unused find
-
-        FindNoUsages.install(editor)
-    });
-
-    editor.selection.on("changeCursor", triggerCursorChanged)
-
-    editor.on('mousedown', function () {
+    editor.onMouseDown(function () {
         updateEditorData()
     });
 
-    editor.on('focus', function () {
+    editor.onFocus(function () {
         updateEditorData()
     });
 
-    editor.on("click", async () => {
+    editor.onClick(async () => {
         await setEditorContext({ errorsUpdate: false }, {
             editor: editor,
             language: language,
@@ -844,25 +807,16 @@ export async function openTab(path, content, extension, name, pathContext, isNew
         })
     });
 
-    editor.session.on('changeAnnotation', function () {
-        const worker = editor.session.$worker
-        if (worker) {
-            worker.send('changeOptions', [{ asi: true }]);
-        }
-
-        updateEditorData()
-    });
-
     if (cached) {
         editor.setValue(cached.content ?? "", -1);
-        editor.session.getUndoManager().reset();
-        setErrors(editor.getSession().getAnnotations())
-        if (cached.cursor) editor.selection.moveTo(cached.cursor.row, cached.cursor.column);
-        if (typeof cached.scrollTop === "number") editor.session.setScrollTop(cached.scrollTop);
+        editor.resetUndoManager();
+        setErrors(editor.getAnnotations())
+        if (cached.cursor) editor.moveCursorTo(cached.cursor.row, cached.cursor.column);
+        if (typeof cached.scrollTop === "number") editor.setScrollTop(cached.scrollTop);
     } else {
         editor.setValue(content ?? "", -1);
-        editor.session.getUndoManager().reset();
-        setErrors(editor.getSession().getAnnotations())
+        editor.resetUndoManager();
+        setErrors(editor.getAnnotations())
     }
 
     const tab = document.createElement("div");
@@ -975,8 +929,18 @@ export async function openTab(path, content, extension, name, pathContext, isNew
             closeTab(path);
         }
     });
-    editor.session.on('change', async () => {
+    editor.onChange(async () => {
         tab.classList.add("not-saved");
+
+        await setEditorContext({}, {
+            editor: editor,
+            language: language,
+            updateEditorData: updateEditorData,
+            path: path,
+            settings: settings
+        })
+
+        triggerAceChanged({ editor: editor, extension: extension, language: language })
     });
 
     activateTab(tab);
@@ -1068,7 +1032,7 @@ export function closeTab(path) {
     const state = {
         content: editor.getValue(),
         cursor: editor.getCursorPosition(),
-        scrollTop: editor.session.getScrollTop(),
+        scrollTop: editor.getScrollTop(),
         when: Date.now()
     };
     recentlyClosed.set(path, state);
@@ -1186,7 +1150,7 @@ function bindEditorBtns(editor, properties = {}) {
 
     if (codeSnippet) {
         codeSnippet.addEventListener("click", () => {
-            const currentMode = editor.session.$modeId
+            const currentMode = editor.currentLanguageId()
             const currentTheme = editor.getTheme()
 
             const captureWrapper = document.createElement("div")
@@ -1220,16 +1184,15 @@ function bindEditorBtns(editor, properties = {}) {
 
             document.body.appendChild(captureWrapper)
 
-            const captureEditor = ace.edit(captureArea)
-            captureEditor.session.setMode(currentMode);
+            const captureEditor = new EditorAdapter(ace.edit(captureArea))
+            captureEditor.setLanguage(currentMode);
             captureEditor.setTheme(currentTheme);
 
             captureEditor.setOption("scrollPastEnd", 0);
             captureEditor.setOption("maxLines", Infinity);
             captureEditor.setOption("wrap", true);
 
-            captureEditor.session.setUseWrapMode(true);
-            captureEditor.session.setUseWorker(false)
+            captureEditor.useWrapMode(true);
 
             const flashEl = document.createElement("div")
             flashEl.classList.add("ace-flash", "hidden")

@@ -15,6 +15,7 @@ import { createDIV, createIcon } from "./modalsHandler/handlers/helpers.js"
 import { _GLS } from "./libClasses/gls.js"
 import { _Filenames } from "./libClasses/fillenames.js"
 import { _CodeTemplates } from "./libClasses/codeTemplates.js"
+import { _EditorAdapter } from "./libClasses/EditorAdapter.js"
 
 let runtimeErrors = []
 let runtimeErrorsCount = 0
@@ -33,6 +34,7 @@ export const ContextMenuLoader = _ContextMenuLoader
 export const Loader = _Loader
 export const GLS = _GLS
 export const CodeTemplates = _CodeTemplates
+export const EditorAdapter = _EditorAdapter
 
 // Language: adds a image icons
 const imageIcons = ["png", "jpg", "jpeg", "gif", "webp", "bmp", "svg", "ico", "avif", "tif", "tiff", "heic", "heif"]

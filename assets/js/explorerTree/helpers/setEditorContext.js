@@ -7,59 +7,13 @@ import { CSSParser } from "../../contextParsers/cssParser.js"
 import { addRuntimeError, GLS } from "../../lib.js"
 import { GoParser } from "../../contextParsers/goParser.js"
 
-const errors = new Map()
-const markerIds = new Set()
-const aceRange = ace.require("ace/range").Range
-
 let diagnosticTimer = null
 let generation = 0
-let renderToken = 0
 
-function makeErrorKey(item, path) {
-    return `${path}:${item.start ?? `${item.line}:${item.col}`}:${item.message}`
-}
-
-function renderErrors({ editor }) {
-    const token = ++renderToken
-
-    for (const id of markerIds) {
-        editor.session.removeMarker(id)
-    }
-    markerIds.clear()
-
-    const annotations = []
-
-    for (const err of errors.values()) {
-        if (token !== renderToken) return
-
-        err.markerId = null
-        annotations.push(err.annotation)
-
-        const id = editor.session.addMarker(
-            err.range,
-            "error-marker",
-            "fullLine"
-        )
-
-        markerIds.add(id)
-        err.markerId = id
-    }
-
-    editor.session.setAnnotations(annotations)
-    editor.renderer.updateFull()
-}
-
-function clearErrors({ editor }) {
-    const allMarkers = editor.session.getMarkers()
-    for (const id in allMarkers) {
-        if (allMarkers[id].clazz === "error-marker") {
-            editor.session.removeMarker(Number(id))
-        }
-    }
-    markerIds.clear()
-    errors.clear()
-    editor.session.setAnnotations([])
-    editor.renderer.updateFull()
+const SEVERITY_MAP = {
+    Warning: "warning",
+    Suggestion: "info",
+    Error: "error",
 }
 
 function getOxcLanguage(filePath, fallback) {
@@ -83,34 +37,34 @@ function getOxcLanguage(filePath, fallback) {
 }
 
 function showDiagnostics(diagnostics, { editor, path }) {
-    clearErrors({ editor })
+    const docLength = editor.getValue().length
+
+    const list = diagnostics.map(item => {
+        const from = clamp(item.from, docLength)
+        const to = clamp(item.to, docLength, from)
+
+        return {
+            from,
+            to,
+            severity: SEVERITY_MAP[item.category] || "error",
+            message: item.message,
+        }
+    })
+
+    editor.setDiagnostics(list)
 
     diagnostics.forEach(item => {
-        const line = Math.max(1, Number(item.line) || 1)
-        const col = Math.max(0, Number(item.col) || 0)
-        const row = line - 1
-        const range = new aceRange(row, col, row, 999)
-
-        errors.set(makeErrorKey(item, path), {
-            range,
-            annotation: {
-                row,
-                column: col,
-                text: item.message,
-                type: item.category === "Warning" ? "warning" : "error",
-            },
-            markerId: null,
-        })
-
         addRuntimeError({
             msg: item.message,
-            line,
-            col,
+            line: Math.max(1, Number(item.line) || 1),
+            col: Math.max(0, Number(item.col) || 0),
             time: Math.floor(Date.now() / 1000),
         })
     })
+}
 
-    renderErrors({ editor })
+function clamp(value, max, min = 0) {
+    return Math.min(Math.max(value, min), max)
 }
 
 export async function setEditorContext(properties = {}, { editor, language, updateEditorData, path, settings }) {
@@ -121,8 +75,6 @@ export async function setEditorContext(properties = {}, { editor, language, upda
     const currentGen = ++generation
 
     const setScriptContext = async (isTypeScript) => {
-        editor.getSession().setUseWorker(false)
-
         const oxcLanguage = getOxcLanguage(path, isTypeScript ? "ts" : "js")
         const getDiagnostics = isTypeScript
             ? window.electron.typescriptDiagnostic
@@ -163,7 +115,7 @@ export async function setEditorContext(properties = {}, { editor, language, upda
             const row = editor.getCursorPosition().row + 1
 
             const chain = cssParser.getContextChain(editor.getValue(), row)
-            cssParser.renderContext(chain) 
+            cssParser.renderContext(chain)
         },
         golang: async () => {
             const goParser = new GoParser()
@@ -175,20 +127,18 @@ export async function setEditorContext(properties = {}, { editor, language, upda
         }
     }
 
-    if("editor" in settings) {
-        if("goContextParser" in settings.editor && settings.editor.goContextParser == false) {
+    if ("editor" in settings) {
+        if ("goContextParser" in settings.editor && settings.editor.goContextParser == false) {
             delete contextMap["golang"]
         }
     }
 
     updateEditorData()
 
-    if(language.mode in contextMap) {
+    if (language.mode in contextMap) {
         contextMap[language.mode]()
     }
     else {
-        editor.getSession().setUseWorker(true)
-
         const codeStructure = document.querySelector(".code-structure")
         if (codeStructure) {
             codeStructure.textContent = gls.get("editor.nocontextFor", { name: language.name })

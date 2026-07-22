@@ -1,0 +1,6 @@
+[
+    "document", "window", "console", "navigator", "localStorage", "sessionStorage",
+    "fetch", "setTimeout", "setInterval", "requestAnimationFrame",
+    "addEventListener", "removeEventListener", "querySelector", "querySelectorAll",
+    "getElementById", "getElementsByClassName", "createElement"
+]

@@ -7,10 +7,10 @@ export class _TopBarElement {
         const normalizedId = idify(id)
 
         if (_TopBarElement.instances.has(normalizedId)) {
-            return _TopBarElement.instances.get(normalizedId)
+	        return _TopBarElement.instances.get(normalizedId)
         }
 
-        this.parent = document.querySelector("#topbarCenter .status-indicator")
+	    this.parent = document.querySelector("#topbarCenter .status-indicator")
 
         let item = document.querySelector(`#${normalizedId}`)
 

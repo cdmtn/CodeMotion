@@ -57,11 +57,13 @@ function formatError(error, code, lineTable) {
     const end = clampOffset(label?.end, code.length);
     const loc = offsetToLoc(start, lineTable);
 
+    const safeEnd = Math.max(end, start + 1);
+
     return {
         message: error.message || label?.message || "Syntax error",
         category: severityToCategory(error.severity),
-        start,
-        length: Math.max(1, end - start),
+        from: start,
+        to: safeEnd,
         line: loc.line,
         col: loc.column,
     };
@@ -71,8 +73,8 @@ function formatThrownError(error, code) {
     return {
         message: error?.message || "Unable to parse source",
         category: "Error",
-        start: 0,
-        length: Math.max(1, code.length),
+        from: 0,
+        to: Math.max(1, code.length),
         line: 1,
         col: 0,
     };
