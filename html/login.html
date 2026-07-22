@@ -49,36 +49,36 @@
                     <div class="user-logo">
                         <span class="material-symbols-rounded">key</span>
                     </div>
-                    <div class="user-logo__title">Login</div>
+                    <div class="user-logo__title" gls="auth.login.title">Login</div>
                 </div>
                 <div class="user-logo__section">
-                    <div class="user-logo__desc">Login in your account username and password</div>
+                    <div class="user-logo__desc" gls="auth.login.htmlDescription">Login in your account username and password</div>
                 </div>
             </div>
 
             <div class="user-form__inputs">
                 <div class="form-element">
                     <input type="text" spellcheck="false" id="email"/>
-                    <span class="form-label">EMail</span>
+                    <span class="form-label" gls="auth.login.inputs.email">EMail</span>
                 </div>
                 <div class="form-element">
                     <input type="password" spellcheck="false" id="password"/>
-                    <span class="form-label">Password</span>
+                    <span class="form-label" gls="auth.login.inputs.password">Password</span>
                 </div>
-                <div class="form-submit">
+                <div class="form-submit" gls="auth.login.inputs.submitBtn">
                     Login
                 </div>
             </div>
         </div>
 
-        <div class="user-form__error hidden">
+        <div class="user-form__error hidden" gls="common.error">
             Some error
         </div>
 
         <div class="user-form__links">
-            <a href="register.html" id="registerNewAccount">Register a new account</a>
-            <a href="recovery.html" id="recovery">Recovery</a>
-            <a id="skipAccountCreation">Skip account creation</a>
+            <a href="register.html" id="registerNewAccount" gls="auth.registerNewAccount">Register a new account</a>
+            <a href="recovery.html" id="recovery" gls="auth.recoveryLink">Recovery</a>
+            <a id="skipAccountCreation" gls="auth.skipAccountCreation">Skip account creation</a>
         </div>
     </div>
 </body>

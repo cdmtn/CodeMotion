@@ -12,13 +12,16 @@
         "createdBy": "Created by %{name}",
         "description": "Web development environment",
         "closeBtn": "Close",
-        "offlineBtn": "Sign in without an account"
+        "offlineBtn": "Sign in without an account",
+        "offlineMode": "Offline mode"
     },
 
     "auth": {
         "register": {
             "title": "Register",
             "description": "Sign up using your email address and password",
+            "htmlDescription": "Signup with your PlusID with your account username and password",
+            "formTitle": "Register",
 
             "inputs": {
                 "username": "Username",
@@ -36,6 +39,7 @@
         "login": {
             "title": "Login",
             "description": "Log in to your account using your email address",
+            "htmlDescription": "Login in your account username and password",
 
             "inputs": {
                 "email": "EMail",
@@ -70,7 +74,8 @@
         "alreadyHaveAnAccount": "Already have an account?",
         "howToRegOrganization": "How to register organization",
         "registerNewAccount": "Register a new account",
-        "skipAccountCreation": "Skip account creation"
+        "skipAccountCreation": "Skip account creation",
+        "recoveryLink": "Recovery"
     },
 
     "errorPlaceholder": {
@@ -85,9 +90,15 @@
 
     "cancel": "Cancel",
 
+    "common": {
+        "error": "Some error"
+    },
+
     "popups": {
         "file": {
-            "title": "File"
+            "title": "File",
+            "openFolder": "Open folder",
+            "closeFolder": "Close folder"
         },
         "tools": {
             "title": "Tools",
@@ -132,7 +143,13 @@
 
     "editor": {
         "nocontext": "Context unavailable",
-        "nocontextFor": "Context unavailable for %{name}"
+        "nocontextFor": "Context unavailable for %{name}",
+        "footer": {
+            "tabSize": "Tab size:",
+            "symbols": "Symb.",
+            "column": "Col",
+            "line": "Line"
+        }
     },
 
     "explorer": {
