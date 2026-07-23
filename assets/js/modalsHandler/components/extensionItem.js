@@ -9,6 +9,7 @@ export function renderExtensionItem(properties = {}) {
     const tags = properties.tags
     const buttons = properties.buttons
     const id = properties.id
+    const toggle = properties.toggle
 
     const wrapper = document.createElement("div")
     wrapper.classList.add("modal-extension__item")
@@ -107,6 +108,27 @@ export function renderExtensionItem(properties = {}) {
 
             btnWrapper.appendChild(btnEl)
         })
+    }
+
+    if (toggle && typeof toggle.onChange === "function") {
+        const toggleLabel = document.createElement("label")
+        toggleLabel.classList.add("round-switch", "modal-extension__toggle")
+
+        const toggleInput = document.createElement("input")
+        toggleInput.type = "checkbox"
+        toggleInput.checked = toggle.checked !== false
+
+        const toggleSlider = document.createElement("span")
+        toggleSlider.classList.add("slider")
+
+        toggleLabel.appendChild(toggleInput)
+        toggleLabel.appendChild(toggleSlider)
+
+        toggleInput.addEventListener("change", () => {
+            toggle.onChange(toggleInput.checked)
+        })
+
+        btnWrapper.appendChild(toggleLabel)
     }
 
     contentEl.appendChild(contentTitleEl)

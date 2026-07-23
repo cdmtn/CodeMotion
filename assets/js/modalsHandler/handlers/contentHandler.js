@@ -11,6 +11,7 @@ import { renderContainer } from "../components/container.js"
 import { renderCentered } from "../components/centered.js"
 import { renderDivider } from "../components/divider.js"
 import { renderImage } from "../components/image.js"
+import { renderDropdown } from "../components/dropdown.js"
 
 const types = {
     columns: (wrapper, data) => {
@@ -204,6 +205,7 @@ function contentItemsHandler(element, itemsData) {
             const image = valid(item.image) ?? false
             const tags = validArray(item.tags) ?? []
             const buttons = validArray(item.buttons) ?? []
+            const toggle = valid(item.toggle) ?? null
 
             const extensionItemElement = renderExtensionItem(
                 {
@@ -213,7 +215,8 @@ function contentItemsHandler(element, itemsData) {
                     image: image,
                     tags: tags,
                     buttons: buttons,
-                    id: id
+                    id: id,
+                    toggle: toggle
                 }
             )
 
@@ -333,6 +336,27 @@ function contentItemsHandler(element, itemsData) {
             element.appendChild(imageElement)
 
             appendGlobalProperties(item, imageElement)
+        }
+        if (type == "dropdown") {
+            const id = valid(item.id) ?? false
+            const title = valid(item.title) ?? "Unnamed"
+            const description = valid(item.description) ?? "No description provided"
+            const options = validArray(item.options) ?? []
+            const selected = valid(item.selected) ?? ""
+
+            const dropdownElement = renderDropdown(
+                {
+                    id: id,
+                    title: title,
+                    description: description,
+                    options: options,
+                    selected: selected
+                }
+            )
+
+            element.appendChild(dropdownElement)
+
+            appendGlobalProperties(item, dropdownElement)
         }
     })
 }

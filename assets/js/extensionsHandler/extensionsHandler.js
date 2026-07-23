@@ -179,6 +179,7 @@ export async function initExtensions() {
     const names = extensionsRequest.result
     const settings = await window.electron.readSettings()
     const currentPlatform = await window.electron.getPlatform()
+    const disabledExtensions = settings?.extensions?.disabledExtensions || []
 
     // PROCEED EACH EXT
     for (const name of names) {
@@ -198,7 +199,8 @@ export async function initExtensions() {
                     image: name,
                     permissions: new Set(),
                     path: "",
-                    extensionName: name
+                    extensionName: name,
+                    enabled: true
                 })
             )
             continue
@@ -225,7 +227,8 @@ export async function initExtensions() {
                     image: name,
                     permissions: new Set(),
                     path: extensionPath,
-                    extensionName: name
+                    extensionName: name,
+                    enabled: true
                 })
             )
             continue
@@ -249,6 +252,8 @@ export async function initExtensions() {
             isDev = settings.app.devMode
         }
 
+        const isEnabled = !disabledExtensions.includes(name)
+
         // add extension to the list
 
         installedExtensionModalData.push(
@@ -258,9 +263,17 @@ export async function initExtensions() {
                 description: description,
                 image: icon ? `${normalizePath(extensionPath)}/${icon}` : name,
                 permissions: allPermissions,
-                path: extensionPath
+                path: extensionPath,
+                extensionName: name,
+                settings: extensionPackage.settings,
+                enabled: isEnabled
             })
         )
+
+        if (!isEnabled) {
+            sendDebugWarn(`${name}: extension disabled by user`)
+            continue
+        }
 
         if(!Array.isArray(activeOn)) {
             sendDebugError(`${name}: activeOn key in package.json must be array`)
@@ -415,6 +428,8 @@ export async function initExtensions() {
                 }
             }
 
+            const extSettingsValues = settings?.extensions?.[name] || {}
+
             const runResult = await window.electron.runExtension(
                 extensionMainFileContentRes.result,
                 permissionsArray,
@@ -424,7 +439,8 @@ export async function initExtensions() {
                     extensionPath: extensionPath,
                     isDev: isDev,
                     allCSSVariables: getAllCSSVariables(),
-                    activeOn: activeOn
+                    activeOn: activeOn,
+                    extensionSettings: extSettingsValues
                 }
             )
 
@@ -515,7 +531,134 @@ function showExtensionErrors(extensionName) {
     document.body.appendChild(wrapper)
 }
 
-function createInstalledExtensionsModalTemplate({ title, subtitle, description, image, permissions, path, extensionName }) {
+async function showExtensionSettings(extensionName, settingsDef, extensionPath) {
+    const configPath = `${normalizePath(extensionPath)}/config.json`
+    let currentValues = {}
+    try {
+        const configRes = await window.electron.readFileContent(configPath)
+        if (configRes) currentValues = JSON.parse(configRes)
+    } catch (e) {
+        settingsDef.forEach(s => {
+            if (s.default !== undefined) currentValues[s.id] = s.default
+        })
+        await window.electron.saveFile(configPath, JSON.stringify(currentValues, null, 4))
+    }
+
+    Modal.destroy(`extSettings_${extensionName}`)
+
+    const modal = Modal.create({
+        id: `extSettings_${extensionName}`,
+        name: `${extensionName} Settings`,
+        title: `${extensionName} Settings`,
+        modalClassList: ["window"],
+        size: "sm",
+        content: [
+            {
+                type: "row",
+                classList: ["background"],
+                items: settingsDef.map(s => {
+                    const val = currentValues[s.id] ?? s.default
+                    if (s.type === "switch") {
+                        return {
+                            type: "switch",
+                            id: `ext_setting_${extensionName}_${s.id}`,
+                            title: s.title,
+                            description: s.description || "",
+                            checked: !!val
+                        }
+                    }
+                    if (s.type === "range") {
+                        return {
+                            type: "range",
+                            id: `ext_setting_${extensionName}_${s.id}`,
+                            title: s.title,
+                            description: s.description || "",
+                            min: s.min ?? 0,
+                            max: s.max ?? 100,
+                            value: val ?? s.default ?? 0,
+                            step: s.step ?? 1,
+                            prefix: s.prefix || ""
+                        }
+                    }
+                    if (s.type === "input") {
+                        return {
+                            type: "input",
+                            id: `ext_setting_${extensionName}_${s.id}`,
+                            title: s.title,
+                            description: s.description || "",
+                            placeholder: s.placeholder || ""
+                        }
+                    }
+                    if (s.type === "dropdown") {
+                        return {
+                            type: "dropdown",
+                            id: `ext_setting_${extensionName}_${s.id}`,
+                            title: s.title,
+                            description: s.description || "",
+                            options: s.options || [],
+                            selected: val ?? s.default ?? ""
+                        }
+                    }
+                    return { type: "placeholder", title: s.title || "Unknown" }
+                })
+            }
+        ]
+    })
+
+    document.body.prepend(modal.el)
+    modal.zIndex(200000)
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            modal.open()
+        })
+    })
+
+    settingsDef.forEach(s => {
+        const input = document.querySelector(`#ext_setting_${extensionName}_${s.id}`)
+        if (!input) return
+
+        if (s.type === "dropdown") {
+            const wrapper = input.closest(".options-selector__wrapper") || input
+            wrapper.addEventListener("click", async () => {
+                requestAnimationFrame(() => {
+                    const selected = wrapper.querySelector(".options-selector__item[default]")
+                    if (selected) {
+                        currentValues[s.id] = selected.id
+                        window.electron.saveFile(configPath, JSON.stringify(currentValues, null, 4))
+                    }
+                })
+            })
+        } else {
+            const eventType = s.type === "range" ? "change" : "input"
+            input.addEventListener(eventType, async () => {
+                const val = s.type === "switch" ? input.checked : input.value
+                currentValues[s.id] = val
+                await window.electron.saveFile(configPath, JSON.stringify(currentValues, null, 4))
+            })
+        }
+
+        if (s.type === "switch") {
+            input.checked = !!currentValues[s.id]
+        } else if (s.type === "range") {
+            input.value = currentValues[s.id] ?? s.default ?? 0
+        } else if (s.type === "input") {
+            input.value = currentValues[s.id] ?? ""
+            if (input.value) input.classList.add("focused")
+        } else if (s.type === "dropdown") {
+            const saved = currentValues[s.id] ?? s.default ?? ""
+            if (saved) {
+                const item = input.querySelector(`.options-selector__item[id="${saved}"]`)
+                if (item) {
+                    input.querySelectorAll(".options-selector__item").forEach(el => el.removeAttribute("default"))
+                    item.setAttribute("default", true)
+                    input.querySelector("#current").textContent = item.querySelector("#option_name").textContent
+                }
+            }
+        }
+    })
+}
+
+function createInstalledExtensionsModalTemplate({ title, subtitle, description, image, permissions, path, extensionName, settings: extSettings, enabled }) {
     const tags = []
 
     for (const p of permissions) {
@@ -537,6 +680,18 @@ function createInstalledExtensionsModalTemplate({ title, subtitle, description, 
         })
     }
 
+    if (extSettings && Array.isArray(extSettings) && extSettings.length > 0) {
+        buttons.push({
+            icon: "settings",
+            onclick: () => {
+                Modal.closeAll()
+                requestAnimationFrame(() => {
+                    showExtensionSettings(extensionName, extSettings, path)
+                })
+            }
+        })
+    }
+
     buttons.push({
         icon: "delete",
         onclick: (data) => {
@@ -552,7 +707,21 @@ function createInstalledExtensionsModalTemplate({ title, subtitle, description, 
         description: description,
         image: image,
         tags: tags,
-        buttons: buttons
+        buttons: buttons,
+        toggle: extensionName ? {
+            checked: enabled,
+            onChange: async (isChecked) => {
+                const settings = await window.electron.readSettings()
+                const disabled = settings?.extensions?.disabledExtensions || []
+                let updated
+                if (isChecked) {
+                    updated = disabled.filter(n => n !== extensionName)
+                } else {
+                    updated = [...disabled, extensionName]
+                }
+                await window.electron.setSettings({ extensions: { disabledExtensions: updated } })
+            }
+        } : null
     }
 
     return template

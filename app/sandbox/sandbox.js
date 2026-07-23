@@ -119,6 +119,7 @@ ipcMain.handle("run-extension", async (event, code, permissions, meta) => {
     const isDev = meta.isDev != undefined ? meta.isDev : false
     const activeOn = meta.activeOn
     const isPackaged = app.isPackaged
+    const extensionSettings = meta.extensionSettings || {}
 
     let allCSSVariables = meta.allCSSVariables != undefined ? meta.allCSSVariables : []
 
@@ -140,6 +141,7 @@ ipcMain.handle("run-extension", async (event, code, permissions, meta) => {
             isDev: isDev,
             CSSVariables: allCSSVariables,
             isPackaged: isPackaged,
+            settings: extensionSettings,
             os: {
                 platform: platformMap[platformRaw] || platformRaw,
                 platformRaw: platformRaw,

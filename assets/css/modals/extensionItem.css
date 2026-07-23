@@ -119,6 +119,10 @@
 .modal-extension__item .modal-extension__item-btn__wrapper .modal-extension__item-btn.text-danger:hover {
     opacity: .8;
 }
+.modal-extension__toggle {
+    transform: scale(0.8);
+    margin-left: -2px;
+}
 
 .extension-error-item {
     font-size: 13px;
