@@ -10,6 +10,7 @@ import { renderButton } from "../components/button.js"
 import { renderContainer } from "../components/container.js"
 import { renderCentered } from "../components/centered.js"
 import { renderDivider } from "../components/divider.js"
+import { renderImage } from "../components/image.js"
 
 const types = {
     columns: (wrapper, data) => {
@@ -196,6 +197,7 @@ function contentItemsHandler(element, itemsData) {
             appendGlobalProperties(item, dividerElement)
         }
         if (type == "extensionItem") {
+            const id = valid(item.id) ?? false
             const title = valid(item.title) ?? false
             const subtitle = valid(item.subtitle) ?? false
             const description = valid(item.description) ?? false
@@ -210,7 +212,8 @@ function contentItemsHandler(element, itemsData) {
                     description: description,
                     image: image,
                     tags: tags,
-                    buttons: buttons
+                    buttons: buttons,
+                    id: id
                 }
             )
 
@@ -226,6 +229,7 @@ function contentItemsHandler(element, itemsData) {
             const columns = validArray(item.columns) ?? []
             const badgeOwner = validBool(item.badgeOwner) ?? false
             const badgeVerified = validBool(item.badgeVerified) ?? false
+            const avatar = valid(item.avatar) ?? false
 
             const organizationElement = renderOrganization(
                 {
@@ -235,7 +239,8 @@ function contentItemsHandler(element, itemsData) {
                     website: website,
                     columns: columns,
                     badgeOwner: badgeOwner,
-                    badgeVerified: badgeVerified
+                    badgeVerified: badgeVerified,
+                    avatar: avatar
                 }
             )
 
@@ -314,6 +319,21 @@ function contentItemsHandler(element, itemsData) {
 
             appendGlobalProperties(item, centeredElement)
         }
+        if (type == "image") {
+            const id = valid(item.id) ?? false
+            const src = valid(item.src) ?? false
+
+            const imageElement = renderImage(
+                {
+                    id: id,
+                    src: src
+                }
+            )
+
+            element.appendChild(imageElement)
+
+            appendGlobalProperties(item, imageElement)
+        }
     })
 }
 
@@ -321,6 +341,7 @@ function appendGlobalProperties(item, element) {
     let note = false
     let disabled = false
     let classList = []
+    let styles = {}
 
     if ("note" in item) {
         note = document.createElement("div")
@@ -329,6 +350,18 @@ function appendGlobalProperties(item, element) {
     }
     if ("disabled" in item) disabled = item.disabled
     if ("classList" in item && Array.isArray(item.classList)) element.classList.add(...item.classList)
+
+    if ("styles" in item) {
+        const aliases = {
+            width: "width",
+            height: "height",
+            borderRadius: "border-radius"
+        }
+
+        Object.keys(item.styles).forEach(s => {
+            element.style.cssText += `${aliases[s]}: ${item.styles[s]}`
+        })
+    }
 
     if (note) element.appendChild(note)
     if (disabled) element.classList.add("disabled")

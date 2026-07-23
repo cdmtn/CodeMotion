@@ -8,9 +8,12 @@ export function renderExtensionItem(properties = {}) {
     const image = properties.image
     const tags = properties.tags
     const buttons = properties.buttons
+    const id = properties.id
 
     const wrapper = document.createElement("div")
     wrapper.classList.add("modal-extension__item")
+
+    if(id) wrapper.id = id
 
     let imageEl = document.createElement("div")
 
@@ -18,8 +21,9 @@ export function renderExtensionItem(properties = {}) {
         imageEl.innerHTML = generateAvatar(title)
         imageEl = imageEl.firstElementChild
     }
-    else if (typeof image == "string" && /^[A-Za-z]:\//.test(image)) {
+    else if (typeof image == "string" && /^(?:[A-Za-z]:\/|https?:\/\/)/gm.test(image)) {
         imageEl = document.createElement("img")
+        imageEl.crossOrigin = "anonymous"
         imageEl.src = image
     }
     else if (typeof image == "string") {

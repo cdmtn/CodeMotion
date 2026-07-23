@@ -10,6 +10,7 @@ export function renderOrganization(properties = {}) {
     const columns = properties.columns
     const badgeOwner = properties.badgeOwner
     const badgeVerified = properties.badgeVerified
+    const avatar = properties.avatar
 
     function createSection() {
         const sectionEl = createDIV()
@@ -41,7 +42,20 @@ export function renderOrganization(properties = {}) {
     // first section
     const firstSectionEl = createSection()
     firstSectionEl.classList.add("row")
-    firstSectionEl.innerHTML = generateAvatar(name)
+
+    console.log(firstSectionEl)
+    console.log(avatar)
+
+    if(avatar) {
+        const avatarEl = document.createElement("img")
+        avatarEl.src = avatar
+        avatarEl.classList.add("modal-org__section-avatar")
+
+        firstSectionEl.appendChild(avatarEl)
+    }
+    else {
+        firstSectionEl.innerHTML = generateAvatar(name)
+    }
 
     const countersEl = createDIV()
     countersEl.classList.add("modal-org__section-counters")

@@ -1,6 +1,5 @@
 import { Modal } from "../modalsHandler/engine.js"
-import { createNotify, getInitials, Options, truncateString } from "../lib.js"
-import { sendEvent } from "../bus.js"
+import { createNotify, getInitials, GetOrgAvatar, Options, truncateString } from "../lib.js"
 import { dashboardModalHandle, dashboardModalObject } from "./organizationModal/dashboard.js"
 import { createNewModalHandle, createNewModalObject } from "./organizationModal/create-new.js"
 import { joinModalHandle, joinModalObject } from "./organizationModal/join.js"
@@ -71,6 +70,11 @@ export async function createUserOrgsModalStructure({ gls, userOrgs, userJSON, ro
 
                 badgeVerified:
                     organizationData.verified == 1
+            }
+
+            const orgAvatar = await GetOrgAvatar.get(organizationData.avatarID, "large")
+            if(orgAvatar) {
+                preparedData["avatar"] = orgAvatar
             }
 
             if(!roleVisible) {
@@ -160,7 +164,8 @@ export async function createUserOrgModal({ gls, userOrgs, userJSON }) {
 
                 content: [
                     {
-                        type: "row",
+                        type: "columns",
+                        cols: 2,
                         gap: 10,
                         items: exploreItems
                     }

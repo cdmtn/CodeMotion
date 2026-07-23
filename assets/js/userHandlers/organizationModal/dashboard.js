@@ -1,5 +1,5 @@
 import { sendEvent } from "../../bus.js"
-import { createNotify, truncateString, Options, formatUnix } from "../../lib.js"
+import { createNotify, truncateString, Options, formatUnix, GetOrgAvatar } from "../../lib.js"
 import { Modal } from "../../modalsHandler/engine.js"
 
 export function dashboardModalObject({ lgls }) {
@@ -21,9 +21,34 @@ export function dashboardModalObject({ lgls }) {
                         type: "placeholder",
                         id: "dashboardOrgSelect"
                     },
+
                     {
                         type: "divider"
                     },
+
+                    {
+                        type: "image",
+                        src: null,
+                        styles: {
+                            width: "30px",
+                            height: "30px",
+                            borderRadius: "5px"
+                        },
+                        id: "dashboardOrgAvatar",
+                        classList: ["hidden"]
+                    },
+                    {
+                        type: "placeholder",
+                        title: "...",
+                        description: "...",
+                        id: "dashboardOrgInfo",
+                        classList: ["hidden"]
+                    },
+
+                    {
+                        type: "divider"
+                    },
+
                     {
                         type: "placeholder",
                         title: lgls("dashboard.members.title"),
@@ -67,6 +92,12 @@ export function dashboardModalObject({ lgls }) {
                         type: "button",
                         title: lgls("dashboard.edit.resetInviteCode.title"),
                         id: "dashboardOrgEditResetInvite",
+                        container: "#dashboardOrgEditZoneButtons"
+                    },
+                    {
+                        type: "button",
+                        title: "Upload new avatar",
+                        id: "dashboardOrgEditUploadAvatar",
                         container: "#dashboardOrgEditZoneButtons"
                     },
 
@@ -135,8 +166,15 @@ export function dashboardModalHandle({ userOrgs, element, orgModal }) {
     const inviteCode = element.querySelector("#dashboardOrgInviteCode .modal-category__item-desc")
     const createdAt = element.querySelector("#dashboardOrgCreatedAt .modal-category__item-desc")
 
+    const infoWrapper = element.querySelector("#dashboardOrgInfo")
+    const infoName = infoWrapper.querySelector("#dashboardOrgInfo .modal-category__item-title")
+    const infoDesc = infoWrapper.querySelector("#dashboardOrgInfo .modal-category__item-desc")
+
+    const avatar = element.querySelector("#dashboardOrgAvatar")
+
     const editButtons = element.querySelector("#dashboardOrgEditZoneButtons")
     const editResetInvite = element.querySelector("#dashboardOrgEditResetInvite")
+    const editUploadAvatar = element.querySelector("#dashboardOrgEditUploadAvatar")
 
     const dangerZoneSwitch = element.querySelector("#dashboardOrgDangerZoneSwitch")
     const dangerZoneTitle = element.querySelector("#dashboardOrgDangerZoneTitle")
@@ -166,8 +204,19 @@ export function dashboardModalHandle({ userOrgs, element, orgModal }) {
     })
 
     dashboardOrgSelect.on("click", async (e) => {
-        function render(data) {
+        async function render(data) {
             const isOwner = data.is_owner
+
+            infoWrapper.classList.remove("hidden")
+            infoName.textContent = data.name
+            infoDesc.textContent = data.description
+
+            const avatarUrl = await GetOrgAvatar.get(data.avatarID)
+            
+            if(avatarUrl) {
+                avatar.classList.remove("hidden")
+                avatar.src = avatarUrl
+            }
 
             membersCount.textContent = data.members_count
             inviteCode.textContent = data.invite_code == false ? "--" : data.invite_code
@@ -186,6 +235,24 @@ export function dashboardModalHandle({ userOrgs, element, orgModal }) {
                 buttonsContainer.classList.remove("hidden")
 
                 editButtons.classList.remove("disabled")
+
+                editUploadAvatar.onclick = async () => {
+                    const res = await window.electron.uploadOrgAvatar(data.id)
+                    
+                    if(res.success) {
+                        sendEvent("org-update", {})
+                    }
+                    else {
+                        createNotify(
+                            {
+                                type: "success",
+                                icon: "check",
+                                title: "Avatar updating error",
+                                content: String(res.msg)
+                            }
+                        )
+                    }
+                }
             }
 
             // remove btn handler
@@ -257,12 +324,12 @@ export function dashboardModalHandle({ userOrgs, element, orgModal }) {
 
             if (orgRes.success) {
                 const data = orgRes.msg
-                render(data)
+                await render(data)
                 alreadyLoadedDashboardOrgs.set(e.id, data)
             }
         }
         else {
-            render(alreadyLoadedDashboardOrgs.get(e.id))
+            await render(alreadyLoadedDashboardOrgs.get(e.id))
         }
     })
 }

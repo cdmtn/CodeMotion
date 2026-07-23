@@ -13,20 +13,35 @@
     <link rel="shortcut icon" href="../assets/media/codemotion-logo.png" type="image/x-icon">
 
     <meta http-equiv="Content-Security-Policy" content="
-        default-src 'self' 'unsafe-eval' 'unsafe-inline' https://unpkg.com file: data: blob:;
+        default-src 'self' file: data: blob:;
         script-src 'self' 'unsafe-eval' 'unsafe-inline'
-            https://unpkg.com 
-            https://cdnjs.cloudflare.com 
-            https://cdnjs.com
-            https://cdn.yurba.one 
-            https://cdn.jsdelivr.net
-            https://speedcf.cloudflareaccess.com
+            https://unpkg.com
             https://www.unpkg.com
+            https://cdnjs.cloudflare.com
+            https://cdnjs.com
+            https://cdn.jsdelivr.net
+            https://cdn.yurba.one
+            https://speedcf.cloudflareaccess.com
             https://html2canvas.hertzen.com;
-        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net;
-        font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:;
+        style-src 'self' 'unsafe-inline'
+            https://fonts.googleapis.com
+            https://cdn.jsdelivr.net;
+        font-src 'self'
+            https://fonts.gstatic.com
+            https://cdn.jsdelivr.net
+            data:;
+        img-src 'self'
+            data:
+            blob:
+            https://twemoji.maxcdn.com
+            https://cdn.jsdelivr.net
+            https://codemotion.yurba.one;
+        connect-src 'self'
+            https://cdn.jsdelivr.net
+            https://unpkg.com
+            https://www.unpkg.com
+            https://codemotion.yurba.one;
         worker-src 'self' blob:;
-        img-src 'self' data: blob: https://twemoji.maxcdn.com https://cdn.jsdelivr.net;
     ">
 
     <link rel="stylesheet" href="../assets/css/material-icons/css2.css" />
