@@ -79,8 +79,8 @@ async function createDebuggerWindow(mainWindow, title = "Debugger") {
         fs.writeFileSync(filePath, text, "utf-8")
 
         const escapedPS = filePath.replace(/'/g, "''")
-        const escapedOSA = filePath.replace(/\\/g, "\\\\").replace(/"/g, '\\"')
-        const escapedURL = encodeURI("file://" + filePath)
+        const escapedOSA = filePath.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\$/g, "\\$").replace(/`/g, "\\`")
+        const escapedURL = "file://" + filePath.replace(/\\/g, "/").replace(/[^a-zA-Z0-9-._~:/?#\[\]@!'()*+,;=%]/g, encodeURIComponent)
 
         if (process.platform === 'win32') {
             exec(
