@@ -69,10 +69,6 @@ async function createDebuggerWindow(mainWindow, title = "Debugger") {
     });
 
     ipcMain.on('debugger-copy-as-file', (event, text) => {
-        // Caused by: PowerShell is Windows-only. macOS uses osascript
-        // for clipboard access, Linux uses xclip. Without this check
-        // the copy-as-file feature throws on non-Windows platforms.
-        // Each platform has its own native clipboard API.
         const now = new Date()
         const pad = (n) => String(n).padStart(2, "0")
         const datetime = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`
@@ -82,25 +78,27 @@ async function createDebuggerWindow(mainWindow, title = "Debugger") {
 
         fs.writeFileSync(filePath, text, "utf-8")
 
-        const escaped = filePath.replace(/'/g, "''")
+        const escapedPS = filePath.replace(/'/g, "''")
+        const escapedOSA = filePath.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\$/g, "\\$").replace(/`/g, "\\`")
+        const escapedURL = "file://" + filePath.replace(/\\/g, "/").replace(/[^a-zA-Z0-9-._~:/?#\[\]@!'()*+,;=%]/g, encodeURIComponent)
 
         if (process.platform === 'win32') {
             exec(
-                `powershell -NoProfile -Command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Clipboard]::SetFileDropList(@('${escaped}'))"`,
+                `powershell -NoProfile -Command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Clipboard]::SetFileDropList(@('${escapedPS}'))"`,
                 (err) => {
                     if (err) clipboard.writeText(text)
                 }
             )
         } else if (process.platform === 'darwin') {
             exec(
-                `osascript -e 'set the clipboard to (POSIX file "${filePath}")'`,
+                `osascript -e 'set the clipboard to (POSIX file "${escapedOSA}")'`,
                 (err) => {
                     if (err) clipboard.writeText(text)
                 }
             )
         } else {
             exec(
-                `xclip -selection clipboard -t text/uri-list <<< "file://${filePath}"`,
+                `xclip -selection clipboard -t text/uri-list <<< "${escapedURL}"`,
                 (err) => {
                     if (err) clipboard.writeText(text)
                 }
