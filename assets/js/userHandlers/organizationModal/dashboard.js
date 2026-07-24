@@ -1,6 +1,13 @@
 import { sendEvent } from "../../bus.js"
-import { createNotify, truncateString, Options, formatUnix, GetOrgAvatar } from "../../lib.js"
+import { createNotify, truncateString, Options, formatUnix, GetOrgAvatar, GLS } from "../../lib.js"
 import { Modal } from "../../modalsHandler/engine.js"
+
+function encodeInviteCode(code) {
+    return code
+        .split("-")
+        .map(part => "*".repeat(part.length))
+        .join("-")
+}
 
 export function dashboardModalObject({ lgls }) {
     return {
@@ -61,8 +68,13 @@ export function dashboardModalObject({ lgls }) {
                         title: lgls("dashboard.inviteCode.title"),
                         id: "dashboardOrgInviteCode",
                         description: "--",
-                        note: lgls("dashboard.inviteCode.note"),
                         classList: ["placeholder-bigdata"]
+                    },
+                    {
+                        type: "placeholder",
+                        description: "...",
+                        classList: ["hidden", "placeholder-label"],
+                        id: "dashboardOrgInviteCodeLastUpdated"
                     },
                     {
                         type: "placeholder",
@@ -137,7 +149,9 @@ export function dashboardModalObject({ lgls }) {
     }
 }
 
-export function dashboardModalHandle({ userOrgs, element, orgModal }) {
+export async function dashboardModalHandle({ userOrgs, element, orgModal }) {
+    const gls = await GLS.initLocal()
+
     const dashboardOrgSelect = new Options("dashboardOrgSelect")
     dashboardOrgSelect.clear()
     dashboardOrgSelect.add("none", "None").default()
@@ -164,6 +178,8 @@ export function dashboardModalHandle({ userOrgs, element, orgModal }) {
     const buttonsContainer = element.querySelector("#dashboardOrgButtons")
     const membersCount = element.querySelector("#dashboardOrgMembers .modal-category__item-desc")
     const inviteCode = element.querySelector("#dashboardOrgInviteCode .modal-category__item-desc")
+    const inviteCodeLastUpdateWrapper = element.querySelector("#dashboardOrgInviteCodeLastUpdated")
+    const inviteCodeLastUpdate = inviteCodeLastUpdateWrapper.querySelector(".modal-category__item-desc")
     const createdAt = element.querySelector("#dashboardOrgCreatedAt .modal-category__item-desc")
 
     const infoWrapper = element.querySelector("#dashboardOrgInfo")
@@ -206,6 +222,7 @@ export function dashboardModalHandle({ userOrgs, element, orgModal }) {
     dashboardOrgSelect.on("click", async (e) => {
         async function render(data) {
             const isOwner = data.is_owner
+            const inviteCodeResetAt = data.invite_reset_at
 
             infoWrapper.classList.remove("hidden")
             infoName.textContent = data.name
@@ -217,10 +234,25 @@ export function dashboardModalHandle({ userOrgs, element, orgModal }) {
                 avatar.classList.remove("hidden")
                 avatar.src = avatarUrl
             }
+            else {
+                avatar.classList.add("hidden")
+            }
+
+            if(inviteCodeResetAt > 0) {
+                inviteCodeLastUpdateWrapper.classList.remove("hidden")
+                inviteCodeLastUpdate.textContent = gls.get("modals.organizations.dashboard.inviteCode.lastResetAt", { date: formatUnix(inviteCodeResetAt, "{dd}.{mm}.{yyyy}, {hh}:{ii}") })
+            }
+            else {
+                inviteCodeLastUpdateWrapper.classList.add("hidden")
+            }
 
             membersCount.textContent = data.members_count
-            inviteCode.textContent = data.invite_code == false ? "--" : data.invite_code
+            inviteCode.textContent = data.invite_code == false ? "--" : encodeInviteCode(data.invite_code)
             createdAt.textContent = formatUnix(data.created_at, "{dd}.{mm}.{yyyy}, {hh}:{ii}")
+
+            inviteCode.onclick = () => {
+                inviteCode.textContent = data.invite_code
+            }
 
             if(!isOwner) {
                 dangerZoneTitle.classList.add("hidden")
@@ -245,8 +277,8 @@ export function dashboardModalHandle({ userOrgs, element, orgModal }) {
                     else {
                         createNotify(
                             {
-                                type: "success",
-                                icon: "check",
+                                type: "danger",
+                                icon: "cancel",
                                 title: "Avatar updating error",
                                 content: String(res.msg)
                             }

@@ -40,7 +40,8 @@
     "@uiw/codemirror-extensions-color": "^4.25.11",
     "@uiw/codemirror-themes": "^4.25.11",
     "@uiw/codemirror-themes-all": "^4.25.11",
-    "codemirror": "^6.0.2"
+    "codemirror": "^6.0.2",
+    "html-to-image": "^1.11.13"
   },
   "devDependencies": {
     "esbuild": "^0.28.1"

@@ -213,7 +213,7 @@
                 },
                 "inviteCode": {
                     "title": "Invite code",
-                    "note": "This code cannot be changed. You can share this code with trusted individuals so they can join the organization"
+                    "lastResetAt": "Last reset at %{date}"
                 },
                 "createdAt": {
                     "title": "Created at"

@@ -2,10 +2,10 @@ import { EditorView } from "@codemirror/view";
 
 export const vscodeDarkOverride = EditorView.theme({
     "&": {
-        backgroundColor: "oklch(from var(--body-color) calc(l - 0.02) c h)!important"
+        backgroundColor: "#101010!important"
     },
     ".cm-gutters": {
-        backgroundColor: "oklch(from var(--body-color) calc(l - 0.02) c h)!important"
+        backgroundColor: "#101010!important"
     }
 });
 export const atomoneOverride = EditorView.theme({

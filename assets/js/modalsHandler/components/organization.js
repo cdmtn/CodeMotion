@@ -43,9 +43,6 @@ export function renderOrganization(properties = {}) {
     const firstSectionEl = createSection()
     firstSectionEl.classList.add("row")
 
-    console.log(firstSectionEl)
-    console.log(avatar)
-
     if(avatar) {
         const avatarEl = document.createElement("img")
         avatarEl.src = avatar

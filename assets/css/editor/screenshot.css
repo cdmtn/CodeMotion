@@ -1,11 +1,11 @@
 .code-snippet__wrapper {
     position: absolute;
-    top: 999999px;
-    left: 999999px;
-    z-index: 99999999;
+    left: 0px;
+    top: 0;
+    pointer-events: none;
     max-width: 800px;
     width: 100%;
-    top: 0;
+    display: none;
     height: fit-content;
     overflow: hidden;
     border-radius: 10px;
@@ -36,7 +36,7 @@
     background: var(--body-color);
     padding: 10px 15px;
     color: var(--text-color-muted);
-    font-size: var(--main-font);
+    font-size: 14px;
     display: flex;
     align-items: center;
     gap: 10px;

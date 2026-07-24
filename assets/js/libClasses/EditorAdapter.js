@@ -3,18 +3,26 @@ import { Languages } from "../lib.js";
 export class _EditorAdapter {
     constructor(
         { 
-            view, languageCompartment, themeCompartment, tabSizeCompartment, setDiagnostics, 
-            setOnChange, commands, recreateState
+            view, compartments, setOnChange, commands, recreateState, editorView,
+            editorState, tools
         }
     ) {
         this.instance = view
-        this.languageCompartment = languageCompartment;
-        this.themeCompartment = themeCompartment;
-        this.tabSizeCompartment = tabSizeCompartment
-        this.setDiagnosticsInternal = setDiagnostics;
+        this.languageCompartment = compartments.languageCompartment;
+        this.themeCompartment = compartments.themeCompartment;
+        this.tabSizeCompartment = compartments.tabSizeCompartment
+        this.setDiagnosticsInternal = compartments.setDiagnostics;
+        this.wordWrapCompartment = compartments.wordWrapCompartment
+        this.scrollCompartment = compartments.scrollCompartment
+        this.readOnlyCompartment = compartments.readOnlyCompartment
+
         this.setOnChangeInternal = setOnChange;
         this.commands = commands
         this.recreateState = recreateState
+
+        this.editorView = editorView
+        this.editorState = editorState
+        this.tools = tools
 
         this.language = undefined
         this.theme = undefined
@@ -34,6 +42,20 @@ export class _EditorAdapter {
 
     resetUndoManager() {
         this.recreateState(this.instance.state.doc.toString());
+    }
+
+    scrollPastEnd(value) {
+        this.instance.dispatch({
+            effects: this.scrollCompartment.reconfigure(
+                this.editorView.theme({
+                    ".cm-content": {
+                        paddingBottom: value === 0 ? "0px" : `${value * 100}vh`
+                    }
+                })
+            )
+        });
+
+        return this;
     }
 
     //
@@ -138,6 +160,42 @@ export class _EditorAdapter {
     //
     // setters
     //
+
+    readOnly(enabled) {
+        this.instance.dispatch({
+            effects: this.readOnlyCompartment.reconfigure(
+                this.editorState.readOnly.of(enabled)
+            )
+        });
+
+        return this;
+    }
+
+    wordWrap(enabled) {
+        this.instance.dispatch({
+            effects: this.wordWrapCompartment.reconfigure(
+                enabled ? this.editorView.lineWrapping : []
+            )
+        });
+
+        return this;
+    }
+
+    setMaxLines(lines) {
+        const container = this.instance.dom.parentElement;
+
+        if (lines === Infinity) {
+            container.style.height = "auto";
+            container.style.maxHeight = "";
+        } else {
+            const lineHeight = this.instance.defaultLineHeight;
+            container.style.maxHeight = `${lineHeight * lines}px`;
+        }
+
+        this.instance.requestMeasure();
+
+        return this;
+    }
 
     setValue(value) {
         this.instance.dispatch({

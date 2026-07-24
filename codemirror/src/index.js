@@ -56,6 +56,12 @@ import javascriptSnippetsJSON from "./snippets/js/snippets.json"
 import javascriptGlobalsJSON from "./snippets/js/globals.json"
 import { identifierJavaScriptCompletionSource } from "./snippets/js/source";
 
+// external
+
+import { toPng, toBlob } from "html-to-image";
+
+// 
+
 export const javascriptSnippets = fromVSCodeSnippets(javascriptSnippetsJSON);
 export const javascriptGlobals = completeFromList(
     javascriptGlobalsJSON.map(label => ({ label, type: "variable" }))
@@ -126,7 +132,6 @@ export const TabSizes = {
 };
 
 const insertTab = (view) => {
-    // let the default keymap handle Tab if a completion popup is open
     if (completionStatus(view.state) !== null) {
         return acceptCompletion(view);
     }
@@ -153,6 +158,9 @@ window.CodeMirror = {
         const languageCompartment = new Compartment();
         const themeCompartment = new Compartment();
         const tabSizeCompartment = new Compartment();
+        const wordWrapCompartment = new Compartment();
+        const scrollCompartment = new Compartment();
+        const readOnlyCompartment = new Compartment();
 
         let onChange = null;
 
@@ -190,6 +198,9 @@ window.CodeMirror = {
                     languageCompartment.of(Languages.javascript),
                     themeCompartment.of(Themes.vscodeDark),
                     tabSizeCompartment.of(EditorState.tabSize.of(4)),
+                    wordWrapCompartment.of([]),
+                    scrollCompartment.of([]),
+                    readOnlyCompartment.of(EditorState.readOnly.of(false)),
                     indentUnit.of("\t"),
 
                     closeBrackets(),
@@ -219,9 +230,15 @@ window.CodeMirror = {
 
         return {
             view,
-            languageCompartment,
-            themeCompartment,
-            tabSizeCompartment,
+
+            compartments: {
+                languageCompartment,
+                themeCompartment,
+                tabSizeCompartment,
+                wordWrapCompartment,
+                scrollCompartment,
+                readOnlyCompartment
+            },
 
             setDiagnostics(value) {
                 diagnostics = value;
@@ -241,6 +258,20 @@ window.CodeMirror = {
 
             recreateState(doc) {
                 view.setState(createState(doc));
+            },
+
+            editorView: {
+                theme: EditorView.theme,
+                lineWrapping: EditorView.lineWrapping
+            },
+
+            editorState: {
+                readOnly: EditorState.readOnly
+            },
+
+            tools: {
+                toPng: toPng,
+                toBlob: toBlob
             }
         }
     },

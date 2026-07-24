@@ -1187,58 +1187,65 @@ function bindEditorBtns(editor, properties = {}) {
             }
             
             const captureArea = captureWrapper.querySelector("#code-snippet-area")
-            captureArea.textContent = value
             captureArea.id = "code-snippet-area"
 
             document.body.appendChild(captureWrapper)
 
-            const captureEditor = new EditorAdapter(ace.edit(captureArea))
+            const captureCodeMirrorView = window.CodeMirror.create(
+                captureArea,
+                {
+                    value: value
+                }
+            )
+
+            const captureEditor = new EditorAdapter(captureCodeMirrorView)
             captureEditor.setLanguage(currentMode);
             captureEditor.setTheme(currentTheme);
 
-            captureEditor.setOption("scrollPastEnd", 0);
-            captureEditor.setOption("maxLines", Infinity);
-            captureEditor.setOption("wrap", true);
-
-            captureEditor.useWrapMode(true);
+            captureEditor.scrollPastEnd(0);
+            captureEditor.setMaxLines(Infinity);
+            captureEditor.wordWrap(true);
+            captureEditor.readOnly(true)
 
             const flashEl = document.createElement("div")
             flashEl.classList.add("ace-flash", "hidden")
 
+            captureWrapper.style.zIndex = -1
+            captureWrapper.style.display = "block"
+
             setTimeout(() => {
-                html2canvas(captureWrapper, {
-                    backgroundColor: null,
-                    scale: 3
-                }).then(canvas => {
+                captureEditor.tools.toBlob(captureWrapper, {
+                    pixelRatio: 5
+                }).then(async blob => {
                     // flash animation
-                    editor.container.appendChild(flashEl)
+                    editor.dom.appendChild(flashEl);
 
-                    flashEl.classList.remove("hidden")
-                    
+                    flashEl.classList.remove("hidden");
+
                     setTimeout(() => {
-                        flashEl.classList.add("hidden")
+                        flashEl.classList.add("hidden");
                         flashEl.addEventListener("transitionend", () => {
-                            flashEl.remove()
+                            flashEl.remove();
+                        }, { once: true });
+                    }, 100);
+                    //
+
+                    await navigator.clipboard.write([
+                        new ClipboardItem({
+                            "image/png": blob
                         })
-                    }, 100)
-                    // 
+                    ]);
 
-                    canvas.toBlob(blob => {
-                        navigator.clipboard.write([
-                            new ClipboardItem({ 'image/png': blob })
-                        ])
-                    })
-                    let image = canvas.toDataURL("image/png")
+                    createNotify({
+                        icon: "image",
+                        title: "Screenshot taken!",
+                        content: "Screenshot taken and copied to your clipboard"
+                    });
 
-                    createNotify(
-                        {
-                            icon: "image",
-                            title: "Screenshot taken!",
-                            content: "Screenshot taken and copied to your clipboard"
-                        }
-                    )
-                })
-            }, 100)
+                    captureWrapper.style.zIndex = 0
+                    captureWrapper.style.display = "none"
+                });
+            }, 100);
         })
     }
 }

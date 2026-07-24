@@ -744,6 +744,7 @@ body.explorer-resizing {
     white-space: nowrap;
     padding-right: 10px;
     height: 42px;
+    background: var(--body-color);
     border-bottom: 1px solid var(--block-divider-border-color);
 }
 .code-tabs::-webkit-scrollbar {

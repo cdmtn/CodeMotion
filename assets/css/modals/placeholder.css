@@ -6,3 +6,6 @@
     opacity: 1;
     user-select: all;
 }
+.modal-category__item.placeholder-label .modal-category__item-desc {
+    opacity: .2;
+}
