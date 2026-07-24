@@ -766,8 +766,8 @@ body.explorer-resizing {
     border-right: 1px solid var(--block-divider-border-color);
 }
 .code-tab .file-icon {
-    width: 15px;
-    height: 15px;
+    width: 20px;
+    height: 20px;
     border-radius: 3px;
 }
 .code-tab.not-saved::before {
@@ -857,16 +857,16 @@ body.explorer-resizing {
 }
 
 .explorer-elements[data-tab="files"] {
-    gap: 5px;
+    gap: 1px;
 }
 .explorer-elements .file { 
     display: flex;
     align-items: center;
     flex: 0 0 auto;
-    gap: 8px;
-    font-size: 12px;
-    padding: 4px 5px;
-    border-radius: 5px;
+    gap: 6px;
+    font-size: 13px;
+    padding: 2px 4px;
+    border-radius: 3px;
     transition: .2s;
     width: -webkit-fill-available;
     user-select: none;
@@ -884,65 +884,49 @@ body.explorer-resizing {
     pointer-events: none;
 }
 .explorer-elements .file-icon {
-    width: 12px;
-    height: 12px;
+    width: 16px;
+    height: 16px;
     border-radius: 2px;
 }
+.explorer-elements .dir-title {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 22px;
+}
 .explorer-elements .folder-icon {
-    width: 15px;
+    width: 16px;
+    height: 16px;
     flex: 0 0 auto;
-    z-index: 1;
 }
 .explorer-elements .dir {
     display: flex;
     flex: 0 0 auto;
     flex-direction: column;
     overflow: visible;
-    min-height: 28px;
+    min-height: 22px;
     height: auto;
     transition: .2s;
-    margin-left: 5px;
-    border-left: 1px solid transparent;
 }
-.explorer-elements .dir.expanded {
-    position: relative;
-    padding-left: 10px;
+.explorer-elements .dir-content {
+    margin-left: 11px;
+    padding-left: 8px;
+    border-left: 1px solid var(--expanded-line);
+    display: none;
+    flex-direction: column;
+    gap: 1px;
+    margin-top: 1px;
+    flex: 0 0 auto;
 }
-.explorer-elements .dir.expanded::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: 5px;
-    width: 1px;
-    height: calc(100% - 28px);
-    background: linear-gradient(45deg, transparent 5%, var(--expanded-line) 80%);
+.explorer-elements .dir.expanded > .dir-content {
+    display: flex;
 }
-.explorer-elements .dir.expanded.ignored::before {
-    opacity: .45;
-}
-.explorer-elements .dir.expanded > .dir-title:first-child::before {
-    content: "";
-    position: absolute;
-    width: 8px;
-    height: 10px;
-    background: var(--expanded-line);
-    border-top-left-radius: 5px;
-    left: 0px;
-    margin-top: 7px;
-}
-.explorer-elements .dir.expanded > .dir-title:first-child::after {
-    content: "";
-    position: absolute;
-    width: 8px;
-    height: 10px;
-    background: var(--topbar-color);
-    left: 1px;
-    border-top-left-radius: 5px;
-    margin-top: 10px;
+.explorer-elements .dir.expanded.ignored > .dir-content {
+    border-left-color: rgba(255, 255, 255, 0.1);
 }
 .explorer-elements .file i {
     font-size: 10px;
-    padding: 5px;
+    padding: 2px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -956,38 +940,23 @@ body.explorer-resizing {
     cursor: pointer;
 }
 .explorer-elements .file .explorer-name {
-    font-size: 12px;
+    font-size: 13px;
     opacity: 1;
     margin-top: 0;
 }
 
-.explorer-elements .dir-title {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    min-height: 28px;
-}
+
 .explorer-elements .dir-title > span {
     font-size: 12px;
     opacity: .2;
-    margin-top: 2px;
+    margin-top: 0;
 }
 .explorer-elements .file.ignored,
 .explorer-elements .dir.ignored > .dir-title,
 .explorer-elements .dir.ignored .file {
     opacity: .45;
 }
-.explorer-elements .dir-content {
-    margin-left: 5px;
-    display: none;
-    flex-direction: column;
-    gap: 5px;
-    margin-top: 5px;
-    flex: 0 0 auto;
-}
-.explorer-elements .dir.expanded > .dir-content {
-    display: flex;
-}
+
 .explorer-title__name {
     display: flex;
     justify-content: space-between;
