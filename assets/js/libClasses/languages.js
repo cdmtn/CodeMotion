@@ -1,10 +1,12 @@
+import { getFileIcon } from "../iconRegistry.js";
+
 export class _Languages {
     static contexts = {}
 
     static languages = {
         default: {
             name: "Text",
-            icon: "default",
+            icon: "document",
             iconExt: "svg",
             mode: "text",
             color: "#9aa0a6"
@@ -413,40 +415,23 @@ export class _Languages {
     }
 
     static async getIcon(name) {
-        let info = this.get(name)
-        let allLanguageIcons = await window.electron.getAllIcons()
-
-        allLanguageIcons = allLanguageIcons.map(item => { if (item.type != "folder") return item.name })
-        allLanguageIcons = allLanguageIcons.filter(item => item != undefined)
-
-        if (name in this.languages) {
-            let fileName = `${this.languages[name].icon}.${this.languages[name].iconExt}`
-
-            if (info.customIcon) {
-                fileName = this.languages[name].icon
-            }
-
-            if (allLanguageIcons.includes(fileName)) {
-                return fileName
-            }
-            else {
-                return fileName
-            }
+        if (!name) return "document.svg";
+        let info = this.get(name);
+        if (info && info.customIcon) {
+            return info.icon;
         }
-        else {
-            return `${this.languages.default.icon}.${this.languages.default.iconExt}`
-        }
+        return getFileIcon(name);
     }
 
     static async getIconPath(name) {
-        let info = this.get(name)
-        let icon = await this.getIcon(name)
+        let info = this.get(name);
+        let icon = await this.getIcon(name);
 
-        if (info.customIcon) {
-            return icon
+        if (info && info.customIcon) {
+            return icon;
         }
         else {
-            return `../assets/media/icons/${icon}`
+            return `../assets/media/icons/symbols/files/${icon}`;
         }
     }
 }

@@ -210,16 +210,16 @@ export class _EditorAdapter {
     setLanguage(name) {
         this.language = name;
 
-        const extension = Languages.list()[name];
+        const langInfo = Languages.get(name);
+        const mode = langInfo ? langInfo.mode : (name || "text");
 
-        if (!extension) {
-            console.warn(`Unknown language: ${name}`);
-            return;
+        const targetLang = window.CodeMirror?.Languages?.[mode];
+
+        if (targetLang) {
+            this.instance.dispatch({
+                effects: this.languageCompartment.reconfigure(targetLang)
+            });
         }
-
-        this.instance.dispatch({
-            effects: this.languageCompartment.reconfigure(window.CodeMirror.Languages[extension.mode])
-        });
     }
 
     setTheme(name) {

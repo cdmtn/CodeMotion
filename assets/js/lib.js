@@ -174,10 +174,10 @@ async function getFileIconByName(name) {
     })
 
     if (listNames.includes(name)) {
-        return `./assets/media/icons/${name}.${ext}`
+        return `./assets/media/icons/symbols/files/${name}.${ext}`
     }
     else {
-        return `./assets/media/icons/default.svg`
+        return `./assets/media/icons/symbols/files/document.svg`
     }
 }
 

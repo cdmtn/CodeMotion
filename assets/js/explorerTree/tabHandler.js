@@ -28,6 +28,7 @@ import {
 import { BottomWindow, closeAllWindows } from "../handlers/BottomWindowHandler.js"
 import { enableSmoothScroll } from "../../plugins/aceSmoothScroller/index.js"
 import { Setting } from "../settings.js"
+import { getFileIconUrl } from "../iconRegistry.js"
 import {
     setCurrentLanguage,
     setColumn,
@@ -754,7 +755,11 @@ export async function openTab(path, content, extension, name, pathContext, isNew
 
     if ("editor" in settings && "smoothScroll" in settings.editor) {
         if (settings.editor.smoothScroll) {
-            enableSmoothScroll(editor)
+            try {
+                enableSmoothScroll(editor)
+            } catch (e) {
+                console.warn("Smooth scroll not supported for current editor adapter:", e)
+            }
         }
     }
 
@@ -838,9 +843,10 @@ export async function openTab(path, content, extension, name, pathContext, isNew
         setTabColor(tab, language.color)
     }
 
-    const languageTabIcon = fileNameInfoIcon != false ? fileNameInfoIcon : languageIcon
+    const iconPath = getFileIconUrl(name);
+    let tabIcon = `<img class="file-icon" src="${iconPath}" alt="icon">`;
     tab.innerHTML = `
-            <img class="file-icon" src="${languageTabIcon}">
+            ${tabIcon}
             <span class="file-name">${escapeHtml(name)}</span>
             <span class="material-symbols-rounded" id="tab-close">close</span>
         `;

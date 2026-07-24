@@ -1,36 +1,5 @@
-import { Languages, Dirs, escapeHtml, Filenames } from "../lib.js";
-
-const iconCache = new Map();
-
-async function getFileIcon({ ext, name }) {
-    const nameKey = `name:${name}`;
-    const extKey = `ext:${ext}`;
-
-    if (iconCache.has(nameKey)) {
-        return iconCache.get(nameKey);
-    }
-
-    const fileNameIcon = await Filenames.getIconPath(name);
-
-    if (fileNameIcon) {
-        iconCache.set(nameKey, fileNameIcon);
-        return fileNameIcon;
-    }
-
-    if (iconCache.has(extKey)) {
-        return iconCache.get(extKey);
-    }
-
-    const fileIcon = await Languages.getIconPath(ext);
-
-    iconCache.set(extKey, fileIcon);
-
-    return fileIcon;
-}
-
-function getDirIcon(name) {
-    return Dirs.getIcon(name);
-}
+import { escapeHtml } from "../lib.js";
+import { getFileIconUrl, getFolderIconUrl } from "../iconRegistry.js";
 
 function createFileElement(node, ext, fileIcon) {
     return `
@@ -40,12 +9,12 @@ function createFileElement(node, ext, fileIcon) {
         </div>`;
 }
 
-function createDirElement(node, icon, childrenHtml, loaded) {
+function createDirElement(node, icon, childrenHtml, loaded, expanded = false) {
     return `
-        <div class="dir${node.ignored ? " ignored" : ""}" data-path="${node.escapedPath}" data-loaded="${loaded ? "true" : "false"}" data-ignored="${node.ignored ? "true" : "false"}">
+        <div class="dir${node.ignored ? " ignored" : ""}${expanded ? " expanded" : ""}" data-path="${node.escapedPath}" data-loaded="${loaded ? "true" : "false"}" data-ignored="${node.ignored ? "true" : "false"}">
             <div class="dir-title">
                 <img class="folder-icon" src="${icon}" alt="folder icon">
-                <div class="file"><span class="explorer-name">${node.escapedName}</span></div>
+                <span class="explorer-name">${node.escapedName}</span>
             </div>
             <div class="dir-content">
                 ${childrenHtml}
@@ -69,11 +38,21 @@ function normalizeNode(node) {
     };
 }
 
+/**
+ * Reads a directory tree from root path and generates corresponding HTML structure.
+ * @param {string} rootPath - Absolute path of the root directory.
+ * @returns {Promise<string>} Rendered HTML string of the file tree.
+ */
 export async function buildTreeHtml(rootPath) {
     const nodes = await window.electron.readDirTree(rootPath, { maxDepth: 0, ignoreRoot: rootPath });
     return renderNodes(nodes);
 }
 
+/**
+ * Recursively converts tree node data objects into HTML file/folder elements with dynamic SVG icons.
+ * @param {Array<Object>} nodes - List of file tree node descriptors.
+ * @returns {Promise<string>} Generated HTML string for the current directory level.
+ */
 export async function renderNodes(nodes) {
     if (!Array.isArray(nodes) || nodes.length === 0) {
         return "";
@@ -89,7 +68,7 @@ export async function renderNodes(nodes) {
             switch (node.type) {
                 case "file": {
                     const ext = normalized.escapedName.split(".").pop();
-                    const fileIcon = await getFileIcon({ ext: ext, name: normalized.escapedName });
+                    const fileIcon = getFileIconUrl(normalized.escapedName);
 
                     html = createFileElement(normalized, ext, fileIcon);
                     break;
@@ -97,14 +76,14 @@ export async function renderNodes(nodes) {
                 case "dir": {
                     const loaded = node.loaded !== false;
                     const children = loaded && Array.isArray(node.children) ? node.children : [];
-                    const icon = getDirIcon(normalized.escapedName);
+                    const icon = getFolderIconUrl(normalized.escapedName, false);
                     const childrenHtml = await renderNodes(children);
 
                     html = createDirElement(normalized, icon, childrenHtml, loaded);
                     break;
                 }
                 case "symlink": {
-                    const icon = getDirIcon(normalized.escapedName);
+                    const icon = getFolderIconUrl(normalized.escapedName, false);
                     html = createSymlinkElement(normalized, icon);
                     break;
                 }
