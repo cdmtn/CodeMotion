@@ -1,4 +1,7 @@
 export function enableSmoothScroll(editor, options = {}) {
+    if (!editor || !editor.session || !editor.renderer) {
+        return () => {};
+    }
     const {
         ease = 0.18,
         step = 80,
