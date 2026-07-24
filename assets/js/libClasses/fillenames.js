@@ -88,7 +88,7 @@ export class _Filenames {
             return icon
         }
         else if(icon) {
-            return `../assets/media/icons/filenames/${icon}`
+            return `../assets/media/icons/symbols/files/${icon}`
         }
         else {
             return false

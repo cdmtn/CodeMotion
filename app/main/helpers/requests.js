@@ -168,6 +168,10 @@ function readFilesInFolder(folderPath) {
         ? folderPath
         : path.join(app.getAppPath(), folderPath);
 
+    if (!fs.existsSync(base)) {
+        return [];
+    }
+
     return fs.readdirSync(base).map(file => {
         const fullPath = path.join(base, file);
         const isDir = fs.statSync(fullPath).isDirectory();

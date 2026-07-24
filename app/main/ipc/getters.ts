@@ -34,10 +34,18 @@ ipcMain.handle("get-user-pc-info", async () => {
     };
 });
 ipcMain.handle('get-all-app-icons', () => {
-    return readFilesInFolder("assets/media/icons");
+    try {
+        return readFilesInFolder("assets/media/icons/symbols/files");
+    } catch (e) {
+        return [];
+    }
 });
 ipcMain.handle('get-all-filenames-app-icons', () => {
-    return readFilesInFolder("assets/media/icons/filenames");
+    try {
+        return readFilesInFolder("assets/media/icons/symbols/files");
+    } catch (e) {
+        return [];
+    }
 });
 ipcMain.handle("get-app-icons", async () => {
     try {

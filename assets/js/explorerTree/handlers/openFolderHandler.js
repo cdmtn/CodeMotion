@@ -3,6 +3,7 @@ import { buildTreeHtml, renderNodes } from "../render.js";
 import { bindFileClicks } from "./bindFileClicksHandler.js";
 import { tabsByPath, recentlyClosed } from "../tabHandler.js";
 import { initializeExplorerContextMenu } from "./contextMenuHandler.js";
+import { getFolderIconUrl } from "../../iconRegistry.js";
 
 async function setProjectDataUsedLanguages(path) {
     const usedLanguages = await window.electron.getUsedLanguagesByPath(path)
@@ -138,6 +139,12 @@ export function initializeFolderToggle(container, context = {}) {
 
         const isExpanding = !dirElement.classList.contains("expanded");
         dirElement.classList.toggle("expanded", isExpanding);
+
+        const folderImg = dirTitle.querySelector(".folder-icon");
+        if (folderImg) {
+            const folderName = dirTitle.querySelector(".explorer-name")?.textContent || "";
+            folderImg.src = getFolderIconUrl(folderName, isExpanding);
+        }
 
         if (!isExpanding || dirElement.dataset.loaded !== "false" || dirElement.dataset.loading === "true") {
             return;

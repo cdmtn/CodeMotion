@@ -165,7 +165,7 @@ window.CodeMirror = {
         let onChange = null;
 
         const updateListener = EditorView.updateListener.of((update) => {
-            if (update.docChanged) {
+            if (update.docChanged && typeof onChange === "function") {
                 onChange(update);
             }
         });
