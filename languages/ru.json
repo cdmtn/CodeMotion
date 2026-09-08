@@ -129,7 +129,9 @@
         "file": {
             "title": "Файл",
             "openFolder": "Открыть папку",
-            "closeFolder": "Закрыть папку"
+            "closeFolder": "Закрыть папку",
+            "enableAutosave": "Включить автосохранение",
+            "enabledAutosave": "Автосохранение включено"
         },
         "tools": {
             "title": "Инструменты",
@@ -441,6 +443,7 @@
             "editor": {
                 "editorLabel": "Редактор",
                 "contextsLabel": "Контексты",
+                "autosaves": "Автосохранения",
 
                 "builtInPythonCausePlatformNote": "{{platformNotSupported}}. Будет использоваться встроенная среда Python",
 
@@ -464,6 +467,11 @@
                         "title": "Парсер контекста GOLang",
                         "description": "Включить парсер контекста для GO?"
                     }
+                },
+
+                "autosave": {
+                    "title": "Автосохранение файлов",
+                    "description": "Включить автосохранения файлов?"
                 }
             },
 

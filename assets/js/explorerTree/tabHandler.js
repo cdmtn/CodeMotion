@@ -41,7 +41,7 @@ import { Console } from "../handlers/terminalHandler.js"
 import { initHoverTooltip } from "../handlers/hoverTooltip.js"
 import { minifyJS, minifyCSS } from "../handlers/minifyHandlers.js"
 import { initCodeContextMenu, destroyCodeContextMenu } from "../codeContextMenu.js"
-import { enableSave, disableSave } from "../../../app/renderer.js"
+import { enableSave, disableSave, isAutosaveEnabled } from "../../../app/renderer.js"
 import { bus, sendEvent } from "../bus.js"
 
 import { renderPyMsgSuccess, renderPyMsgErr } from "../terminalRenderer/PyRuntimeHandler.js"
@@ -257,6 +257,51 @@ function touchLive(path) {
 
         hibernateRec(rec);
         liveOrder.splice(idx, 1);
+    }
+}
+
+const autosaveTimers = new Map();
+const AUTOSAVE_DELAY = 800;
+
+function scheduleAutosave(tabEl) {
+    if (!isAutosaveEnabled()) return;
+
+    const path = tabEl.getAttribute("data-path");
+    const rec = tabsByPath.get(path);
+
+    if(!rec || rec.isImage || rec.new || rec._suspend || rec.hibernated) return;
+
+    const previous = autosaveTimers.get(path);
+    if (previous) clearTimeout(previous);
+    autosaveTimers.set(path, setTimeout(() => {
+        autosaveTimers.delete(path);
+        runAutosave(path)
+    }, AUTOSAVE_DELAY));
+}
+
+function cancelAutosave(path) {
+    const t = autosaveTimers.get(path);
+    if (t) { clearTimeout(t); autosaveTimers.delete(path)}
+}
+
+async function runAutosave(path) {
+    const rec = tabsByPath.get(path);
+    if (!rec || rec.hibernated || rec.isImage || rec.new) return;
+
+    if (rec._saving) { scheduleAutosave(rec.tabEl); return; }
+
+    const content = rec.editor.getValue();
+    rec._saving = true;
+
+    let saveStatus;
+    try {
+        saveStatus = await window.electron.saveFile(path, content);
+    } finally {
+        rec._saving = false;
+    }
+
+    if (saveStatus.success && tabsByPath.get(path) === rec && rec.editor.getValue() === content) {
+        rec.tabEl.classList.remove('not-saved');
     }
 }
 
@@ -1060,10 +1105,12 @@ export async function openTab(path, content, extension, name, pathContext, isNew
         }
     });
     editor.onChange(async () => {
-        const currentRec = tabsByPath.get(path);
+        const livePath = tab.getAttribute("data-path");
+        const currentRec = tabsByPath.get(livePath);
         if (currentRec && currentRec._suspend) return;
 
         tab.classList.add("not-saved");
+        scheduleAutosave(tab)
 
         await setEditorContext({}, {
             editor: editor,
@@ -1163,6 +1210,7 @@ export function closeTab(path) {
     const { tabEl, editor, paneEl, id } = rec;
 
     dropLive(path);
+    cancelAutosave(path);
 
     const state = {
         content: getRecContent(rec),

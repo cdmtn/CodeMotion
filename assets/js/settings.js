@@ -9,6 +9,8 @@ import { BottomWindow } from "./handlers/BottomWindowHandler.js"
 
 import { getSettingsModal } from "./modals/settingsModal.js"
 
+import { setAutosave } from "../../app/renderer.js"
+
 const themeSelect = new Options("themeSelect")
 themeSelect.add("default", "Default").default()
 themeSelect.add("light", "Default Light")
@@ -77,6 +79,7 @@ export async function handleSettings(settingsObject) {
             restoreFolder: get("restoreFolder"),
 
             goContextParser: get("go_context_parser"),
+            autosave: get("autosave"),
 
             disableRiskyPermissionWarning: get("disableRiskyPermissionWarning"),
             useSystemNotifications: get("useSystemNotifications"),
@@ -134,6 +137,10 @@ export async function handleSettings(settingsObject) {
     // context parsers
     setupListener("goContextParser", ({ target }) => {
         Setting.goContextParser(target)
+    })
+
+    setupListener("autosave", ({ target }) => {
+        Setting.autosave(target)
     })
 
     setupListener("disableRiskyPermissionWarning", ({ target }) => {
@@ -273,6 +280,7 @@ export async function handleSettings(settingsObject) {
         if ("confirmCloseTab" in settingsObject.editor) Setting.confirmCloseTab(settingsObject.editor.confirmCloseTab, false)
 
         if ("goContextParser" in settingsObject.editor) Setting.goContextParser(settingsObject.editor.goContextParser, false)
+        if ("autosave" in settingsObject.editor) Setting.autosave(settingsObject.editor.autosave, false)
     }
     if (settingsObject.ui) {
         if ("useSystemFont" in settingsObject.ui) Setting.useSystemFonts(settingsObject.ui.useSystemFont, false)
@@ -473,6 +481,14 @@ export class Setting {
 
         if (set) {
             await window.electron.setSettings({ editor: { goContextParser: value } })
+        }
+    }
+    static async autosave(value, set = true) {
+        settingsSelectors.autosave.checked = value
+
+        if (set) {
+            await window.electron.setSettings({ editor: { autosave: value } })
+            setAutosave(value);
         }
     }
     static async disableRiskyPermissionWarning(value, set = true) {

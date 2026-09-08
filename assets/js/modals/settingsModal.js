@@ -270,6 +270,23 @@ export async function getSettingsModal({ platform }) {
                                 id: "setting_go_context_parser"
                             },
                         ]
+                    },
+                    {
+                        type: "category",
+                        label: lgls("editor.autosaves"),
+                        items: []
+                    },
+                    {
+                        type: "row",
+                        classList: ["background"],
+                        items: [
+                            {
+                                type: "switch",
+                                title: lgls("editor.autosave.title"),
+                                description: lgls("editor.autosave.description"),
+                                id: "setting_autosave"
+                            },
+                        ]
                     }
                 ]
             },

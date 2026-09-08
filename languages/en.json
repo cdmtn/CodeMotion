@@ -129,7 +129,9 @@
         "file": {
             "title": "File",
             "openFolder": "Open folder",
-            "closeFolder": "Close folder"
+            "closeFolder": "Close folder",
+            "enableAutosave": "Enable autosave",
+            "enabledAutosave": "Autosave enabled"
         },
         "tools": {
             "title": "Tools",
@@ -441,6 +443,7 @@
             "editor": {
                 "editorLabel": "Editor",
                 "contextsLabel": "Contexts",
+                "autosaves": "Autosaves",
 
                 "builtInPythonCausePlatformNote": "{{platformNotSupported}}. Built-in Python environment will be used",
 
@@ -464,6 +467,11 @@
                         "title": "GOLang Context Parser",
                         "description": "Should the context parser be enabled for GO?"
                     }
+                },
+
+                "autosave": {
+                    "title": "Autosave files",
+                    "description": "Enable autosave files?"
                 }
             },
 
