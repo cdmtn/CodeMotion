@@ -782,6 +782,9 @@ body.explorer-resizing {
     margin-top: 3px;
     margin-right: 8px;
 }
+.code-tab.autosave-fix .file-name::before {
+    display: none!important;
+}
 .code-tab:hover {
     cursor: pointer;
     color: var(--text-color);

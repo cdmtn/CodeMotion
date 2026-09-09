@@ -1,14 +1,10 @@
 import {
-    escapeHtml,
-    addToBug,
     addToHistory,
     showIndicator,
     handlePopups,
     Loader,
-    capitilize,
     handleOnWheelScrollX,
     Languages,
-    Dirs,
     TopBarElement,
     tabName,
     setTabNameCounter,
@@ -20,7 +16,7 @@ import { getCurrentUserDataFromAPI } from "../assets/js/user.js"
 
 import * as object from "../assets/js/objects.js"
 
-import { openTab, reopenLastClosed, activateTab, recentlyClosed, tabsByPath, currentPath, updateTabPath, closeFolder, previewTabPath, promotePreview } from "../assets/js/explorerTree/tabHandler.js"
+import { openTab, reopenLastClosed, recentlyClosed, tabsByPath, currentPath, updateTabPath, closeFolder, previewTabPath, promotePreview } from "../assets/js/explorerTree/tabHandler.js"
 import { handlePopovers } from "../assets/js/handlers/handlePopovers.js"
 import { initExtensions } from "../assets/js/extensionsHandler/extensionsHandler.js"
 import { sendDebugMsg } from "../assets/js/handlers/debuggerSignalHandlers.js"
@@ -34,7 +30,6 @@ import { electronAPI, getDirname, readSettings } from "../assets/js/global.js"
 import { handleSettings } from "../assets/js/settings.js"
 import { SidebarResizeHandler } from "../assets/js/handlers/SidebarResizeHandler.js"
 
-import { buildTreeHtml, renderNodes } from "../assets/js/explorerTree/render.js"
 import { openFolder } from "../assets/js/explorerTree/handlers/openFolderHandler.js"
 import { bindFileClicks } from "../assets/js/explorerTree/handlers/bindFileClicksHandler.js"
 
@@ -45,13 +40,19 @@ import { getLogoutModal } from "../assets/js/modals/logoutModal.js"
 import { ExplorerSidebar } from "../assets/js/sidebar/ExplorerSidebar.js"
 
 let isSaveAviable = true
-let useAutosave = localStorage.getItem('isAutosave') === 'true'
+let autoSaveValue = "off"
 
-export function isAutosaveEnabled() { return useAutosave }
+export function getAutoSaveValue() {
+    return autoSaveValue;
+}
 
-export function setAutosave(value){
-    useAutosave = value;
-    localStorage.setItem('isAutosave', `${value}`)
+export function isAutoSaveEnabled() {
+    return autoSaveValue !== "off"
+}
+
+export function setAutosave(value) {
+    autoSaveValue = value;
+    localStorage.setItem('autoSave', `${value}`)
 }
 
 export function disableSave() {
@@ -163,8 +164,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const pathContext = {}
     window.__pathContext = pathContext
 
-	document.querySelectorAll("[appicon-src-setup]").forEach(el => {
-		el.src = appIcon
+    document.querySelectorAll("[appicon-src-setup]").forEach(el => {
+        el.src = appIcon
     })
 
     setupSegmentedControl()
@@ -213,7 +214,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 pathContext: pathContext,
                 settings: settings
             })
-        } catch (e) {}
+        } catch (e) { }
     }
 
     // Main
@@ -257,11 +258,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Explorer tabs
 
     document.querySelectorAll(".sidebar-item").forEach(tab => {
-		const id = tab.getAttribute("id");
+        const id = tab.getAttribute("id");
 
-		if(tab.getAttribute("non-native")) return
+        if (tab.getAttribute("non-native")) return
 
-		tab.addEventListener("click", async () => {
+        tab.addEventListener("click", async () => {
             document.querySelectorAll("[visibleOn]").forEach(el => {
                 const tabID = tab.id
                 const visibleID = el.getAttribute("visibleOn")

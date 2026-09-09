@@ -1,9 +1,7 @@
 import {
     toBase64,
-    getCodeByName,
     capitilize,
     escapeHtml,
-    runCode,
     runSandbox,
     clearRuntimeErrors,
     isFloat,
@@ -14,7 +12,6 @@ import {
     Languages,
     showCodeWindowVisuals,
     Filenames,
-    idify,
     CodeTemplates,
     dedent,
     GLS,
@@ -34,20 +31,18 @@ import {
     setErrors,
     toggleCodeFooter,
     setLine,
-    enableErrors,
-    disableErrors
 } from "../handlers/bottomTabHandler.js"
 import { Console } from "../handlers/terminalHandler.js"
 import { initHoverTooltip } from "../handlers/hoverTooltip.js"
 import { minifyJS, minifyCSS } from "../handlers/minifyHandlers.js"
 import { initCodeContextMenu, destroyCodeContextMenu } from "../codeContextMenu.js"
-import { enableSave, disableSave, isAutosaveEnabled } from "../../../app/renderer.js"
+import { enableSave, disableSave, isAutoSaveEnabled, getAutoSaveValue } from "../../../app/renderer.js"
 import { bus, sendEvent } from "../bus.js"
 
 import { renderPyMsgSuccess, renderPyMsgErr } from "../terminalRenderer/PyRuntimeHandler.js"
 
 import { triggerEditorChanged, triggerEditorClicked } from "./triggers.js"
-import { TopWindowList, destroyAllTopWindowLists } from "../topWindowHandler/topWindowList.js"
+import { TopWindowList } from "../topWindowHandler/topWindowList.js"
 import { setEditorContext } from "./helpers/setEditorContext.js"
 import { setFileDiagnostics } from "./explorerDiagnostics.js"
 import { Modal } from "../modalsHandler/engine.js"
@@ -108,7 +103,7 @@ async function bindCodeTools({ editor, extension }) {
             let templateContent = dedent(item[id].content)
             const placeholders = extractPlaceholders(templateContent)
 
-            if(placeholders.length > 0) {
+            if (placeholders.length > 0) {
                 const modalInputs = []
 
                 placeholders.forEach(p => {
@@ -264,24 +259,40 @@ const autosaveTimers = new Map();
 const AUTOSAVE_DELAY = 800;
 
 function scheduleAutosave(tabEl) {
-    if (!isAutosaveEnabled()) return;
+    if (!isAutoSaveEnabled()) return;
+
+    const autoSaveValue = getAutoSaveValue();
 
     const path = tabEl.getAttribute("data-path");
     const rec = tabsByPath.get(path);
 
-    if(!rec || rec.isImage || rec.new || rec._suspend || rec.hibernated) return;
+    if (!rec || rec.isImage || rec.new || rec._suspend || rec.hibernated) return;
 
-    const previous = autosaveTimers.get(path);
-    if (previous) clearTimeout(previous);
-    autosaveTimers.set(path, setTimeout(() => {
-        autosaveTimers.delete(path);
+    console.log(autoSaveValue)
+
+    if (autoSaveValue == "timer") {
+        tabEl.classList.remove("autosave-fix")
+
+        const previous = autosaveTimers.get(path);
+        if (previous) clearTimeout(previous);
+
+        autosaveTimers.set(path, setTimeout(() => {
+            autosaveTimers.delete(path);
+            runAutosave(path)
+        }, AUTOSAVE_DELAY));
+    }
+    else if (autoSaveValue == "change") {
+        tabEl.classList.add("autosave-fix")
         runAutosave(path)
-    }, AUTOSAVE_DELAY));
+    }
+    else if (autoSaveValue == "off") {
+        tabEl.classList.remove("autosave-fix")
+    }
 }
 
 function cancelAutosave(path) {
     const t = autosaveTimers.get(path);
-    if (t) { clearTimeout(t); autosaveTimers.delete(path)}
+    if (t) { clearTimeout(t); autosaveTimers.delete(path) }
 }
 
 async function runAutosave(path) {
@@ -311,11 +322,11 @@ function dropLive(path) {
 }
 
 function setTabColor(tab, color) {
-	if (color == undefined) {
-		tab.style.cssText += `--tab-color: var(--text-color)`
-	}
-	else {
-		tab.style.cssText += `--tab-color: ${color}`
+    if (color == undefined) {
+        tab.style.cssText += `--tab-color: var(--text-color)`
+    }
+    else {
+        tab.style.cssText += `--tab-color: ${color}`
     }
 }
 
@@ -690,8 +701,8 @@ function initializeGlobalButtons(settings = {}) {
 function initializeChangeTabSizeButton(settings) {
     let currentTabSize = 2;
 
-    if("editor" in settings && "tabSize" in settings.editor) {
-        if(settings.editor.tabSize != undefined && settings.editor.tabSize.length != 0) {
+    if ("editor" in settings && "tabSize" in settings.editor) {
+        if (settings.editor.tabSize != undefined && settings.editor.tabSize.length != 0) {
             currentTabSize = settings.editor.tabSize
         }
     }
@@ -853,7 +864,7 @@ export async function openTab(path, content, extension, name, pathContext, isNew
         animatedScroll: true,
         cursorStyle: "smooth",
         fixedWidthGutter: true
-	});
+    });
 
     window.electron.triggers.sendFileOpened(
         {
@@ -955,7 +966,7 @@ export async function openTab(path, content, extension, name, pathContext, isNew
             updateEditorData: updateEditorData,
             path: path,
             settings: settings
-		})
+        })
         triggerCursorChanged()
     });
 
@@ -1104,6 +1115,7 @@ export async function openTab(path, content, extension, name, pathContext, isNew
             closeTab(path);
         }
     });
+
     editor.onChange(async () => {
         const livePath = tab.getAttribute("data-path");
         const currentRec = tabsByPath.get(livePath);
@@ -1130,14 +1142,14 @@ bus.addEventListener("on-setting-colored-tabs", (data) => {
     const value = data.detail
 
     // update settings editor.coloredTabs
-    if("editor" in settingsObject && "coloredTabs" in settingsObject.editor) {
+    if ("editor" in settingsObject && "coloredTabs" in settingsObject.editor) {
         settingsObject.editor.coloredTabs = value
     }
 
     tabsByPath.forEach(item => {
         const tabEl = item.tabEl
 
-        if(value) {
+        if (value) {
             tabEl.classList.remove("no-color")
             setTabColor(tabEl, item.color)
         }
@@ -1416,7 +1428,7 @@ function bindEditorBtns(editor, properties = {}) {
             let value = null;
             const selectedText = editor.getSelectedText();
 
-            if(selectedText.length > 0) {
+            if (selectedText.length > 0) {
                 value = selectedText
             }
             else {

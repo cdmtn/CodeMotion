@@ -281,7 +281,7 @@ export async function getSettingsModal({ platform }) {
                         classList: ["background"],
                         items: [
                             {
-                                type: "switch",
+                                type: "placeholder",
                                 title: lgls("editor.autosave.title"),
                                 description: lgls("editor.autosave.description"),
                                 id: "setting_autosave"

@@ -19,6 +19,11 @@ themeSelect.add("contrast-dark", "Contrast dark")
 const pythonRunnerMethodSelect = new Options("pythonRunnerMethod")
 const languageSelect = new Options("languageSelect")
 
+const autosaveSelect = new Options("autosaveSelect")
+autosaveSelect.add("off", "Off").default()
+autosaveSelect.add("timer", "Every 800ms")
+autosaveSelect.add("change", "When file changed")
+
 export let settingsSelectors = {}
 
 export function updateSettingSelectors(object) {
@@ -38,8 +43,8 @@ function setupListener(property, callback) {
         settingsSelectors[property].addEventListener("click", (e) => {
             let target = false;
 
-            if(e.target instanceof HTMLInputElement) target = e.target.value
-            if(e.target instanceof HTMLInputElement && e.target.type == "checkbox") target = e.target.checked
+            if (e.target instanceof HTMLInputElement) target = e.target.value
+            if (e.target instanceof HTMLInputElement && e.target.type == "checkbox") target = e.target.checked
 
             callback({ target: target })
         })
@@ -139,10 +144,6 @@ export async function handleSettings(settingsObject) {
         Setting.goContextParser(target)
     })
 
-    setupListener("autosave", ({ target }) => {
-        Setting.autosave(target)
-    })
-
     setupListener("disableRiskyPermissionWarning", ({ target }) => {
         Setting.disableRiskyPermissionWarning(target)
     })
@@ -213,7 +214,14 @@ export async function handleSettings(settingsObject) {
 
     Setting.gitlabOAuthRender(localObject)
 
-    themeSelect.appendTo(document.querySelector("#setting_theme"))
+    themeSelect.appendTo(get("theme"))
+    autosaveSelect.appendTo(get("autosave"))
+
+    autosaveSelect.on("click", (e) => {
+        const id = e.id
+
+        Setting.autosave(id, true)
+    })
 
     if (platform == "win32") {
         const pyInfo = await window.electron.getPython()
@@ -484,11 +492,12 @@ export class Setting {
         }
     }
     static async autosave(value, set = true) {
-        settingsSelectors.autosave.checked = value
+        if (autosaveSelect.get(value)) autosaveSelect.get(value).default()
+
+        setAutosave(value);
 
         if (set) {
             await window.electron.setSettings({ editor: { autosave: value } })
-            setAutosave(value);
         }
     }
     static async disableRiskyPermissionWarning(value, set = true) {
