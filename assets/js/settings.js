@@ -1,7 +1,7 @@
 import { Notificator, Options, showNeedReloadTopBar, GLS, createNotify } from "./lib.js"
 import { optionsThemeButtonHandler } from "./handlers/themesHandler.js"
 
-import { getDirname, readSettings } from "../../assets/js/global.js"
+import { readSettings } from "../../assets/js/global.js"
 import { capitilize } from "./lib.js"
 
 import { bus, sendEvent } from "./bus.js"
@@ -11,23 +11,81 @@ import { getSettingsModal } from "./modals/settingsModal.js"
 
 import { setAutosave } from "../../app/renderer.js"
 
-const themeSelect = new Options("themeSelect")
-themeSelect.add("default", "Default").default()
-themeSelect.add("light", "Default Light")
-themeSelect.add("contrast-dark", "Contrast dark")
-
-const pythonRunnerMethodSelect = new Options("pythonRunnerMethod")
-const languageSelect = new Options("languageSelect")
-
-const autosaveSelect = new Options("autosaveSelect")
-autosaveSelect.add("off", "Off").default()
-autosaveSelect.add("timer", "Every 800ms")
-autosaveSelect.add("change", "When file changed")
+import { SETTINGS } from "./settingsHandler/list.js"
+import { themeSelect, pythonRunnerMethodSelect, languageSelect, autosaveSelect } from "./settingsHandler/options.js"
+import { AUTOSAVE_DELAY } from "./explorerTree/tabHandler.js"
 
 export let settingsSelectors = {}
 
-export function updateSettingSelectors(object) {
-    settingsSelectors = object
+function persistPath(path, value) {
+    const keys = path.split(".")
+    const root = {}
+    let node = root
+    keys.forEach((key, index) => {
+        if (index === keys.length - 1) node[key] = value
+        else node = (node[key] = {})
+    })
+    window.electron.setSettings(root)
+}
+
+function readPath(source, path) {
+    return path.split(".").reduce((node, key) => (node && typeof node === "object") ? node[key] : undefined, source)
+}
+
+function hasPath(source, path) {
+    let node = source
+    for (const key of path.split(".")) {
+        if (node && typeof node === "object" && key in node) node = node[key]
+        else return false
+    }
+    return true
+}
+
+function genericApply(entry, value, ctx) {
+    const el = settingsSelectors[entry.id]
+    if (el) {
+        if (entry.control === "switch") el.checked = value
+        else if (entry.control === "range") el.value = value
+    }
+    if (entry.event) sendEvent(entry.event, value)
+    if (ctx.persist) persistPath(entry.path, value)
+    if (entry.reload && ctx.persist) window.electron.reload()
+}
+
+function applyEntry(entry, value, ctx) {
+    if (typeof entry.apply === "function") entry.apply(value, ctx)
+    else genericApply(entry, value, ctx)
+}
+
+function bindControls(get) {
+    for (const entry of SETTINGS) {
+        if (entry.control === "select" || entry.bind === false) continue
+
+        const el = get(entry.domId || entry.id)
+        settingsSelectors[entry.id] = el
+        if (!el) continue
+
+        if (entry.control === "action") {
+            el.addEventListener("click", () => { if (entry.action) entry.action() })
+            continue
+        }
+        if (entry.control === "element") continue
+
+        el.addEventListener("click", (e) => {
+            let target = false
+            if (e.target instanceof HTMLInputElement) target = e.target.value
+            if (e.target instanceof HTMLInputElement && e.target.type == "checkbox") target = e.target.checked
+            applyEntry(entry, target, { persist: true, notify: true })
+        })
+    }
+}
+
+function hydrateSettings(settingsObject) {
+    for (const entry of SETTINGS) {
+        if (!entry.path) continue
+        if (!hasPath(settingsObject, entry.path)) continue
+        applyEntry(entry, readPath(settingsObject, entry.path), { persist: false, notify: false })
+    }
 }
 
 function updateThemeSelectDefault(settingsObject) {
@@ -35,19 +93,6 @@ function updateThemeSelectDefault(settingsObject) {
         const instance = themeSelect.get(settingsObject.ui.theme)
 
         if (instance) instance.default()
-    }
-}
-
-function setupListener(property, callback) {
-    if (property in settingsSelectors) {
-        settingsSelectors[property].addEventListener("click", (e) => {
-            let target = false;
-
-            if (e.target instanceof HTMLInputElement) target = e.target.value
-            if (e.target instanceof HTMLInputElement && e.target.type == "checkbox") target = e.target.checked
-
-            callback({ target: target })
-        })
     }
 }
 
@@ -60,6 +105,18 @@ export async function handleSettings(settingsObject) {
     const aviableLanguages = await window.electron.getAllLanguages()
     const gls = await GLS.initLocal()
 
+    // adding options to custom option objects
+
+    themeSelect.add("default", gls.get("modals.appearance.options.themes.default")).default()
+    themeSelect.add("light", gls.get("modals.appearance.options.themes.light"))
+    themeSelect.add("contrast-dark", gls.get("modals.appearance.options.themes.contrastDark"))
+
+    autosaveSelect.add("off", gls.get("modals.appearance.options.autosave.off")).default()
+    autosaveSelect.add("timer", gls.get("modals.appearance.options.autosave.timer", { ms: AUTOSAVE_DELAY }))
+    autosaveSelect.add("change", gls.get("modals.appearance.options.autosave.change"))
+
+    // 
+
     const appearanceModal = await getSettingsModal({ platform: platform })
 
     appearanceModal.bind(document.querySelector("#appearance_n"))
@@ -69,37 +126,7 @@ export async function handleSettings(settingsObject) {
         return appearanceModal.el.querySelector(`#setting_${id}`)
     }
 
-    updateSettingSelectors(
-        {
-            editorTextSize: get("editorTextSize"),
-            useSystemFonts: get("useSystemFonts"),
-            boldFont: get("boldFont"),
-            devMode: get("devMode"),
-            splash: get("splash"),
-            reduceMotion: get("reduceMotion"),
-            uiScale: get("uiScale"),
-
-            coloredTabs: get("coloredTabs"),
-            confirmCloseTab: get("confirmCloseTab"),
-            restoreFolder: get("restoreFolder"),
-
-            goContextParser: get("go_context_parser"),
-            autosave: get("autosave"),
-
-            disableRiskyPermissionWarning: get("disableRiskyPermissionWarning"),
-            useSystemNotifications: get("useSystemNotifications"),
-
-            githubOAuthLogin: get("githubOAuthLogin"),
-            githubOAuthDisconnect: get("githubOAuthDisconnect"),
-            githubOAuthUserInfo: get("githubOAuthUserInfo"),
-            githubOAuthPending: get("githubOAuthPending"),
-
-            gitlabOAuthLogin: get("gitlabOAuthLogin"),
-            gitlabOAuthDisconnect: get("gitlabOAuthDisconnect"),
-            gitlabOAuthUserInfo: get("gitlabOAuthUserInfo"),
-            gitlabOAuthPending: get("gitlabOAuthPending"),
-        }
-    )
+    bindControls(get)
 
     // handler for options button theme cause it need to be updated. Another one in custom theme handler
     optionsThemeButtonHandler(themeSelect)
@@ -139,79 +166,7 @@ export async function handleSettings(settingsObject) {
     })
     // 
 
-    // context parsers
-    setupListener("goContextParser", ({ target }) => {
-        Setting.goContextParser(target)
-    })
-
-    setupListener("disableRiskyPermissionWarning", ({ target }) => {
-        Setting.disableRiskyPermissionWarning(target)
-    })
-
-    setupListener("useSystemNotifications", ({ target }) => {
-        Setting.useSystemNotifications(target)
-    })
-
-    //
-
-    setupListener("coloredTabs", ({ target }) => {
-        Setting.coloredTabs(target)
-    })
-
-    setupListener("confirmCloseTab", ({ target }) => {
-        Setting.confirmCloseTab(target)
-    })
-
-    setupListener("restoreFolder", ({ target }) => {
-        Setting.restoreFolder(target)
-    })
-
-    setupListener("editorTextSize", ({ target }) => {
-        Setting.editorTextSize(target)
-    })
-
-    setupListener("useSystemFonts", ({ target }) => {
-        Setting.useSystemFonts(target)
-    })
-
-    setupListener("boldFont", ({ target }) => {
-        Setting.boldFont(target)
-    })
-
-    setupListener("devMode", ({ target }) => {
-        Setting.devMode(target)
-    })
-
-    setupListener("splash", ({ target }) => {
-        Setting.splash(target)
-    })
-
-    setupListener("reduceMotion", ({ target }) => {
-        Setting.reduceMotion(target)
-    })
-
-    setupListener("uiScale", ({ target }) => {
-        Setting.uiScale(target)
-    })
-
-    setupListener("githubOAuthLogin", ({ target }) => {
-        Setting.githubOAuthStart(target)
-    })
-
-    setupListener("githubOAuthDisconnect", ({ target }) => {
-        Setting.githubOAuthDisconnect(target)
-    })
-
     Setting.githubOAuthRender(localObject)
-
-    setupListener("gitlabOAuthLogin", ({ target }) => {
-        Setting.gitlabOAuthStart(target)
-    })
-
-    setupListener("gitlabOAuthDisconnect", ({ target }) => {
-        Setting.gitlabOAuthDisconnect(target)
-    })
-
     Setting.gitlabOAuthRender(localObject)
 
     themeSelect.appendTo(get("theme"))
@@ -281,32 +236,7 @@ export async function handleSettings(settingsObject) {
         updateThemeSelectDefault(settingsObject)
     })
 
-    if (settingsObject.editor) {
-        if ("fontSize" in settingsObject.editor) Setting.editorTextSize(settingsObject.editor.fontSize, false, false)
-        if ("pythonRunnerMethod" in settingsObject.editor) Setting.pythonRunnerMethod(settingsObject.editor.pythonRunnerMethod, false)
-        if ("coloredTabs" in settingsObject.editor) Setting.coloredTabs(settingsObject.editor.coloredTabs, false)
-        if ("confirmCloseTab" in settingsObject.editor) Setting.confirmCloseTab(settingsObject.editor.confirmCloseTab, false)
-
-        if ("goContextParser" in settingsObject.editor) Setting.goContextParser(settingsObject.editor.goContextParser, false)
-        if ("autosave" in settingsObject.editor) Setting.autosave(settingsObject.editor.autosave, false)
-    }
-    if (settingsObject.ui) {
-        if ("useSystemFont" in settingsObject.ui) Setting.useSystemFonts(settingsObject.ui.useSystemFont, false)
-        if ("boldFont" in settingsObject.ui) Setting.boldFont(settingsObject.ui.boldFont, false)
-        if ("theme" in settingsObject.ui) Setting.themeSelect(settingsObject.ui.theme, false)
-    }
-    if (settingsObject.app) {
-        if ("devMode" in settingsObject.app) Setting.devMode(settingsObject.app.devMode, false)
-        if ("splashScreen" in settingsObject.app) Setting.splash(settingsObject.app.splashScreen, false)
-        if ("reduceMotion" in settingsObject.app) Setting.reduceMotion(settingsObject.app.reduceMotion, false)
-        if ("uiScale" in settingsObject.app) Setting.uiScale(settingsObject.app.uiScale, false, false)
-        if ("language" in settingsObject.app) Setting.language(settingsObject.app.language, false)
-        if ("restoreFolder" in settingsObject.app) Setting.restoreFolder(settingsObject.app.restoreFolder, false)
-        if ("useSystemNotifications" in settingsObject.app) Setting.useSystemNotifications(settingsObject.app.useSystemNotifications, false)
-    }
-    if (settingsObject.extensions) {
-        if ("disableRiskyPermissionWarning" in settingsObject.extensions) Setting.disableRiskyPermissionWarning(settingsObject.extensions.disableRiskyPermissionWarning, false)
-    }
+    hydrateSettings(settingsObject)
 }
 
 export class Setting {
@@ -375,21 +305,6 @@ export class Setting {
 
         if (set) window.electron.setSettings({ ui: { theme: value } })
     }
-    static async devMode(value, set = true) {
-        settingsSelectors.devMode.checked = value
-
-        if (set) {
-            await window.electron.setSettings({ app: { devMode: value } })
-            window.electron.reload()
-        }
-    }
-    static async splash(value, set = true) {
-        settingsSelectors.splash.checked = value
-
-        if (set) {
-            await window.electron.setSettings({ app: { splashScreen: value } })
-        }
-    }
     static async reduceMotion(value, set = true) {
         settingsSelectors.reduceMotion.checked = value
 
@@ -454,43 +369,6 @@ export class Setting {
 
         bus.addEventListener("extension-localization-register", update)
     }
-    static async coloredTabs(value, set = true) {
-        settingsSelectors.coloredTabs.checked = value
-
-        sendEvent("on-setting-colored-tabs", value)
-
-        if (set) {
-            await window.electron.setSettings({ editor: { coloredTabs: value } })
-        }
-    }
-    static async restoreFolder(value, set = true) {
-        settingsSelectors.restoreFolder.checked = value
-
-        if (set) {
-            await window.electron.setSettings({ app: { restoreFolder: value } })
-        }
-    }
-    static async useSystemNotifications(value, set = true) {
-        settingsSelectors.useSystemNotifications.checked = value
-
-        if (set) {
-            await window.electron.setSettings({ app: { useSystemNotifications: value } })
-        }
-    }
-    static async confirmCloseTab(value, set = true) {
-        settingsSelectors.confirmCloseTab.checked = value
-
-        if (set) {
-            await window.electron.setSettings({ editor: { confirmCloseTab: value } })
-        }
-    }
-    static async goContextParser(value, set = true) {
-        settingsSelectors.goContextParser.checked = value
-
-        if (set) {
-            await window.electron.setSettings({ editor: { goContextParser: value } })
-        }
-    }
     static async autosave(value, set = true) {
         if (autosaveSelect.get(value)) autosaveSelect.get(value).default()
 
@@ -498,13 +376,6 @@ export class Setting {
 
         if (set) {
             await window.electron.setSettings({ editor: { autosave: value } })
-        }
-    }
-    static async disableRiskyPermissionWarning(value, set = true) {
-        settingsSelectors.disableRiskyPermissionWarning.checked = value
-
-        if (set) {
-            await window.electron.setSettings({ extensions: { disableRiskyPermissionWarning: value } })
         }
     }
 

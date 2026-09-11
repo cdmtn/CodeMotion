@@ -255,8 +255,8 @@ function touchLive(path) {
     }
 }
 
-const autosaveTimers = new Map();
-const AUTOSAVE_DELAY = 800;
+export const autosaveTimers = new Map();
+export const AUTOSAVE_DELAY = 800;
 
 function scheduleAutosave(tabEl) {
     if (!isAutoSaveEnabled()) return;
