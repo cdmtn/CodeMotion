@@ -1260,6 +1260,11 @@ export function closeTab(path) {
         tabsBar.classList.add("hidden");
         currentPath = null;
 
+        const codeStructureEl = document.querySelector(".code-structure")
+        if (codeStructureEl) {
+            codeStructureEl.innerHTML = `<span gls="editor.nocontext">${GLS.initLocal().get("editor.nocontext")}</span>`
+        }
+
         setAppTitle()
     } else if (toActivate) {
         activateTab(toActivate);
