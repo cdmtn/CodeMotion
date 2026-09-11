@@ -139,10 +139,13 @@ ipcMain.handle('ask-to-save-content', async (_: IpcMainInvokeEvent, payload: Sav
 
 ipcMain.handle("read-file", async (event: IpcMainInvokeEvent, filePath: string, parentPath: string): Promise<{ success: boolean; result: string | Error }> => {
     try {
-        const data = await fs.promises.readFile(
-            path.join(parentPath, filePath),
-            "utf-8"
-        )
+        // A drive-absolute ("C:\...") or UNC ("\\server") filePath is already
+        // complete — joining it onto parentPath would fabricate "D:\D:\..." on
+        // Windows (path.join does not collapse a second absolute path).
+        const isFullPath = /^[a-zA-Z]:[\\/]/.test(filePath) || /^\\\\/.test(filePath)
+        const fullPath = isFullPath ? path.resolve(filePath) : path.join(parentPath, filePath)
+
+        const data = await fs.promises.readFile(fullPath, "utf-8")
 
         return {
             success: true,
