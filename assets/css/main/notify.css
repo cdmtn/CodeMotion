@@ -1,0 +1,99 @@
+.notify-wrapper {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    padding: 10px;
+    z-index: 99;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.notify {
+    color: var(--text-color);
+    background: var(--body-color-solid);
+    display: flex;
+    flex-direction: column;
+    min-width: 300px;
+    transition: .2s;
+    position: relative;
+    border-radius: 15px;
+    border: 1px solid var(--topbar-menu-item-hover-bg);
+    align-items: stretch;
+
+    &.hidden {
+        opacity: 0;
+        transform: translateY(-100%);
+        pointer-events: none;
+    }
+
+    .notify-content {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        padding-left: 15px;
+        padding-right: 15px;
+        padding-bottom: 15px;
+        border-top: 1px solid var(--topbar-menu-item-hover-bg);
+        padding-top: 10px;
+        margin-top: 5px;
+    }
+
+    .notify-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: var(--bold-font-weight);
+        padding: 8px;
+        padding-bottom: 0px;
+        font-size: small;
+        padding-top: 7px;
+
+        .notify-title__text {
+            max-width: 80%;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        span[class^="material-symbols"] {
+            font-size: 15px;
+            background: var(--block-divider-border-color);
+            padding: 5px;
+            border-radius: 100%;
+            border: 1px solid var(--block-divider-border-color);
+        }
+    }
+
+    .notify-desc {
+        font-size: small;
+        color: var(--text-color-muted);
+        width: 80%;
+        word-wrap: break-word;
+    }
+
+    .notify-image {
+        width: 100%;
+        height: 100px;
+        margin-top: 5px;
+        border-radius: 10px 10px 0px 0px;
+    }
+
+    #close {
+        position: absolute;
+        right: 8px;
+        width: 10px;
+        height: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 1;
+        transition: .2s;
+
+        &:hover {
+            opacity: 1;
+            cursor: pointer;
+        }
+    }
+}
+/*  */

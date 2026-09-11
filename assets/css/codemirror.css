@@ -13,23 +13,24 @@
 
 .cm-scroller {
     overflow: auto;
-}
-.cm-scroller::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-}
 
-.cm-scroller::-webkit-scrollbar-track {
-    background: transparent;
-}
+    &::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
 
-.cm-scroller::-webkit-scrollbar-thumb {
-    background: var(--context-border);
-    border-radius: 2px;
-}
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
 
-.cm-scroller::-webkit-scrollbar-thumb:hover {
-    opacity: .5;
+    &::-webkit-scrollbar-thumb {
+        background: var(--context-border);
+        border-radius: 2px;
+
+        &:hover {
+            opacity: .5;
+        }
+    }
 }
 
 /* data color */

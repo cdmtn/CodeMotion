@@ -4,43 +4,48 @@
     align-items: center;
     margin-bottom: 10px;
     gap: 10px;
-}
-.github-oauth-pending .github-oauth-code {
-    font-family: var(--code-font);
-    font-size: 25px;
-    background: var(--body-color-solid);
-    border: 1px solid var(--block-divider-border-color);
-    border-radius: 10px;
-    padding: 10px 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    user-select: text;
-}
-.github-oauth-pending .github-oauth-hint {
-    opacity: .5;
-    font-size: 15px;
-}
-.github-oauth-pending .github-oauth-hint::before {
-    content: "\f525";
-    font-family: 'Material Symbols Rounded';
-    opacity: .5;
-    font-size: 12px;
-    margin-right: 2px;
+
+    .github-oauth-code {
+        font-family: var(--code-font);
+        font-size: 25px;
+        background: var(--body-color-solid);
+        border: 1px solid var(--block-divider-border-color);
+        border-radius: 10px;
+        padding: 10px 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        user-select: text;
+    }
+
+    .github-oauth-hint {
+        opacity: .5;
+        font-size: 15px;
+
+        &::before {
+            content: "\f525";
+            font-family: 'Material Symbols Rounded';
+            opacity: .5;
+            font-size: 12px;
+            margin-right: 2px;
+        }
+    }
 }
 
 .github-oauth-user {
     display: flex;
     align-items: center;
     gap: 5px;
-}
-.github-oauth-user .github-oauth-avatar {
-    width: 30px;
-    height: 30px;
-    border-radius: 100%;
-    border: 1px solid var(--block-divider-border-color);
-    background: var(--body-color-solid);
-}
-.github-oauth-user .github-oauth-info {
-    font-size: 15px;
+
+    .github-oauth-avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 100%;
+        border: 1px solid var(--block-divider-border-color);
+        background: var(--body-color-solid);
+    }
+
+    .github-oauth-info {
+        font-size: 15px;
+    }
 }

@@ -7,22 +7,24 @@
     font-size: 14px;
     border: 1px solid var(--block-divider-border-color);
     transition: .2s;
-}
-.modal-button:hover {
-    background: var(--topbar-menu-item-hover-bg);
-    cursor: pointer;
-}
 
-.modal-button.danger {
-    background: #ff5b5b14;
-    color: #ff5b5b;
-    font-weight: 400;
-    border: 1px solid #ff5b5b14;
-}
+    &:hover {
+        background: var(--topbar-menu-item-hover-bg);
+        cursor: pointer;
+    }
 
-.modal-button.secondary {
-    background: transparent;
-}
-.modal-button.secondary:hover {
-    background-color: var(--block-divider-border-color);
+    &.danger {
+        background: #ff5b5b14;
+        color: #ff5b5b;
+        font-weight: 400;
+        border: 1px solid #ff5b5b14;
+    }
+
+    &.secondary {
+        background: transparent;
+
+        &:hover {
+            background-color: var(--block-divider-border-color);
+        }
+    }
 }

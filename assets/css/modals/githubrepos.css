@@ -16,10 +16,11 @@
     text-decoration: none;
     font-size: 15px;
     transition: .4s;
-}
-.modal-githubrepos__item:hover {
-    opacity: .5;
-    cursor: pointer;
+
+    &:hover {
+        opacity: .5;
+        cursor: pointer;
+    }
 }
 .modal-githubrepos__icon {
     width: 25px;
@@ -33,25 +34,28 @@
     white-space: nowrap;
 }
 
-.modal-githubrepos .modal-githubrepos__item-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
+.modal-githubrepos {
+    .modal-githubrepos__item-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
 
-.modal-githubrepos .modal-githubrepos__forkbtn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    background: var(--code-background);
-    color: var(--text-color);
-    border: 1px solid var(--block-divider-border-color);
-    border-radius: 10px;
-    height: 40px;
-    transition: .4s;
-}
-.modal-githubrepos .modal-githubrepos__forkbtn:hover {
-    opacity: .5;
-    cursor: pointer;
+    .modal-githubrepos__forkbtn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background: var(--code-background);
+        color: var(--text-color);
+        border: 1px solid var(--block-divider-border-color);
+        border-radius: 10px;
+        height: 40px;
+        transition: .4s;
+
+        &:hover {
+            opacity: .5;
+            cursor: pointer;
+        }
+    }
 }

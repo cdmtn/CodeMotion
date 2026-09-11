@@ -29,9 +29,9 @@ body[theme="contrast-dark"] {
     --switch-checkbox-active: #3f6cf7;
     --switch-checkbox: #999999;
     --link-color: #4165f1;
-}
 
-body[theme="contrast-dark"] .ace-tomorrow-night-bright .ace_gutter {
-    background: var(--body-color);
-    border-right: 1px solid var(--block-divider-border-color);
+    .ace-tomorrow-night-bright .ace_gutter {
+        background: var(--body-color);
+        border-right: 1px solid var(--block-divider-border-color);
+    }
 }

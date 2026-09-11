@@ -1,0 +1,63 @@
+.blur-hidden {
+    transition: 1s;
+    filter: blur(10px);
+    transform: scale(0);
+    opacity: 0;
+}
+
+.form-element {
+    width: 100%;
+    position: relative;
+    transition: .4s;
+
+    &[disabled] {
+        opacity: .5;
+    }
+
+    .max-symbols {
+        margin-left: 2px;
+        opacity: .5;
+    }
+}
+
+input {
+    width: -webkit-fill-available;
+    height: 25px;
+    font-size: 14px;
+    font-family: Inter;
+    padding: 20px 15px 5px 10px;
+    background-clip: padding-box;
+    transition: border-color 0.125s ease, box-shadow 0.125s ease;
+    background: var(--block-divider-border-color);
+    border: none;
+    color: var(--text-color);
+    position: relative;
+    outline: none;
+    border-radius: 10px;
+}
+
+input.focused~.form-label,
+input:focus~.form-label,
+input:valid[required]~.form-label input[placeholder]~.form-label {
+    top: 5px;
+    font-size: 12px;
+    line-height: 1.75;
+    left: 10px;
+}
+
+input~span {
+    pointer-events: none;
+}
+
+.form-label {
+    position: absolute;
+    top: 17px;
+    left: 15px;
+    color: var(--text-color-muted);
+    display: block;
+    font-size: 14px;
+    line-height: 1.23543;
+    font-family: var(--main-font);
+    transition-timing-function: ease-in;
+    transition-duration: 0.125s;
+}

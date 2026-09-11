@@ -35,21 +35,21 @@ body[theme="terminal"] {
 
     --main-font: monospace;
     --code-font: monospace;
-}
 
-body[theme="terminal"] .ace-tomorrow-night-bright .ace_gutter {
-    background: var(--body-color);
-    border-right: 1px solid var(--block-divider-border-color);
-}
+    .ace-tomorrow-night-bright .ace_gutter {
+        background: var(--body-color);
+        border-right: 1px solid var(--block-divider-border-color);
+    }
 
-body[theme="terminal"] .popup-content {
-    border-radius: 0;
-    backdrop-filter: none;
-    background: var(--body-color);
-    box-shadow: black 0px 2px 19px 0px;
-}
+    .popup-content {
+        border-radius: 0;
+        backdrop-filter: none;
+        background: var(--body-color);
+        box-shadow: black 0px 2px 19px 0px;
+    }
 
-body[theme="terminal"] .explorer-title {
-    background: var(--code-background);
-    backdrop-filter: none;
+    .explorer-title {
+        background: var(--code-background);
+        backdrop-filter: none;
+    }
 }

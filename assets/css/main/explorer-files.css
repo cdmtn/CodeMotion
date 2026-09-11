@@ -1,0 +1,269 @@
+.explorer-elements[data-tab="files"] {
+    gap: 5px;
+}
+
+.explorer-elements .file {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    gap: 8px;
+    font-size: 12px;
+    padding: 4px 5px;
+    border-radius: 5px;
+    transition: .2s;
+    width: -webkit-fill-available;
+    user-select: none;
+    font-weight: var(--slim-font-weight);
+    white-space: nowrap;
+    position: relative;
+
+    &.error {
+        color: var(--danger);
+    }
+
+    &.warn {
+        color: var(--warning)
+    }
+
+    &::after {
+        content: "";
+        position: absolute;
+        right: -20px;
+        width: 100px;
+        height: 100%;
+        background: linear-gradient(270deg, var(--body-color-transparent-solid) 20%, transparent);
+        pointer-events: none;
+    }
+}
+
+.explorer-elements .file-icon {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+.explorer-elements .folder-icon {
+    width: 15px;
+    flex: 0 0 auto;
+    z-index: 1;
+}
+
+.explorer-elements .dir {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    overflow: visible;
+    min-height: 28px;
+    height: auto;
+    transition: .2s;
+    margin-left: 5px;
+    border-left: 1px solid transparent;
+
+    &.expanded {
+        position: relative;
+        padding-left: 10px;
+
+        &::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: 5px;
+            width: 1px;
+            height: calc(100% - 28px);
+            background: linear-gradient(45deg, transparent 5%, var(--expanded-line) 80%);
+        }
+
+        &.ignored::before {
+            opacity: .45;
+        }
+
+        & > .dir-title:first-child::before {
+            content: "";
+            position: absolute;
+            width: 8px;
+            height: 10px;
+            background: var(--expanded-line);
+            border-top-left-radius: 5px;
+            left: 0px;
+            margin-top: 7px;
+        }
+
+        & > .dir-title:first-child::after {
+            content: "";
+            position: absolute;
+            width: 8px;
+            height: 10px;
+            background: var(--topbar-color);
+            left: 1px;
+            border-top-left-radius: 5px;
+            margin-top: 10px;
+        }
+    }
+}
+
+.explorer-elements .file:hover {
+    background: #ffffff12;
+    cursor: pointer;
+}
+
+.explorer-elements .file.active {
+    background: #ffffff12;
+    cursor: pointer;
+}
+
+.explorer-elements .dir-title {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 28px;
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.explorer-elements .explorer-name {
+    font-size: 13px;
+    opacity: 1;
+    margin-top: 0;
+}
+
+.explorer-elements .file-info:empty {
+    display: none;
+}
+
+.explorer-elements .file-info {
+    font-weight: 700;
+    font-size: smaller;
+    position: relative;
+    z-index: 1;
+
+    &.file-info__error {
+        color: var(--danger);
+        opacity: .5;
+    }
+
+    &.file-info__warn {
+        color: var(--warning);
+        opacity: .5;
+    }
+}
+
+.explorer-elements .file.ignored,
+.explorer-elements .dir.ignored > .dir-title,
+.explorer-elements .dir.ignored .file {
+    opacity: .45;
+}
+
+.explorer-elements .dir-content {
+    margin-left: 5px;
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 5px;
+    flex: 0 0 auto;
+}
+
+.explorer-elements .dir.expanded > .dir-content {
+    display: flex;
+}
+
+.explorer-title__name {
+    display: flex;
+    justify-content: space-between;
+    width: 80%;
+    overflow: hidden;
+    padding-right: 20px;
+    z-index: 1;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+    #tab-name {
+        font-weight: var(--bold-font-weight);
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+
+        .counter {
+            min-width: 12px;
+            height: 12px;
+            display: flex;
+            font-size: 12px;
+            font-weight: var(--default-font-weight);
+            border-radius: 100px;
+            background: var(--block-divider-border-color);
+            align-items: center;
+            justify-content: center;
+            margin-top: 2px;
+            padding: 2px 5px;
+        }
+    }
+}
+
+.path-parent {
+    text-transform: capitalize;
+    opacity: .5;
+    font-size: 12px!important;
+    margin-right: 5px!important;
+}
+
+.path-title {
+    font-size: 12px!important;
+    opacity: .5;
+    margin-left: 5px;
+    text-transform: none;
+    width: 100px;
+    overflow: hidden;
+    display: block;
+    text-overflow: ellipsis;
+    text-transform: capitalize;
+    display: flex;
+    align-items: center;
+}
+
+.code-start {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    background: url("../media/code-main-background.svg"), var(--body-color-solid);
+    background-size: cover;
+    background-position: center;
+    color: white;
+
+    img.code-start__main-logo {
+        position: static;
+        filter: none;
+        transform: none;
+        opacity: 1;
+        width: 100px;
+        -webkit-user-drag: none;
+    }
+
+    .code-start__main {
+        z-index: 1;
+        color: var(--text-color);
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        align-items: center;
+        font-weight: var(--default-font-weight);
+
+        p,
+        h1 {
+            margin: 0px;
+        }
+
+        h1 {
+            font-weight: var(--bold-font-weight);
+            font-size: 100px;
+        }
+
+        p {
+            opacity: .5;
+        }
+    }
+}

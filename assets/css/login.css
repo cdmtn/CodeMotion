@@ -63,14 +63,15 @@
     position: relative;
     cursor: pointer;
     transition: .2s;
-}
-.form-submit:hover {
-    background: #4183ff;
-}
-.form-submit[disabled] {
-    pointer-events: none;
-    user-select: none;
-    opacity: .5;
+
+    &:hover {
+        background: #4183ff;
+    }
+    &[disabled] {
+        pointer-events: none;
+        user-select: none;
+        opacity: .5;
+    }
 }
 .form-element.disappearance {
     transform: translateY(-50px);
@@ -82,46 +83,49 @@
     bottom: 40px;
     display: flex;
     gap: 20px;
-}
-.user-form__links a {
-    text-decoration: none;
-    color: var(--text-color-muted);
-    position: relative;
-    cursor: pointer;
-    transition: .2s;
-}
-.user-form__links a::after {
-    content: '';
-    background: var(--switch-bg-default);
-    width: 1px;
-    height: 50%;
-    position: absolute;
-    right: -10px;
-    top: 5px;
-    border-radius: 100px;
-}
-.user-form__links a:hover {
-    color: var(--text-color);
-}
-.user-form__links a:last-child::after {
-    display: none;
+
+    a {
+        text-decoration: none;
+        color: var(--text-color-muted);
+        position: relative;
+        cursor: pointer;
+        transition: .2s;
+
+        &::after {
+            content: '';
+            background: var(--switch-bg-default);
+            width: 1px;
+            height: 50%;
+            position: absolute;
+            right: -10px;
+            top: 5px;
+            border-radius: 100px;
+        }
+        &:hover {
+            color: var(--text-color);
+        }
+        &:last-child::after {
+            display: none;
+        }
+    }
 }
 
 l-line-spinner {
     transition: 1s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-}
-l-line-spinner.hidden {
-    opacity: 0;
-    position: absolute;
-    pointer-events: none;
-    filter: blur(10px);
-    transform: scale(0);
-}
 
-l-line-spinner.animate-appearance {
-    filter: unset;
-    opacity: 1;
-    transform: scale(1);
+    &.hidden {
+        opacity: 0;
+        position: absolute;
+        pointer-events: none;
+        filter: blur(10px);
+        transform: scale(0);
+    }
+
+    &.animate-appearance {
+        filter: unset;
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .user-form__error.hidden {

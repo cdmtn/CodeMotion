@@ -38,17 +38,18 @@
 .modal-verified__badge {
     background: var(--verified-bagde-bg);
     color: var(--verified-badge-text);
-}
-/* .modal-verified__badge span[class^="material-symbols"] {
-    font-size: 14px;
-    font-variation-settings: 'FILL' 1, 'wght' 700 !important;
-    margin-top: 1px;
-} */
-.modal-verified__badge span[class^="material-symbols"] {
-    font-size: 10px;
-    font-variation-settings: 'FILL' 1, 'wght' 700 !important;
-    margin-top: 1px;
-    color: white;
+
+    /* .modal-verified__badge span[class^="material-symbols"] {
+        font-size: 14px;
+        font-variation-settings: 'FILL' 1, 'wght' 700 !important;
+        margin-top: 1px;
+    } */
+    span[class^="material-symbols"] {
+        font-size: 10px;
+        font-variation-settings: 'FILL' 1, 'wght' 700 !important;
+        margin-top: 1px;
+        color: white;
+    }
 }
 
 /* .modal-owner__badge {
@@ -59,9 +60,10 @@
     clip-path: none;
     background: transparent;
     color: var(--owner-badge);
-}
-.modal-owner__badge span[class^="material-symbols"] {
-    font-size: 14px;
-    font-variation-settings: 'FILL' 1, 'wght' 700 !important;
-    margin-top: 1px;
+
+    span[class^="material-symbols"] {
+        font-size: 14px;
+        font-variation-settings: 'FILL' 1, 'wght' 700 !important;
+        margin-top: 1px;
+    }
 }

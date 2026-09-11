@@ -14,81 +14,90 @@
     border: 1px solid var(--topbar-menu-item-hover-bg);
     box-shadow: #00000014 0px 2px 5px 0px;
     transition: .2s;
-}
-.ace-documentation__tooltip.hidden {
-    display: flex!important;
-    opacity: 0;
-    pointer-events: none;
-}
 
-.ace-documentation__tooltip .ace-documentation__tooltip-key {
-    padding: 10px 15px;
-    padding-bottom: 0px;
-    padding-top: 8px;
-    color: var(--text-color);
-    font-weight: 700;
-}
-.ace-documentation__tooltip .ace-documentation__tooltip-key.operator {
-    color: var(--color-keyword);
-}
-.ace-documentation__tooltip .ace-documentation__tooltip-key.function {
-    color: var(--color-function);
-}
-.ace-documentation__tooltip .ace-documentation__tooltip-key.object {
-    color: var(--color-class);
-}
-.ace-documentation__tooltip .ace-documentation__tooltip-key.class {
-    color: var(--color-class);
-}
-.ace-documentation__tooltip .ace-documentation__tooltip-key.const {
-    color: var(--color-const);
-}
+    &.hidden {
+        display: flex!important;
+        opacity: 0;
+        pointer-events: none;
+    }
 
-.ace-documentation__tooltip .ace-documentation__tooltip-type {
-    padding: 10px 15px;
-    padding-bottom: 8px;
-    padding-top: 0px;
-    font-size: 12px;
-    border-bottom: 1px solid var(--topbar-menu-item-hover-bg);
-    color: var(--text-color-muted);
-} 
-.ace-documentation__tooltip .ace-documentation__tooltip-description {
-    padding: 10px 15px;
-    padding-bottom: 5px;
-    padding-top: 8px;
-    font-size: 12px;
-}
-.ace-documentation__tooltip .ace-documentation__tooltip-example,
-.ace-documentation__tooltip .ace-documentation__tooltip-block {
-    border-top: 1px solid var(--topbar-menu-item-hover-bg);
-    padding: 10px;
-    padding-left: 15px;
-    font-size: 12px;
-}
-.ace-documentation__tooltip .ace-documentation__tooltip-example .ace_editor {
-    background: transparent!important;
-    height: 50px;
-    font-size: 15px;
-    padding: 0px;
-}
-.ace-documentation__tooltip .ace-documentation__tooltip-example .ace_editor .ace_cursor {
-    display: none!important;
-}
-.ace-documentation__tooltip .ace-documentation__tooltip-example .content {
-    font-family: var(--code-font);
-}
-.ace-documentation__tooltip .ace-documentation__tooltip-block .content {
-    font-family: var(--code-font);
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
+    .ace-documentation__tooltip-key {
+        padding: 10px 15px;
+        padding-bottom: 0px;
+        padding-top: 8px;
+        color: var(--text-color);
+        font-weight: 700;
 
-.ace-documentation__tooltip a {
-    color: var(--link-color);
-}
-.ace-documentation__tooltip .note {
-    padding-bottom: 5px;
-    color: var(--text-color-muted);
-    font-size: 12px;
+        &.operator {
+            color: var(--color-keyword);
+        }
+        &.function {
+            color: var(--color-function);
+        }
+        &.object {
+            color: var(--color-class);
+        }
+        &.class {
+            color: var(--color-class);
+        }
+        &.const {
+            color: var(--color-const);
+        }
+    }
+
+    .ace-documentation__tooltip-type {
+        padding: 10px 15px;
+        padding-bottom: 8px;
+        padding-top: 0px;
+        font-size: 12px;
+        border-bottom: 1px solid var(--topbar-menu-item-hover-bg);
+        color: var(--text-color-muted);
+    }
+
+    .ace-documentation__tooltip-description {
+        padding: 10px 15px;
+        padding-bottom: 5px;
+        padding-top: 8px;
+        font-size: 12px;
+    }
+
+    .ace-documentation__tooltip-example,
+    .ace-documentation__tooltip-block {
+        border-top: 1px solid var(--topbar-menu-item-hover-bg);
+        padding: 10px;
+        padding-left: 15px;
+        font-size: 12px;
+    }
+
+    .ace-documentation__tooltip-example .ace_editor {
+        background: transparent!important;
+        height: 50px;
+        font-size: 15px;
+        padding: 0px;
+
+        .ace_cursor {
+            display: none!important;
+        }
+    }
+
+    .ace-documentation__tooltip-example .content {
+        font-family: var(--code-font);
+    }
+
+    .ace-documentation__tooltip-block .content {
+        font-family: var(--code-font);
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    a {
+        color: var(--link-color);
+    }
+
+    .note {
+        padding-bottom: 5px;
+        color: var(--text-color-muted);
+        font-size: 12px;
+    }
 }

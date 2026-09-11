@@ -1,11 +1,15 @@
-.modal-category__item.placeholder-bigdata .modal-category__item-title {
-    opacity: .5;
+.modal-category__item.placeholder-bigdata {
+    .modal-category__item-title {
+        opacity: .5;
+    }
+    .modal-category__item-desc {
+        font-size: 20px;
+        opacity: 1;
+        user-select: all;
+    }
 }
-.modal-category__item.placeholder-bigdata .modal-category__item-desc {
-    font-size: 20px;
-    opacity: 1;
-    user-select: all;
-}
-.modal-category__item.placeholder-label .modal-category__item-desc {
-    opacity: .2;
+.modal-category__item.placeholder-label {
+    .modal-category__item-desc {
+        opacity: .2;
+    }
 }

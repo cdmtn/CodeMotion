@@ -6,8 +6,9 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-}
-.modal-centered span {
-    font-size: 100px;
-    opacity: .1;
+
+    span {
+        font-size: 100px;
+        opacity: .1;
+    }
 }

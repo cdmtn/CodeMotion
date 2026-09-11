@@ -2,8 +2,9 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-}
-.modal-list.list-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+
+    &.list-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+    }
 }

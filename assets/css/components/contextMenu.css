@@ -13,10 +13,11 @@
     width: fit-content;
     white-space: nowrap;
     color: var(--text-color);
-}
-.tooltip[data-show] {
-    opacity: 1;
-    pointer-events: all;
+
+    &[data-show] {
+        opacity: 1;
+        pointer-events: all;
+    }
 }
 
 .context-menu {
@@ -39,71 +40,81 @@
     display: flex;
     flex-direction: column;
     gap: 5px;
-}
-.context-menu.hidden {
-    display: none;
-}
-.context-menu.closing {
-    opacity: 0;
-    filter: blur(4px);
-    pointer-events: none;
-}
-.context-menu .context-menu__item {
-    padding: 5px;
-    color: var(--text-color);
-    font-size: 15px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    transition: .2s;
-    justify-content: space-between;
-    border-radius: 5px;
-    padding-right: 8px;
-}
-.context-menu .context-menu__item:hover {
-    cursor: pointer;
-    background: var(--context-border);
-}
-.context-menu .context-menu__item.disabled {
-    opacity: .45;
-}
-.context-menu .context-menu__item.disabled:hover {
-    cursor: default;
-    background: transparent;
-}
 
-.context-menu .context-menu__item .context-menu__item-block {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-.context-menu .context-menu__item .context-menu__item-block .shortcut {
-    font-size: 12px;
-    opacity: .5;
-}
+    &.hidden {
+        display: none;
+    }
 
-.context-menu .context-menu__item span[class^="material-symbols"] {
-    font-size: 15px;
-    font-variation-settings: 'FILL' 0;
-}
-.context-menu .context-menu__item .content {
-    width: fit-content;
-    font-size: small;
-}
-.context-menu .context-menu__item.no-icon {
-    padding-left: 25px;
-}
+    &.closing {
+        opacity: 0;
+        filter: blur(4px);
+        pointer-events: none;
+    }
 
-.context-menu .context-menu__item-divider {
-    width: 100%;
-    height: 1px;
-    display: flex;
-    justify-content: center;
-}
-.context-menu .context-menu__item-divider div {
-    width: 95%;
-    height: 100%;
-    background: var(--context-border);
+    .context-menu__item {
+        padding: 5px;
+        color: var(--text-color);
+        font-size: 15px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        transition: .2s;
+        justify-content: space-between;
+        border-radius: 5px;
+        padding-right: 8px;
+
+        &:hover {
+            cursor: pointer;
+            background: var(--context-border);
+        }
+
+        &.disabled {
+            opacity: .45;
+
+            &:hover {
+                cursor: default;
+                background: transparent;
+            }
+        }
+
+        .context-menu__item-block {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+
+            .shortcut {
+                font-size: 12px;
+                opacity: .5;
+            }
+        }
+
+        span[class^="material-symbols"] {
+            font-size: 15px;
+            font-variation-settings: 'FILL' 0;
+        }
+
+        .content {
+            width: fit-content;
+            font-size: small;
+        }
+
+        &.no-icon {
+            padding-left: 25px;
+        }
+    }
+
+    .context-menu__item-divider {
+        width: 100%;
+        height: 1px;
+        display: flex;
+        justify-content: center;
+
+        div {
+            width: 95%;
+            height: 100%;
+            background: var(--context-border);
+        }
+    }
 }
 
 .explorer-rename-input {

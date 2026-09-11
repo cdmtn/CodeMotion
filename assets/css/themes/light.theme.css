@@ -27,7 +27,7 @@ body[theme="light"] {
     --warning: #e59036;
 
     --context-border: #00000017;
-    
+
     --code-footer-bg: #ffffffcf;
     --notificator-body-bg: #ffffffb5;
     --notificator-body-border: #e9e9e9;
@@ -45,24 +45,24 @@ body[theme="light"] {
     --color-const: #3060b7;
     --color-operator: #424fff;
     --color-template-literal-wrapper: #2a34b6;
-}
 
-body[theme="light"] .code-tab.not-saved::after {
-    background: #388ae1;
-    border: 2px solid #ffffff;
-}
-body[theme="light"] .explorer-elements .file.active {
-    background: #00000012;
-}
+    .code-tab.not-saved::after {
+        background: #388ae1;
+        border: 2px solid #ffffff;
+    }
+    .explorer-elements .file.active {
+        background: #00000012;
+    }
 
-body[theme="light"] .explorer-tabs {
-    backdrop-filter: blur(10px) brightness(1);
-}
+    .explorer-tabs {
+        backdrop-filter: blur(10px) brightness(1);
+    }
 
-body[theme="light"] .code-tab span:hover {
-    background: #00000012;
-}
+    .code-tab span:hover {
+        background: #00000012;
+    }
 
-body[theme="light"] .ace_marker-layer .ace_active-line {
-    background: #bcbcbc2e;
+    .ace_marker-layer .ace_active-line {
+        background: #bcbcbc2e;
+    }
 }

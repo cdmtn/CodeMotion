@@ -1,9 +1,11 @@
-.modal-container.modal-buttons {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-.modal-container.disabled {
-    pointer-events: none;
-    opacity: .5;
+.modal-container {
+    &.modal-buttons {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    &.disabled {
+        pointer-events: none;
+        opacity: .5;
+    }
 }

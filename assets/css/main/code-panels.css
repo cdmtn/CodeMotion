@@ -1,0 +1,241 @@
+.code-footer, .code-structure, .code-taskprogress {
+    position: absolute;
+    bottom: 0;
+    width: -webkit-fill-available;
+    z-index: 9;
+    background: var(--code-footer-bg);
+    backdrop-filter: blur(10px);
+    color: var(--text-color-muted);
+    font-size: 12px;
+    padding: 5px 8px;
+    display: flex!important;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid var(--block-divider-border-color);
+    height: 15px;
+    font-weight: var(--default-font-weight);
+    margin: 5px;
+    border-radius: 5px;
+}
+
+.code-taskprogress {
+    bottom: 60px;
+    color: var(--taskprogress-text);
+    background: linear-gradient(
+        90deg,
+        var(--taskprogress-bg) 25%,
+        var(--taskprogress-bg-second) 50%,
+        var(--taskprogress-bg) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 4s infinite linear;
+    display: inline-block;
+    transition: .2s;
+    padding: 0px 10px;
+    height: 30px;
+    border: none;
+
+    &.hidden {
+        height: 0px;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .code-taskprogress_name {
+        display: flex;
+        align-items: center;
+    }
+
+    &.finished {
+        background: var(--taskprogress-bg);
+
+        .code-taskprogress_name {
+            font-weight: 700;
+
+            &::before {
+                font-family: 'Material Symbols Rounded';
+                content: '\e19f';
+                margin-right: 5px;
+                font-size: 18px;
+                font-weight: 400;
+                font-variation-settings: 'FILL' 1;
+            }
+        }
+    }
+
+    a {
+        color: inherit;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+
+        span {
+            text-decoration: underline;
+            text-decoration-color: var(--taskprogress-bg-second);
+        }
+
+        &:hover span {
+            text-decoration-color: var(--taskprogress-text);
+        }
+
+        &::before {
+            font-family: 'Material Symbols Rounded';
+            content: '\fffb5';
+            margin-right: 5px;
+            font-size: 15px;
+            font-variation-settings: 'FILL' 1;
+        }
+    }
+}
+
+.code-taskprogress_buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+
+    button {
+        font-size: 12px;
+        border-radius: 5px;
+        font-weight: 400;
+        padding: 5px 10px;
+        transition: .4s;
+
+        &.primary {
+            background: var(--taskprogress-bg);
+            color: var(--taskprogress-text);
+            border: none;
+        }
+
+        &.secondary {
+            background: transparent;
+            color: var(--taskprogress-text);
+            border: 1px solid var(--taskprogress-bg);
+        }
+
+        &:hover {
+            opacity: .5;
+            cursor: pointer;
+        }
+    }
+}
+
+.code-structure {
+    bottom: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: row;
+    gap: 5px;
+    overflow-x: auto;
+    background: var(--body-color);
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    .context-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-weight: var(--default-font-weight);
+        white-space: nowrap;
+        letter-spacing: 0px;
+    }
+
+    .separator {
+        opacity: 0.5;
+        font-size: 14px;
+    }
+
+    .context-item span[class^="material-symbols"] {
+        width: 15px;
+        height: 15px;
+        font-size: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 1px;
+
+        &.function {
+            color: var(--color-function);
+        }
+
+        &.method {
+            color: var(--color-const);
+        }
+
+        &.class {
+            color: var(--color-class);
+        }
+
+        &.object,
+        &.array,
+        &.variable {
+            color: var(--color-const);
+        }
+
+        &.block-id {
+            color: var(--color-keyword);
+        }
+
+        &.block-class {
+            color: var(--color-class);
+        }
+
+        &.await {
+            color: var(--color-other);
+        }
+    }
+}
+
+.code-footer.hidden .code-footer__section .visible-after-opened-folder {
+    display: none;
+}
+
+.code-footer .code-footer__section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.code-footer .code-footer__section-btn {
+    transition: .4s;
+
+    &:hover {
+        color: var(--text-color);
+        cursor: pointer;
+    }
+
+    &.disabled {
+        opacity: .5;
+        pointer-events: none;
+    }
+
+    &.row {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    span[class^="material-symbols"] {
+        transform: translateY(2px);
+        font-size: 14px;
+    }
+}
+
+.code-footer .code-footer__section .left-divider {
+    padding-left: 10px;
+    position: relative;
+
+    &::after {
+        content: '';
+        width: 1px;
+        height: 10px;
+        position: absolute;
+        background: var(--context-border);
+        left: 0;
+        top: 20%;
+    }
+}

@@ -1,5 +1,7 @@
-.xterm-dom-renderer-owner-1 .xterm-fg-1 {
-    border-left: 2px solid #cc0000;
-    color: #ff9695!important;
-    padding-left: 10px;
+.xterm-dom-renderer-owner-1 {
+    .xterm-fg-1 {
+        border-left: 2px solid #cc0000;
+        color: #ff9695!important;
+        padding-left: 10px;
+    }
 }

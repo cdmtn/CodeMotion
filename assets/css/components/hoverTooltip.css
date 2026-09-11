@@ -15,10 +15,11 @@
     font-size: 12px;
     pointer-events: auto;
     transition: opacity .15s;
-}
-.hover-tooltip.hidden {
-    opacity: 0;
-    pointer-events: none;
+
+    &.hidden {
+        opacity: 0;
+        pointer-events: none;
+    }
 }
 
 .hover-tooltip__signature {
@@ -47,16 +48,20 @@
     font-family: var(--code-font);
     line-height: 1.5;
 }
+
 .hover-tooltip__member {
     white-space: pre-wrap;
     word-break: break-word;
 }
+
 .hover-tooltip__key {
     color: var(--color-property, var(--color-const, var(--text-color)));
 }
+
 .hover-tooltip__sep {
     color: var(--color-operator, var(--text-color-muted));
 }
+
 .hover-tooltip__type {
     color: var(--color-class, var(--link-color));
 }

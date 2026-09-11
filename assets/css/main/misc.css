@@ -1,0 +1,48 @@
+.text-danger {
+    color: var(--danger);
+}
+
+.text-warning {
+    color: var(--warning);
+}
+
+.backdrop {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 79;
+    background: #00000063;
+    backdrop-filter: blur(20px);
+    transition: .4s;
+
+    &.hidden {
+        opacity: 0;
+        pointer-events: none;
+        display: flex!important;
+    }
+}
+
+/* transparent scrollbar sryle */
+.transparent-scrollbar {
+    &::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+        display: none;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: #ffffff41;
+        border-radius: 100px;
+
+        &:hover {
+            background: white;
+        }
+    }
+
+    &::-webkit-scrollbar-button {
+        display: none;
+    }
+}

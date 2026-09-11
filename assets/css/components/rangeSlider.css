@@ -3,21 +3,21 @@ input[type="range"] {
     position: relative;
     background: #fff0;
     overflow: hidden;
-}
 
-input[type="range"]:focus {
-    outline: none;
-}
+    &:focus {
+        outline: none;
+    }
 
-input[type="range"]:active {
-    cursor: grabbing;
-    outline: none;
-}
+    &:active {
+        cursor: grabbing;
+        outline: none;
+    }
 
-input[type="range"]:disabled {
-    filter: grayscale(1);
-    opacity: 0.3;
-    cursor: not-allowed;
+    &:disabled {
+        filter: grayscale(1);
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
 }
 
 /* === WebKit specific styles === */

@@ -7,51 +7,51 @@
     z-index: 99;
     width: 100%;
     transition: .4s ease-in-out;
-}
 
-.notificator-wrapper.hidden {
-    display: flex !important;
-    opacity: 0;
-    transform: translateY(100%) scale(0);
-    pointer-events: none;
-}
+    &.hidden {
+        display: flex !important;
+        opacity: 0;
+        transform: translateY(100%) scale(0);
+        pointer-events: none;
+    }
 
-.notificator-wrapper .notificator {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    background: var(--body-color);
-    width: 150px;
-    backdrop-filter: blur(10px);
-    margin-bottom: 30px;
-    position: relative;
-    justify-content: flex-start;
-    gap: 5px;
-    border-radius: 10px;
-    border: 1px solid var(--block-divider-border-color);
-    padding: 10px;
-}
+    .notificator {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        background: var(--body-color);
+        width: 150px;
+        backdrop-filter: blur(10px);
+        margin-bottom: 30px;
+        position: relative;
+        justify-content: flex-start;
+        gap: 5px;
+        border-radius: 10px;
+        border: 1px solid var(--block-divider-border-color);
+        padding: 10px;
 
-.notificator-wrapper .notificator .notificator-body {
-    color: var(--text-color);
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    width: 100%;
-}
+        .notificator-body {
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            width: 100%;
 
-.notificator-wrapper .notificator .notificator-body p {
-    margin: 0px;
-}
+            p {
+                margin: 0px;
+            }
+        }
 
-.notificator-wrapper .notificator span[class^="material-symbols"] {
-    color: var(--text-color);
-    font-size: 20px;
-    opacity: .5;
-}
+        span[class^="material-symbols"] {
+            color: var(--text-color);
+            font-size: 20px;
+            opacity: .5;
+        }
 
-.notificator-wrapper .notificator .notificator-body .notificator-body__value {
-    font-size: 15px;
-    font-weight: 600;
-    text-align: center;
+        .notificator-body .notificator-body__value {
+            font-size: 15px;
+            font-weight: 600;
+            text-align: center;
+        }
+    }
 }

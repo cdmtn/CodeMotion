@@ -1,0 +1,223 @@
+.code-tabs {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 5px;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    padding-right: 10px;
+    background: var(--code-background);
+    border-bottom: 1px solid var(--block-divider-border-color);
+    position: relative;
+    z-index: 20;
+    padding: 5px;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    &.hidden {
+        display: none;
+    }
+}
+
+.code-tab {
+    flex: 0 0 auto;
+    padding-left: 10px;
+    padding-right: 8px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    user-select: none;
+    transition: 0.2s;
+    position: relative;
+    overflow: hidden;
+    border-radius: 5px;
+    border: 1px solid var(--block-divider-border-color);
+
+    .file-icon {
+        width: 15px;
+        height: 15px;
+        border-radius: 3px;
+    }
+
+    .tab-info:empty {
+        display: none;
+    }
+
+    .tab-info {
+        font-weight: 700;
+        font-size: smaller;
+    }
+
+    .tab-info.tab-info__error {
+        color: var(--danger);
+        opacity: .5;
+    }
+
+    .tab-info.tab-info__warn {
+        color: var(--warning);
+        opacity: .5;
+    }
+
+    &.error .file-name {
+        color: var(--danger)!important;
+    }
+
+    &.warn .file-name {
+        color: var(--warning)!important;
+    }
+
+    &.not-saved .file-name::before {
+        content: '';
+        position: relative;
+        display: block;
+        width: 5px;
+        height: 5px;
+        background: var(--text-color);
+        border-radius: 100%;
+        margin-top: 3px;
+        margin-right: 8px;
+    }
+
+    &.autosave-fix .file-name::before {
+        display: none!important;
+    }
+
+    &:hover {
+        cursor: pointer;
+        color: var(--text-color);
+    }
+
+    &.dragging { opacity: 0.4; }
+
+    &.drag-over-left { border-left: 2px solid var(--link-color); }
+
+    &.drag-over-right { border-right: 2px solid var(--link-color); }
+
+    &.active {
+        background: var(--code-background);
+    }
+
+    &.active::before {
+        content: "";
+        background: var(--tab-color);
+        position: absolute;
+        width: 100%;
+        height: 4px;
+        bottom: 0;
+        left: 0;
+        filter: blur(15px);
+        opacity: .5;
+    }
+
+    &.active::after {
+        content: "";
+        position: absolute;
+        background: var(--tab-color);
+        width: 100%;
+        height: 2px;
+        right: 0;
+        bottom: 0;
+    }
+
+    &.active.no-color:after {
+        content: "";
+        --tab-color: var(--link-color);
+    }
+
+    &.active.no-color:before {
+        content: "";
+        --tab-color: var(--link-color);
+    }
+
+    &.active .file-name {
+        color: var(--text-color);
+    }
+
+    &.preview .file-name {
+        font-style: italic;
+    }
+
+    &.preview.active {
+        --tab-color: var(--text-color-muted)!important;
+    }
+
+    span {
+        font-size: 15px;
+        height: 15px;
+        color: var(--text-color-muted);
+        border-radius: 100%;
+        transition: .2s;
+        padding: 1px;
+    }
+
+    span:hover {
+        background: #ffffff24;
+        cursor: pointer;
+    }
+
+    span.file-name {
+        height: fit-content;
+        margin: 0px;
+        font-weight: var(--default-font-weight);
+        color: var(--text-color-muted);
+        max-width: 70%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        border-radius: 0px;
+        font-size: small;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: -2px;
+    }
+
+    span.file-name:hover {
+        background: transparent;
+    }
+}
+
+.ace_editor {
+    font-family: var(--code-font);
+    font-size: var(--editor-font-size);
+    background: var(--code-background);
+
+    .ace_gutter {
+        background: var(--code-background);
+    }
+}
+
+.ace-github-dark {
+    background: var(--code-background);
+
+    .ace_gutter {
+        background: var(--code-background);
+        color: var(--text-color-muted);
+        border-right: 1px solid var(--topbar-color);
+    }
+
+    .ace_print-margin {
+        background: #ffffff0a;
+    }
+
+    .ace_marker-layer .ace_active-line {
+        background: #ffffff0d;
+    }
+
+    .ace_marker-layer .ace_selection {
+        background: #ffffff1c;
+    }
+
+    .ace_marker-layer .ace_selected-word {
+        border: 0px;
+    }
+}
+
+.ace_content {
+    width: 100%!important;
+}

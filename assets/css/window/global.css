@@ -12,8 +12,9 @@
     opacity: 1;
     pointer-events: all;
     transition: .2s;
-}
-.top-window.hidden {
-    opacity: 0;
-    pointer-events: none;
+
+    &.hidden {
+        opacity: 0;
+        pointer-events: none;
+    }
 }
