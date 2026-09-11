@@ -109,8 +109,11 @@ export async function openFolder({ pathRoot, filesPanel, addToHistory, pathConte
 
 function updatePathContext({ pathRoot, pathContext }) {
     const parts = pathRoot.split(/[\\/]/g).filter(Boolean);
-    const isAbsolute = pathRoot.startsWith("/") || /^[a-zA-Z]:[\\/]/.test(pathRoot);
-    pathContext["rootPath"] = isAbsolute ? "/" + parts.join("/") : parts.join("/");
+    // Only POSIX-absolute paths ("/home/…") regain a leading slash. A Windows
+    // drive path ("D:\…") already carries its root in parts[0] ("D:"); adding a
+    // slash produced "/D:/…", which path.resolve turned into "D:\D:\…".
+    const isPosixAbsolute = pathRoot.startsWith("/");
+    pathContext["rootPath"] = isPosixAbsolute ? "/" + parts.join("/") : parts.join("/");
     pathContext["root"] = parts.pop();
 }
 
