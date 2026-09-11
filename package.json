@@ -16,6 +16,7 @@
         "install": "cd codemirror && npm i",
         "cdbuild": "cd codemirror && npm run build",
         "start": "npm run cdbuild && npm run build && electron .",
+        "dev": "npm start -- --d",
         "dist": "npm run cdbuild && npm run build && electron-builder",
         "dist-linux": "npm run cdbuild && npm run build && electron-builder --linux",
         "dist-linux-portable": "npm run cdbuild && npm run build && electron-builder --linux tar.gz"

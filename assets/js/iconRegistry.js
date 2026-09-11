@@ -351,7 +351,7 @@ export function getFileIconUrl(filename) {
     const icon = getFileIcon(filename);
     const isAbs = isAbsolutePath(icon)
 
-    if(isAbs) return icon;
+    if (isAbs) return icon;
     else return `../assets/media/icons/symbols/files/${icon}`;
 }
 

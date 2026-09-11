@@ -6,7 +6,7 @@ const { LOCAL_FILE_PATH } = require("./dist/helpers/paths.js")
 const tokenFile = LOCAL_FILE_PATH
 const { API } = require("./dist/helpers/paths.js");
 
-async function register(username, email, password, passwordConfirm) {  
+async function register(username, email, password, passwordConfirm) {
     try {
         const response = await fetch(`${API}/auth/register`, {
             method: 'POST',
