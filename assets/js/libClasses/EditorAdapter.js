@@ -78,6 +78,10 @@ export class _EditorAdapter {
         this.commands.openSearchPanel(this.instance)
     }
 
+    openReplace() {
+        this.commands.openFindReplace(this.instance)
+    }
+
     resetUndoManager() {
         this.recreateState(this.instance.state.doc.toString());
     }

@@ -49,6 +49,7 @@ import { markdown } from "@codemirror/lang-markdown";
 import { colorComments, colorCommentsTheme } from "./plugins/colorComments";
 import { semanticHighlight, semanticHighlightTheme, semanticDiagnosticsSink } from "./plugins/semanticHighlight";
 import { unusedMarksField, unusedMarksTheme, applyUnusedMarks } from "./plugins/unusedMarks";
+import { findWidget, openFindReplace } from "./plugins/findWidget";
 import { formatCode, parserForMode } from "./plugins/formatter";
 import { fromVSCodeSnippets } from "./plugins/snippets";
 import { suggestionField, suggestionTheme, suggestPlugin, suggestUpdateListener, acceptSuggestion, dismissSuggestion, initSuggestListener } from "./plugins/suggest";
@@ -329,6 +330,8 @@ window.CodeMirror = {
                     unusedMarksField,
                     unusedMarksTheme,
 
+                    findWidget(),
+
                     closeBrackets(),
                     autocompletion(),
 
@@ -393,6 +396,7 @@ window.CodeMirror = {
                 undo,
                 redo,
                 openSearchPanel,
+                openFindReplace,
                 toggleComment,
                 indentSelection
             },

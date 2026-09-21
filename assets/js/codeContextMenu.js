@@ -100,6 +100,11 @@ export async function initCodeContextMenu(currentPath, pathContext, editor) {
             editor.openSearch();
         }
     })
+    codeContextMenu.add({
+        id: "replace", icon: "find_replace", content: "Replace", shortcut: "Ctrl+H", func: () => {
+            editor.openReplace();
+        }
+    })
     // codeContextMenu.add({
     //     id: "goToLine", icon: "tag", content: "Go to Line...", shortcut: "Ctrl+G", func: () => {
     //         editor.commands.byName.gotoLine.exec(editor);

@@ -1,0 +1,183 @@
+.cm-editor {
+    .cm-panels.cm-panels-top:has(.cm-find) {
+        position: absolute;
+        top: 0;
+        right: 18px;
+        left: auto;
+        max-width: calc(100% - 36px);
+        z-index: 20;
+        background: transparent!important;
+        border: none!important;
+        color: inherit;
+    }
+
+    .cm-searchMatch {
+        background: #ea5c0047!important;
+        border-radius: 2px;
+
+        &.cm-searchMatch-selected {
+            background: #ea5c0099!important;
+            outline: 1px solid #ea5c00;
+        }
+    }
+}
+
+.cm-find {
+    display: flex;
+    align-items: stretch;
+    gap: 2px;
+    width: 440px;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 6px 8px 6px 2px;
+    font-family: var(--main-font);
+    font-size: 13px;
+    color: var(--text-color);
+    background: var(--body-color-solid);
+    border: 1px solid var(--block-divider-border-color);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    box-shadow: #00000040 0px 4px 12px 0px;
+
+    button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        padding: 0;
+        color: inherit;
+        background: transparent;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+
+        &:hover {
+            background: var(--topbar-menu-item-hover-bg);
+        }
+
+        &:focus-visible {
+            outline: 1px solid var(--link-color);
+        }
+    }
+
+    .material-symbols-rounded {
+        font-size: 17px;
+    }
+
+    .cm-find__toggle {
+        width: 18px;
+
+        .material-symbols-rounded {
+            transition: transform .12s;
+        }
+
+        &[aria-expanded="true"] .material-symbols-rounded {
+            transform: rotate(90deg);
+        }
+    }
+
+    .cm-find__rows {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 5px 3px;
+        align-items: center;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .cm-find__row {
+        display: contents;
+
+        &[hidden] {
+            display: none;
+        }
+    }
+
+    .cm-find__actions {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+    }
+
+    .cm-find__field {
+        display: flex;
+        align-items: center;
+        flex: 1;
+        min-width: 0;
+        padding-right: 3px;
+        background: var(--code-background);
+        border: 1px solid var(--block-divider-border-color);
+        border-radius: 5px;
+
+        &:focus-within {
+            border-color: var(--link-color);
+        }
+    }
+
+    .cm-find__input {
+        flex: 1;
+        min-width: 0;
+        width: auto;
+        height: 24px;
+        padding: 0 6px;
+        font-family: var(--main-font);
+        font-size: 13px;
+        color: var(--text-color);
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        outline: none;
+        transition: none;
+    }
+
+    .cm-find__options {
+        display: flex;
+        gap: 1px;
+    }
+
+    .cm-find__option {
+        min-width: 20px;
+        height: 20px;
+        padding: 0 3px;
+        font-family: var(--code-font);
+        font-size: 12px;
+        opacity: .7;
+
+        &[aria-pressed="true"] {
+            opacity: 1;
+            color: var(--link-color);
+            background: color-mix(in srgb, var(--link-color) 22%, transparent);
+            outline: 1px solid color-mix(in srgb, var(--link-color) 60%, transparent);
+        }
+    }
+
+    .cm-find__button {
+        width: 24px;
+        height: 24px;
+    }
+
+    .cm-find__count {
+        min-width: 76px;
+        padding: 0 4px;
+        font-size: 12px;
+        white-space: nowrap;
+        color: var(--text-color-muted);
+    }
+
+    &.cm-find--empty,
+    &.cm-find--invalid {
+        .cm-find__row:first-child .cm-find__field {
+            border-color: var(--danger);
+        }
+
+        .cm-find__count {
+            color: var(--danger);
+        }
+    }
+
+    &.cm-find--readonly {
+        .cm-find__toggle {
+            visibility: hidden;
+        }
+    }
+}
