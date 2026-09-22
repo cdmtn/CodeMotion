@@ -1,6 +1,6 @@
 {
     "name": "codemotion-app",
-    "version": "0.0.9-alpha.dev",
+    "version": "0.0.9.5-alpha",
     "description": "Web-focused, advanced open-source code editor (IDE) with native tools for web developers",
     "author": {
         "name": "Yurba Developers",
