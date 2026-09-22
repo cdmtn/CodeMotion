@@ -1,5 +1,5 @@
 <div align="center">
-    <img width="100%" height="100%" alt="github-codemotion-prev-rc" src="https://github.com/user-attachments/assets/2fdb8ebf-13be-4d75-83cc-939b7426fdf6" />
+    <img width="100%" height="100%" alt="github-codemotion-prev-rc" src="https://github.com/user-attachments/assets/eb11896a-4bdd-4f72-9181-e7d3e839b839" />
 </div>
 <h1 align="center">CodeMotion IDE<br>
 (Early-Development Alpha)</h1>
