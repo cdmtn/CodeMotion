@@ -8,7 +8,7 @@
     },
     "main": "app/dist/main.js",
     "scripts": {
-        "build": "tsc && tsc -p tsconfig.esm.json",
+        "build": "tsc && tsc -p tsconfig.esm.json && tsc -p tsconfig.app.json && tsc -p tsconfig.app.renderer.json",
         "test": "node --test tests/unit/*.test.mjs",
         "lint": "biome check .",
         "lint:fix": "biome check --write .",

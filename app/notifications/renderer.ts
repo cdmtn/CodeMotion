@@ -1,6 +1,6 @@
 import { generateAvatar, truncateString } from "../../assets/js/lib.js"
 
-window.electron.onData(data => {
+window.electron.onData((data: any) => {
     const types = ["default", "danger", "success", "warn"]
 
     const icon = data.icon == undefined ? false : data.icon
@@ -16,8 +16,8 @@ window.electron.onData(data => {
     const notifyDescription = document.querySelector(".notification-description")
     const notifyClose = document.querySelector(".notification-close")
 
-    if(!icon) {
-        if(image) {
+    if (!icon) {
+        if (image) {
             const img = document.createElement("img")
             img.classList.add("notification-image")
             img.src = image
@@ -25,7 +25,7 @@ window.electron.onData(data => {
             notifyIcon.parentElement.appendChild(img)
             notifyIcon.remove()
         }
-        else if(initials) {
+        else if (initials) {
             const generatedAvatar = generateAvatar(initials)
 
             notifyIcon.parentElement.classList.add("initials")
@@ -33,14 +33,14 @@ window.electron.onData(data => {
         }
         else {
             notifyIcon.parentElement.remove()
-        } 
+        }
     }
     else {
         notifyIcon.textContent = icon
     }
 
-    if(types.includes(type)) notifyWrapper.classList.add(type)
-        
+    if (types.includes(type)) notifyWrapper.classList.add(type)
+
     notifyClose.addEventListener("click", () => {
         window.electron.close()
     })

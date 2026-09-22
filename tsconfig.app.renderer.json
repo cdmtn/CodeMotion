@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "ES2022",
+        "moduleResolution": "bundler",
+        "strict": false,
+        "skipLibCheck": true,
+        "types": [],
+        "lib": ["ES2022", "DOM", "DOM.Iterable"]
+    },
+    "include": [
+        "app/renderer-env.d.ts",
+        "app/notifications/renderer.ts",
+        "app/splash/splashRenderer.ts"
+    ]
+}

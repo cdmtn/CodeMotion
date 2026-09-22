@@ -1,9 +1,20 @@
-const { BrowserWindow, screen, ipcMain, app } = require("electron")
+import { BrowserWindow, screen, ipcMain, IpcMainEvent } from "electron"
+import path from "path"
+
 const { HTML_PATH, APP_PATH } = require("../dist/helpers/paths.js")
+const bus = require("../../helpers/eventBus")
 
-const path = require("path")
+interface NotificationProps {
+    timeout?: number
+    icon?: string
+    image?: string
+    initials?: string
+    title?: string
+    type?: string
+    description?: string
+}
 
-const notifications = []
+const notifications: BrowserWindow[] = []
 
 const notifyWidth = 400
 const margin = 5
@@ -11,9 +22,7 @@ const minHeight = 50
 const maxHeight = 200
 const maxStack = 5
 
-const bus = require("../../helpers/eventBus")
-
-function updatePositions() {
+function updatePositions(): void {
     const { width, height } = screen.getPrimaryDisplay().workAreaSize
 
     let offset = margin
@@ -34,12 +43,12 @@ function updatePositions() {
     }
 }
 
-function closeNotification(win) {
+function closeNotification(win: BrowserWindow): void {
     if (!win || win.isDestroyed()) return
     win.close()
 }
 
-function spawnNotification(properties = {}) {
+function spawnNotification(properties: NotificationProps = {}): BrowserWindow {
     ipcMain.removeAllListeners("notification-close")
 
     const timeout = properties.timeout ?? 4000
@@ -102,7 +111,7 @@ function spawnNotification(properties = {}) {
         }, timeout)
     }
 
-    ipcMain.on("notification-close", (event) => {
+    ipcMain.on("notification-close", (event: IpcMainEvent) => {
         const win = BrowserWindow.fromWebContents(event.sender)
         if (win && !win.isDestroyed()) win.close()
     })
@@ -110,4 +119,4 @@ function spawnNotification(properties = {}) {
     return win
 }
 
-module.exports = { spawnNotification, notifications }
+export { spawnNotification, notifications }

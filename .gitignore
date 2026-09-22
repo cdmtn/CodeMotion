@@ -13,3 +13,9 @@ dist-esm/
 dist-esm/
 bun.lock
 bun.lockb
+
+# notifications&splash
+app/notifications/*.js
+app/notifications/*.js.map
+app/splash/*.js
+app/splash/*.js.map

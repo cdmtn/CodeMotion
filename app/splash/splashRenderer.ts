@@ -11,18 +11,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     let version = packageData.version
 
     let image = document.querySelector(".image")
-    let r = Math.floor(Math.random() * 12) + 1;
+    let r = Math.floor(Math.random() * 12) + 1
     let randomImage = `../assets/media/splash/splash_${r}.png`
     let splashImage = new Image()
     splashImage.src = randomImage
     splashImage.decoding = "async"
     image.replaceChildren(splashImage)
 
-    document.querySelector(".version").innerText = `v${version}`
-    document.querySelector(".description").innerText = gls.get("splash.description")
+    document.querySelector<HTMLElement>(".version").innerText = `v${version}`
+    document.querySelector<HTMLElement>(".description").innerText = gls.get("splash.description")
 
-    window.electron.onStatusUpdate((_event, data) => {
-        document.querySelector(".status").innerText = data.msg
+    window.electron.onStatusUpdate((_event: unknown, data: any) => {
+        document.querySelector<HTMLElement>(".status").innerText = data.msg
 
         if (data.error) {
             document.querySelector(".status").classList.add("text-danger")
@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             let buttons = document.querySelector(".buttons")
             buttons.classList.remove("hidden")
         }
-    });
+    })
 
     closeBtn.textContent = gls.get("splash.closeBtn")
     offlineBtn.textContent = gls.get("splash.offlineBtn")
