@@ -1,12 +1,12 @@
 .main-wrapper {
     display: flex;
     align-items: flex-start;
+    flex: 1;
     min-height: 0;
     overflow: hidden;
     gap: 5px;
     margin: 5px;
     margin-top: 0px;
-    height: calc(100% - 5%);
     padding-bottom: 5px;
 }
 

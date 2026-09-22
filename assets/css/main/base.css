@@ -41,6 +41,8 @@ body {
     font-family: var(--main-font);
     background: var(--body-color);
     height: 100%;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
     overscroll-behavior: none;
     zoom: var(--ui-scale);
