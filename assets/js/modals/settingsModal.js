@@ -1,12 +1,23 @@
 import { Modal } from "../modalsHandler/engine.js"
 import { GLS } from "../lib.js"
 
+import { generalPage } from "./settingsModal/general.js"
+import { sidebarPage } from "./settingsModal/sidebar.js"
+import { terminalPage } from "./settingsModal/terminal.js"
+import { fileWindowPage } from "./settingsModal/fileWindow.js"
+import { editorPage } from "./settingsModal/editor.js"
+import { extensionsPage } from "./settingsModal/extensions.js"
+import { gitPage } from "./settingsModal/git.js"
+
 export async function getSettingsModal({ platform }) {
     const gls = await GLS.initLocal()
-    
+
     function lgls(string, replacements) {
         return gls.get(`modals.appearance.${string}`, replacements)
     }
+
+    // shared context handed to every category page builder
+    const ctx = { lgls, gls, platform }
 
     const appearanceModal = Modal.create({
         id: "appearance",
@@ -15,376 +26,16 @@ export async function getSettingsModal({ platform }) {
         title: lgls("title"),
 
         pages: [
-            {
-                name: lgls("generalCategory"),
-                icon: "settings",
-                content: [
-                    {
-                        type: "category",
-                        label: lgls("application.applicationLabel"),
-                        items: []
-                    },
-                    {
-                        type: "row",
-                        classList: ["background"],
-                        items: [
-                            {
-                                type: "range",
-                                title: lgls("application.uiScale.title"),
-                                description: lgls("application.uiScale.description"),
-                                id: "setting_uiScale",
-                                min: 0.5,
-                                max: 4,
-                                value: 1,
-                                step: 0.1,
-                                prefix: "x"
-                            },
-                            {
-                                type: "placeholder",
-                                title: lgls("application.language.title"),
-                                description: lgls("application.language.description"),
-                                note: gls.get("modals.needToReloadNote"),
-                                id: "setting_language"
-                            },
-                            {
-                                type: "switch",
-                                title: lgls("application.useSystemFonts.title"),
-                                description: lgls("application.useSystemFonts.description"),
-                                id: "setting_useSystemFonts"
-                            },
-                            {
-                                type: "switch",
-                                title: lgls("application.splashWindow.title"),
-                                description: lgls("application.splashWindow.description"),
-                                id: "setting_splash"
-                            },
-                            {
-                                type: "switch",
-                                title: lgls("application.reduceMotion.title"),
-                                description: lgls("application.reduceMotion.description"),
-                                id: "setting_reduceMotion"
-                            },
-                            {
-                                type: "switch",
-                                title: lgls("application.boldFont.title"),
-                                description: lgls("application.boldFont.description"),
-                                id: "setting_boldFont"
-                            },
-                            {
-                                type: "switch",
-                                title: lgls("application.restoreFolder.title"),
-                                description: lgls("application.restoreFolder.description"),
-                                id: "setting_restoreFolder"
-                            },
-                            {
-                                type: "switch",
-                                title: lgls("application.useSystemNotifications.title"),
-                                description: lgls("application.useSystemNotifications.description"),
-                                id: "setting_useSystemNotifications"
-                            },
-                            {
-                                type: "placeholder",
-                                title: lgls("application.theme.title"),
-                                description: lgls("application.theme.description"),
-                                id: "setting_theme"
-                            },
-                            {
-                                type: "switch",
-                                title: lgls("application.developerMode.title"),
-                                description: lgls("application.developerMode.description"),
-                                note: gls.get("modals.needToReloadNote"),
-                                id: "setting_devMode"
-                            },
-                            {
-                                type: "placeholder",
-                                id: "settings_appIcon",
-                                title: lgls("application.appIcons.title"),
-                                description: lgls("application.appIcons.description"),
-                                note: gls.get("modals.appReloadNote")
-                            },
-                        ]
-                    }
-                ]
-            },
-            {
-                name: lgls("sideBarCategory"),
-                icon: "dock_to_left",
-                content: [
-                    {
-                        type: "category",
-                        label: lgls("sideBarCategory"),
-                        items: []
-                    },
-                    {
-                        type: "row",
-                        classList: ["background"],
-                        items: [
-                            {
-                                type: "switch",
-                                title: lgls("sideBar.showHiddenFiles.title"),
-                                description: lgls("sideBar.showHiddenFiles.description"),
-                                id: "setting_sidebarShowHiddenFiles",
-                                disabled: true
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                name: lgls("terminalCategory"),
-                icon: "terminal",
-                content: [
-                    {
-                        type: "category",
-                        label: lgls("terminal.appearanceLabel"),
-                        items: []
-                    },
-                    {
-                        type: "row",
-                        classList: ["background"],
-                        items: [
-                            {
-                                type: "range",
-                                title: lgls("terminal.fontSize.title"),
-                                description: lgls("terminal.fontSize.description"),
-                                id: "setting_terminalFontSize",
-                                min: 10,
-                                max: 24,
-                                value: 14,
-                                step: 1,
-                                prefix: "px",
-                                disabled: true
-                            },
-                            {
-                                type: "switch",
-                                title: lgls("terminal.cursorBlink.title"),
-                                description: lgls("terminal.cursorBlink.description"),
-                                id: "setting_terminalCursorBlink",
-                                disabled: true
-                            },
-                        ]
-                    },
-                    {
-                        type: "category",
-                        label: lgls("terminal.behaviourLabel"),
-                        items: []
-                    },
-                    {
-                        type: "row",
-                        classList: ["background"],
-                        items: [
-                            {
-                                type: "switch",
-                                title: lgls("terminal.copyOnSelect.title"),
-                                description: lgls("terminal.copyOnSelect.description"),
-                                id: "setting_terminalCopyOnSelect",
-                                disabled: true
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                name: lgls("fileWindowCategory"),
-                icon: "tab",
-                content: [
-                    {
-                        type: "category",
-                        label: lgls("fileWindow.tabsCategory"),
-                        items: []
-                    },
-                    {
-                        type: "row",
-                        classList: ["background"],
-                        items: [
-                            {
-                                type: "switch",
-                                title: lgls("fileWindow.title"),
-                                description: lgls("fileWindow.description"),
-                                id: "setting_coloredTabs"
-                            },
-                            {
-                                type: "switch",
-                                title: lgls("fileWindow.showCloseButton.title"),
-                                description: lgls("fileWindow.showCloseButton.description"),
-                                id: "setting_tabShowClose",
-                                disabled: true
-                            },
-                            {
-                                type: "switch",
-                                title: lgls("fileWindow.confirmClose.title"),
-                                description: lgls("fileWindow.confirmClose.description"),
-                                id: "setting_confirmCloseTab"
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                name: lgls("editorCategory"),
-                icon: "code",
-                content: [
-                    {
-                        type: "category",
-                        label: lgls("editor.editorLabel"),
-                        items: []
-                    },
-                    {
-                        type: "row",
-                        classList: ["background"],
-                        items: [
-                            {
-                                type: "range",
-                                title: lgls("editor.textSize.title"),
-                                description: lgls("editor.textSize.description"),
-                                id: "setting_editorTextSize",
-                                min: 50,
-                                max: 200,
-                                value: 100,
-                                step: 10,
-                                prefix: "%"
-                            },
-                            {
-                                type: "placeholder",
-                                title: lgls("editor.pythonRunner.title"),
-                                description: lgls("editor.pythonRunner.description"),
-                                id: "setting_pythonRunMethod",
-                                disabled: platform != "win32",
-                                note: platform == "win32" ? gls.get("modals.needToReloadNote") : `${lgls("editor.builtInPythonCausePlatformNote", { platform: platform.toUpperCase() })}`
-                            }
-                        ]
-                    },
-                    {
-                        type: "category",
-                        label: lgls("editor.contextsLabel"),
-                        items: []
-                    },
-                    {
-                        type: "row",
-                        classList: ["background"],
-                        items: [
-                            {
-                                type: "switch",
-                                title: lgls("editor.contexts.go.title"),
-                                description: lgls("editor.contexts.go.description"),
-                                id: "setting_go_context_parser"
-                            },
-                        ]
-                    },
-                    {
-                        type: "category",
-                        label: lgls("editor.autosaves"),
-                        items: []
-                    },
-                    {
-                        type: "row",
-                        classList: ["background"],
-                        items: [
-                            {
-                                type: "placeholder",
-                                title: lgls("editor.autosave.title"),
-                                description: lgls("editor.autosave.description"),
-                                id: "setting_autosave"
-                            },
-                        ]
-                    }
-                ]
-            },
-            {
-                name: lgls("extensions.title"),
-                icon: "extension",
-                content: [
-                    {
-                        type: "category",
-                        label: lgls("extensions.securityCategory"),
-                        items: []
-                    },
-                    {
-                        type: "row",
-                        classList: ["background"],
-                        items: [
-                            {
-                                type: "switch",
-                                title: lgls("extensions.riskyPermsWarn.title"),
-                                description: lgls("extensions.riskyPermsWarn.description"),
-                                id: "setting_disableRiskyPermissionWarning"
-                            }
-                        ]
-                    }
-                ]
-            },
+            generalPage(ctx),
+            sidebarPage(ctx),
+            terminalPage(ctx),
+            fileWindowPage(ctx),
+            editorPage(ctx),
+            extensionsPage(ctx),
 
-            {
-                divider: true
-            },
+            { divider: true },
 
-            {
-                name: lgls("gitGithub.title"),
-                icon: "commit",
-                content: [
-                    {
-                        type: "category",
-                        label: lgls("gitGithub.oauth.category"),
-                        items: []
-                    },
-                    {
-                        type: "row-clear",
-                        gap: 10,
-                        items: [
-                            {
-                                type: "container",
-                                id: "setting_githubOAuthUserInfo"
-                            },
-                            {
-                                type: "container",
-                                id: "setting_githubOAuthPending"
-                            },
-                            {
-                                type: "button",
-                                title: lgls("gitGithub.oauth.buttons.login"),
-                                id: "setting_githubOAuthLogin"
-                            },
-                            {
-                                type: "button",
-                                title: lgls("gitGithub.oauth.buttons.disconnect"),
-                                id: "setting_githubOAuthDisconnect",
-                                class: "danger"
-                            }
-                        ]
-                    },
-
-                    {
-                        type: "category",
-                        label: lgls("gitlab.oauth.category"),
-                        items: []
-                    },
-                    {
-                        type: "row-clear",
-                        gap: 10,
-                        items: [
-                            {
-                                type: "container",
-                                id: "setting_gitlabOAuthUserInfo"
-                            },
-                            {
-                                type: "container",
-                                id: "setting_gitlabOAuthPending"
-                            },
-                            {
-                                type: "button",
-                                title: lgls("gitlab.oauth.buttons.login"),
-                                id: "setting_gitlabOAuthLogin"
-                            },
-                            {
-                                type: "button",
-                                title: lgls("gitlab.oauth.buttons.disconnect"),
-                                id: "setting_gitlabOAuthDisconnect",
-                                class: "danger"
-                            }
-                        ]
-                    }
-                ]
-            },
+            gitPage(ctx),
 
             // {
             //     name: lgls("gitlab.title"),
