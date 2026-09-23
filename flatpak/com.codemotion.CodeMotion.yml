@@ -16,6 +16,8 @@ finish-args:
   - --env=XCURSOR_PATH=/run/host/user-share/icons:/run/host/share/icons
 
 modules:
+  - flatpak/shared-modules/zypak/zypak.json
+
   - name: nodejs
     buildsystem: simple
     build-commands:
@@ -45,7 +47,7 @@ modules:
       - mkdir -p /app/bin
       - mkdir -p /app/share/codemotion
       - cp -r dist/linux-unpacked/* /app/share/codemotion/
-      - printf '#!/bin/sh\nexec /app/share/codemotion/CodeMotion "$@"\n' > /app/bin/codemotion
+      - printf '#!/bin/sh\nexec zypak-wrapper /app/share/codemotion/codemotion-app "$@"\n' > /app/bin/codemotion
       - chmod +x /app/bin/codemotion
       - install -Dm644 flatpak/com.codemotion.CodeMotion.desktop /app/share/applications/com.codemotion.CodeMotion.desktop
       - install -Dm644 assets/media/builder-icons/app.png /app/share/icons/hicolor/512x512/apps/com.codemotion.CodeMotion.png
