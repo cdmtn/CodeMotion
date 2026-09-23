@@ -19,3 +19,5 @@ app/notifications/*.js
 app/notifications/*.js.map
 app/splash/*.js
 app/splash/*.js.map
+app/electron/*.js
+app/electron/*.js.map

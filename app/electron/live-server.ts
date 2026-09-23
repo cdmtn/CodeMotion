@@ -1,15 +1,17 @@
-const { ipcMain, shell } = require("electron")
-const fs = require("fs")
-const path = require("path")
-const http = require("http")
+import { ipcMain, shell, IpcMainInvokeEvent } from "electron"
+import fs from "fs"
+import path from "path"
+import http from "http"
+import type { FSWatcher } from "chokidar"
+
 const WebSocket = require("ws")
 const chokidar = require("chokidar")
 
-let liveServer = null
-let wss = null
-let watcher = null
+let liveServer: http.Server | null = null
+let wss: any = null
+let watcher: FSWatcher | null = null
 
-ipcMain.handle("start-live-server", async (event, htmlPath) => {
+ipcMain.handle("start-live-server", async (_event: IpcMainInvokeEvent, htmlPath: string) => {
     if (!fs.existsSync(htmlPath)) {
         return { error: "HTML file not found" }
     }
@@ -18,11 +20,11 @@ ipcMain.handle("start-live-server", async (event, htmlPath) => {
         return { error: "Live server already running" }
     }
 
-    const root = path.dirname(htmlPath)
+    const root = path.resolve(path.dirname(htmlPath))
     const port = 3000
     const wsPort = 3001
 
-    function inject(html) {
+    function inject(html: string): string {
         const script = `
         <script>
             const ws = new WebSocket("ws://localhost:${wsPort}")
@@ -33,23 +35,35 @@ ipcMain.handle("start-live-server", async (event, htmlPath) => {
     }
 
     liveServer = http.createServer((req, res) => {
+        let pathname: string
+        try {
+            pathname = decodeURIComponent(new URL(req.url ?? "/", "http://localhost").pathname)
+        } catch {
+            res.writeHead(400)
+            return res.end("Bad request")
+        }
 
-        let filePath = path.join(root, req.url === "/" ? path.basename(htmlPath) : req.url)
+        if (pathname === "/") pathname = "/" + path.basename(htmlPath)
+
+        const filePath = path.resolve(root, "." + pathname)
+        if (filePath !== root && !filePath.startsWith(root + path.sep)) {
+            res.writeHead(403)
+            return res.end("Forbidden")
+        }
 
         fs.readFile(filePath, (err, data) => {
-
             if (err) {
                 res.writeHead(404)
                 return res.end("Not found")
             }
 
+            let payload: string | Buffer = data
             if (filePath.endsWith(".html")) {
-                data = inject(data.toString())
+                payload = inject(data.toString())
             }
 
             res.writeHead(200)
-            res.end(data)
-
+            res.end(payload)
         })
     })
 
@@ -58,12 +72,11 @@ ipcMain.handle("start-live-server", async (event, htmlPath) => {
     wss = new WebSocket.Server({ port: wsPort })
 
     watcher = chokidar.watch(root).on("change", () => {
-        wss.clients.forEach(client => {
+        wss.clients.forEach((client: any) => {
             if (client.readyState === WebSocket.OPEN) {
                 client.send("reload")
             }
         })
-
     })
 
     const url = `http://localhost:${port}`
@@ -82,7 +95,6 @@ ipcMain.handle("stop-live-server", async () => {
     }
 
     try {
-
         if (watcher) {
             await watcher.close()
             watcher = null
@@ -99,10 +111,9 @@ ipcMain.handle("stop-live-server", async () => {
         return {
             success: true
         }
-
     } catch (err) {
         return {
-            error: err.message
+            error: err instanceof Error ? err.message : String(err)
         }
     }
 })

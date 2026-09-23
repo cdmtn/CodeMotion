@@ -11,6 +11,7 @@
     "include": [
         "app/notifications/notifications.ts",
         "app/notifications/preload.ts",
-        "app/splash/splash.ts"
+        "app/splash/splash.ts",
+        "app/electron/live-server.ts"
     ]
 }
