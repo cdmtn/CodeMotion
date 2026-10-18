@@ -40,6 +40,9 @@
                 "to": "extensions"
             }
         ],
+        "asarUnpack": [
+            "app/sandbox/sandboxWorker.js"
+        ],
         "win": {
             "target": [
                 "nsis",

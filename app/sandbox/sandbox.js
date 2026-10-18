@@ -1,4 +1,4 @@
-const { app, ipcMain, BrowserWindow } = require("electron")
+const { app, ipcMain, utilityProcess } = require("electron")
 const fs = require("fs")
 const path = require("path")
 const bus = require("../../helpers/eventBus.js")
@@ -6,28 +6,24 @@ const { APP_PATH } = require("../dist/helpers/paths.js")
 const ErrorStackParser = require("error-stack-parser")
 
 const {
-    getType,
-    createNativeImageFromUrl,
-    checkType,
-    ok,
-    fail,
-    isSafeName,
-    stringify,
-    saveReadFile,
-    isFileExists,
-    checkFields,
     createSandboxConsole,
-    getArgumentNames
+    isSafeName,
+    ok,
+    fail
 } = require("../sandbox/tools.js")
 const { basicMinifyCSS } = require("../../helpers/minify.js")
+const { buildSafeEnv } = require("./permissions/shell/_common.js")
 
-const vm = require("vm");
 const { config } = require("process")
 
 const EXTENSIONS_DIR = path.resolve(
     app.isPackaged ? process.resourcesPath : app.getAppPath(),
     "extensions"
 )
+
+const WORKER_PATH = path.join(__dirname, "sandboxWorker.js")
+
+const PERMISSION_REGEX = /^[A-Za-z]+(?:\.[A-Za-z]+)+$/
 
 console.log("EXTENSIONS PATH:", EXTENSIONS_DIR)
 
@@ -36,8 +32,117 @@ let mainSender = null;
 
 const rendererBus = require("../../assets/js/bus.js")
 
+const extensionWorkers = new Map()
+
 function parsePackageJson(raw) {
-    return JSON.parse(raw.replace(/^\uFEFF/, ""))
+    if (raw.charCodeAt(0) === 0xFEFF) {
+        raw = raw.slice(1)
+    }
+    return JSON.parse(raw)
+}
+
+function sanitizeData(value) {
+    try { structuredClone(value); return value } catch (e) {}
+    try { return JSON.parse(JSON.stringify(value)) } catch (e) {}
+    return String(value)
+}
+
+function sendToWorker(entry, message) {
+    try {
+        entry.child.postMessage(message)
+    } catch (e) {}
+}
+
+function terminateWorker(entry) {
+    if (!entry) return
+
+    extensionWorkers.delete(entry.extensionName)
+
+    try {
+        entry.child.kill()
+    } catch (e) {}
+}
+
+function forwardSandboxConsole(level, content, name) {
+    const sender = debuggerSender ?? mainSender
+    if (!sender) return
+
+    try {
+        const sandboxConsole = createSandboxConsole(name, sender)
+
+        if (level === "error") {
+            try { sandboxConsole.error(content) } catch (e) {}
+        } else if (level === "warn") {
+            sandboxConsole.warn(content)
+        } else {
+            sandboxConsole.log(content)
+        }
+    } catch (e) {}
+}
+
+async function handlePermissionInvoke(entry, message) {
+    const reply = (response) => sendToWorker(entry, { type: "result", id: message.id, ...response })
+
+    try {
+        const permission = message.permission
+
+        if (typeof permission !== "string" || !PERMISSION_REGEX.test(permission)) {
+            throw new Error(`Permission "${String(permission)}" is not exists`)
+        }
+
+        const permissionFile = path.join(
+            APP_PATH,
+            "sandbox",
+            "permissions",
+            permission.replaceAll(".", "/") + ".js"
+        )
+
+        if (!fs.existsSync(permissionFile)) {
+            throw new Error(`Permission "${permission}" is not exists`)
+        }
+
+        const { callback } = require(permissionFile)
+
+        const rawArgs = Array.isArray(message.args) ? message.args : []
+
+        const realArgs = rawArgs.map((arg) => {
+            if (arg !== null && typeof arg === "object" && Number.isInteger(arg.__extensionCallback)) {
+                const token = arg.__extensionCallback
+
+                return (...cbArgs) => {
+                    sendToWorker(entry, {
+                        type: "callback",
+                        token,
+                        args: cbArgs.map(sanitizeData)
+                    })
+                }
+            }
+
+            return arg
+        })
+
+        debuggerSender = debuggerSender ?? mainSender
+
+        const factory = await callback({
+            debuggerSender,
+            mainSender,
+            extensionName: entry.extensionName,
+            extensionPath: entry.meta.extensionPath,
+            permissionName: "app." + permission,
+            allCSSVariables: entry.meta.allCSSVariables,
+            selfArgs: realArgs,
+            activeOn: entry.meta.activeOn
+        })
+
+        let result
+        if (typeof factory === "function") {
+            result = await factory(...realArgs)
+        }
+
+        reply({ ok: true, result: sanitizeData(result) })
+    } catch (err) {
+        reply({ ok: false, error: err?.message || String(err) })
+    }
 }
 
 bus.on("debugger-ready", (sender) => {
@@ -113,7 +218,7 @@ ipcMain.handle("request-extension", async (event, name) => {
 })
 
 ipcMain.handle("run-extension", async (event, code, permissions, meta) => {
-	const extensionName = meta.extensionName != undefined ? meta.extensionName : "Unknown"
+    const extensionName = meta.extensionName != undefined ? meta.extensionName : "Unknown"
     const extensionDisplayName = meta.extensionDisplayName != undefined ? meta.extensionDisplayName : "Unknown"
     const extensionVersion = meta.extensionVersion != undefined ? meta.extensionVersion : null
     const extensionPath = meta.extensionPath != undefined ? meta.extensionPath : null
@@ -121,150 +226,94 @@ ipcMain.handle("run-extension", async (event, code, permissions, meta) => {
     const activeOn = meta.activeOn
     const isPackaged = app.isPackaged
     const extensionSettings = meta.extensionSettings || {}
+    const allCSSVariables = meta.allCSSVariables != undefined ? meta.allCSSVariables : []
 
-    let allCSSVariables = meta.allCSSVariables != undefined ? meta.allCSSVariables : []
+    if (typeof code !== "string" || code.length === 0) {
+        return { success: false, error: "\nExtension code must be a non-empty string" }
+    }
 
-    function createAPI(permissions) {
-        const os = require("os")
-        const platformRaw = os.platform()
-        const platformMap = {
-            win32: "windows",
-            darwin: "macos",
-            linux: "linux",
-            freebsd: "freebsd"
+    const permissionList = Array.isArray(permissions) ? permissions : []
+
+    for (const permission of permissionList) {
+        if (typeof permission !== "string" || !PERMISSION_REGEX.test(permission)) {
+            return { success: false, error: `\nInvalid permission "${String(permission)}"` }
+        }
+    }
+
+    terminateWorker(extensionWorkers.get(extensionName))
+
+    let child
+
+    try {
+        child = utilityProcess.fork(WORKER_PATH, [], {
+            serviceName: `codemotion-extension-${extensionName}`,
+            sandbox: false,
+            env: buildSafeEnv()
+        })
+    } catch (err) {
+        return { success: false, error: `\n${err?.message || String(err)}` }
+    }
+
+    return new Promise((resolve) => {
+        const entry = {
+            extensionName,
+            child,
+            meta: { extensionPath, activeOn, allCSSVariables },
+            settled: false
         }
 
-        const app = {
-			name: extensionName,
-            displayName: extensionDisplayName,
-            permissions: permissions,
-            version: extensionVersion,
-            path: extensionPath,
-            isDev: isDev,
-            CSSVariables: allCSSVariables,
-            isPackaged: isPackaged,
-            settings: extensionSettings,
-            os: {
-                platform: platformMap[platformRaw] || platformRaw,
-                platformRaw: platformRaw,
-                arch: os.arch(),
-                release: os.release(),
-                hostname: os.hostname(),
-                cpus: os.cpus().length,
-                totalMemory: os.totalmem(),
-                freeMemory: os.freemem(),
-                homeDir: os.homedir(),
-                tmpDir: os.tmpdir()
-            }
-        };
+        extensionWorkers.set(extensionName, entry)
 
-        function setNestedProperty(obj, path, value) {
-            const parts = path.split(".")
-
-            let current = obj
-
-            for(let i = 0; i < parts.length - 1; i++) {
-                const part = parts[i]
-
-                if(!current[part]) {
-                    current[part] = {}
-                }
-
-                current = current[part]
-            }
-
-            current[parts.at(-1)] = value
+        const finish = (result) => {
+            if (entry.settled) return
+            entry.settled = true
+            resolve(result)
         }
 
-        permissions.forEach(p => {
-            const checkRegex = /^[A-Za-z]+(?:\.[A-Za-z]+)+$/gm
+        child.on("exit", (exitCode) => {
+            terminateWorker(entry)
+            finish({ success: false, error: `\nExtension worker exited unexpectedly (code ${exitCode})` })
+        })
 
-            if (checkRegex.test(p)) {
-                let appPermissionFile = p.replaceAll(".", "/")
+        child.on("message", (message) => {
+            if (!message || typeof message !== "object") return
 
-                if (fs.existsSync(path.join(APP_PATH, "sandbox", "permissions", appPermissionFile + ".js"))) {
-                    const { callback } = require(`./permissions/${appPermissionFile}.js`)
+            if (message.type === "console") {
+                forwardSandboxConsole(
+                    message.level,
+                    message.content,
+                    message.extensionName || extensionName
+                )
+                return
+            }
 
-                    debuggerSender = debuggerSender ?? mainSender
+            if (message.type === "done") {
+                finish(message.success
+                    ? { success: true }
+                    : { success: false, error: message.error })
+                return
+            }
 
-                    const isAsync = callback[Symbol.toStringTag] === 'AsyncFunction'
-
-                    const buildDataToSend = (args) => ({
-                        debuggerSender,
-                        mainSender,
-                        extensionName,
-                        extensionPath,
-                        permissionName: "app." + p,
-                        allCSSVariables,
-                        selfArgs: args,
-                        activeOn: activeOn
-                    })
-
-                    if (isAsync) {
-                        setNestedProperty(app, p, async (...args) => {
-                            const factory = await callback(buildDataToSend(args))
-                            if (factory && typeof factory === "function") {
-                                return factory(...args)
-                            }
-                        })
-                    } else {
-                        setNestedProperty(app, p, (...args) => {
-                            const factory = callback(buildDataToSend(args))
-                            if (factory && typeof factory === "function") {
-                                return factory(...args)
-                            }
-                        })
-                    }
-                } else {
-                    throw new Error(`Permission "${p}" is not exists`)
-                }
+            if (message.type === "invoke") {
+                handlePermissionInvoke(entry, message)
             }
         })
 
-        return Object.freeze(app);
-    }
-
-    try {
-        let app = createAPI(permissions);
-
-        const sandbox = {
-            console: createSandboxConsole(extensionName, debuggerSender),
-            Map: Map,
-			app,
-            JSON
-        };
-
-        const context = vm.createContext(sandbox);
-
-        await vm.runInContext(`
-            (async function(){
-                "use strict";
-                ${code}
-            })()
-        `, context);
-
-        return { success: true };
-    } catch (err) {
-        const stack = err?.stack || String(err)
-        const evalLocation = stack.match(/evalmachine\.<anonymous>:(\d+):(\d+)/)
-
-        if (!evalLocation) {
-            return {
-                success: false,
-                error: `\n${err?.message || stack}`
-            };
-        }
-
-        const lineNumber = Number(evalLocation[1])
-        const columnNumber = Number(evalLocation[2])
-        let message = stack.replaceAll(evalLocation[0], "").split("at")[0].trim()
-
-        message += `\n\tat line: ${lineNumber - 3}`
-        message += `\n\tat column: ${columnNumber}`
-
-        return {
-            success: false,
-            error: String(err)
-        };
-    }
+        child.postMessage({
+            type: "init",
+            code,
+            permissions: permissionList,
+            meta: {
+                extensionName,
+                extensionDisplayName,
+                extensionVersion,
+                extensionPath,
+                isDev,
+                activeOn,
+                isPackaged,
+                extensionSettings,
+                allCSSVariables
+            }
+        })
+    })
 });

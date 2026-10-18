@@ -1,7 +1,7 @@
-const { execSync } = require("child_process")
+const { execFileP, parseCommand, resolveAllowedCommand, sanitizeRunOptions } = require("./_common.js")
 
 function callback(data) {
-    return (...args) => {
+    return async (...args) => {
         const command = args[0]
         const options = args[1] || {}
 
@@ -9,23 +9,32 @@ function callback(data) {
             throw new Error("[shell.run] First argument must be a non-empty command string")
         }
 
+        const argv = parseCommand(command)
+        const file = resolveAllowedCommand(argv[0])
+        const runOptions = sanitizeRunOptions(options, {
+            timeout: 30000,
+            maxBuffer: 1024 * 1024
+        })
+
         try {
-            const result = execSync(command, {
-                encoding: options.encoding || "utf-8",
-                timeout: options.timeout || 30000,
-                maxBuffer: options.maxBuffer || 1024 * 1024,
-                cwd: options.cwd || undefined,
-                env: options.env || process.env,
-                shell: options.shell || true
+            const { stdout, stderr } = await execFileP(file, argv.slice(1), {
+                encoding: runOptions.encoding,
+                timeout: runOptions.timeout,
+                maxBuffer: runOptions.maxBuffer,
+                cwd: runOptions.cwd,
+                env: runOptions.env,
+                shell: false,
+                windowsHide: true,
+                killSignal: "SIGKILL"
             })
 
-            return { stdout: result, stderr: "", ok: true }
+            return { stdout, stderr, ok: true }
         } catch (err) {
             return {
                 stdout: err.stdout || "",
                 stderr: err.stderr || err.message,
                 ok: false,
-                code: err.status
+                code: typeof err.code === "number" ? err.code : err.status
             }
         }
     }

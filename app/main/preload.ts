@@ -4,6 +4,35 @@ const { contextBridge, ipcRenderer, webUtils } = require('electron');
 
 let isRegisteredCustomLanguageRegistration = false;
 
+const ALLOWED_LISTENER_CHANNELS = new Set(["auth-msg"]);
+
+const isPlainData = (value: any): boolean => {
+    if (value === null) return true;
+    const type = typeof value;
+    if (type === "string" || type === "number" || type === "boolean") return true;
+    if (type !== "object") return false;
+    if (Array.isArray(value)) return true;
+    const proto = Object.getPrototypeOf(value);
+    return proto === Object.prototype || proto === null;
+};
+
+const validatePayload = (value: any, depth = 0): boolean => {
+    if (depth > 8) return false;
+    if (value === null) return true;
+    const type = typeof value;
+    if (type === "string" || type === "number" || type === "boolean") return true;
+    if (type !== "object") return false;
+    if (Array.isArray(value)) {
+        if (value.length > 1000) return false;
+        return value.every((item) => validatePayload(item, depth + 1));
+    }
+    const proto = Object.getPrototypeOf(value);
+    if (proto !== Object.prototype && proto !== null) return false;
+    const keys = Object.keys(value);
+    if (keys.length > 100) return false;
+    return keys.every((key) => validatePayload(value[key], depth + 1));
+};
+
 contextBridge.exposeInMainWorld('electron', {
     readDirTree: (rootPath: any, options = {}) => ipcRenderer.invoke('readDirTree', rootPath, options),
     readFileContent: (filePath: any, encoding = 'utf8') => ipcRenderer.invoke('readFileContent', filePath, encoding),
@@ -263,6 +292,25 @@ contextBridge.exposeInMainWorld('electron', {
     onAuthMsg: (callback: any) => ipcRenderer.on("auth-msg", (event: any, data: any) => callback(data)),
     sendAuthMsg: (data: any) => ipcRenderer.send("auth-msg", data),
     
-    on: (event: any, msg: any) => ipcRenderer.on(event, msg),
-    oncb: (event: any, cb: any) => ipcRenderer.on(event, (_: any, data: any) => cb(data)),
+    on: (event: any, msg: any) => {
+        throw new Error(`[preload] Direct IPC subscription is not allowed. Use oncb with an allowed channel. Received: ${String(event)}`)
+    },
+    oncb: (event: any, cb: any) => {
+        if (typeof event !== "string" || !ALLOWED_LISTENER_CHANNELS.has(event)) {
+            throw new Error(`[preload] Subscribing to IPC channel "${String(event)}" is not allowed`)
+        }
+        if (typeof cb !== "function") {
+            throw new Error("[preload] oncb expects a callback function")
+        }
+
+        const listener = (_: any, data: any) => {
+            if (!isPlainData(data) || !validatePayload(data)) {
+                return
+            }
+            cb(data)
+        }
+
+        ipcRenderer.on(event, listener)
+        return () => ipcRenderer.removeListener(event, listener)
+    },
 });
