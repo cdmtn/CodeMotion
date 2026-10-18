@@ -1,4 +1,5 @@
-const { exec } = require("child_process")
+const { execFile } = require("child_process")
+const { parseCommand, resolveAllowedCommand, sanitizeRunOptions } = require("./_common.js")
 
 function callback(data) {
     return (...args) => {
@@ -10,14 +11,23 @@ function callback(data) {
             throw new Error("[shell.exec] First argument must be a non-empty command string")
         }
 
+        const argv = parseCommand(command)
+        const file = resolveAllowedCommand(argv[0])
+        const runOptions = sanitizeRunOptions(options, {
+            timeout: 60000,
+            maxBuffer: 1024 * 1024 * 5
+        })
+
         return new Promise((resolve) => {
-            const proc = exec(command, {
-                encoding: options.encoding || "utf-8",
-                timeout: options.timeout || 60000,
-                maxBuffer: options.maxBuffer || 1024 * 1024 * 5,
-                cwd: options.cwd || undefined,
-                env: options.env || process.env,
-                shell: options.shell || true
+            const proc = execFile(file, argv.slice(1), {
+                encoding: runOptions.encoding,
+                timeout: runOptions.timeout,
+                maxBuffer: runOptions.maxBuffer,
+                cwd: runOptions.cwd,
+                env: runOptions.env,
+                shell: false,
+                windowsHide: true,
+                killSignal: "SIGKILL"
             })
 
             let stdout = ""
