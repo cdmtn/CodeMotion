@@ -452,6 +452,11 @@
                     "description": "Allows increasing editor text size up to 200%"
                 },
 
+                "coloredComments": {
+                    "title": "Colored comments",
+                    "description": "Colorize comments that start with ?, !, * or TODO"
+                },
+
                 "pythonRunner": {
                     "title": "Python emulator",
                     "description": "Choose the Python version you want to use",

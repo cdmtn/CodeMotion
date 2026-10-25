@@ -490,7 +490,6 @@ function initializeGlobalButtons(settings = {}) {
 
         const globalTerminalWindow = new BottomWindow("globalTerminal", { title: "Terminal" })
         globalTerminalWindow.show()
-        globalTerminalWindow.clear()
         globalTerminalWindow.autoScrollBottom()
         globalTerminalWindow.win.classList.add("console")
 
@@ -866,6 +865,8 @@ export async function openTab(path, content, extension, name, pathContext, isNew
         fixedWidthGutter: true
     });
 
+    editor.setColorComments(!("editor" in settings && settings.editor.coloredComments === false));
+
     window.electron.triggers.sendFileOpened(
         {
             path: path,
@@ -1156,6 +1157,18 @@ bus.addEventListener("on-setting-colored-tabs", (data) => {
         else {
             tabEl.classList.add("no-color")
         }
+    })
+})
+
+bus.addEventListener("on-setting-colored-comments", (data) => {
+    const value = data.detail
+
+    if ("editor" in settingsObject) {
+        settingsObject.editor.coloredComments = value
+    }
+
+    tabsByPath.forEach(item => {
+        if (item.editor) item.editor.setColorComments(value)
     })
 })
 
@@ -1520,7 +1533,6 @@ if (codeConsoleBtn) {
 
         const globalTerminalWindow = new BottomWindow("globalTerminal", { title: "Terminal" })
         globalTerminalWindow.show()
-        globalTerminalWindow.clear()
         globalTerminalWindow.autoScrollBottom()
         globalTerminalWindow.win.classList.add("console")
 

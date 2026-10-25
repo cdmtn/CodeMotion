@@ -34,6 +34,18 @@ export function editorPage({ lgls, gls, platform }) {
                 ]
             },
             {
+                type: "row",
+                classList: ["background"],
+                items: [
+                    {
+                        type: "switch",
+                        title: lgls("editor.coloredComments.title"),
+                        description: lgls("editor.coloredComments.description"),
+                        id: "setting_coloredComments"
+                    }
+                ]
+            },
+            {
                 type: "category",
                 label: lgls("editor.contextsLabel"),
                 items: []

@@ -360,7 +360,6 @@ function openTerminal(targetPath, isFolder) {
     const terminalPath = isFolder ? targetPath : getDirname(targetPath);
     const terminalWindow = new BottomWindow("globalTerminal", { title: "Terminal" });
     terminalWindow.show();
-    terminalWindow.clear();
     terminalWindow.autoScrollBottom();
     terminalWindow.win.classList.add("console");
 

@@ -1,13 +1,14 @@
 import { EditorState, Compartment, EditorSelection, Prec, Transaction } from "@codemirror/state";
 import {
     EditorView, keymap, lineNumbers, highlightActiveLine,
-    highlightActiveLineGutter
+    highlightActiveLineGutter, drawSelection, dropCursor,
+    rectangularSelection, crosshairCursor
 } from "@codemirror/view";
 import {
     closeBrackets, autocompletion, completionKeymap, completeFromList,
     acceptCompletion, completionStatus
 } from "@codemirror/autocomplete";
-import { indentUnit, language, HighlightStyle, syntaxHighlighting } from "@codemirror/language";
+import { indentUnit, language, HighlightStyle, syntaxHighlighting, bracketMatching, foldGutter, codeFolding, foldKeymap } from "@codemirror/language";
 import { tags } from "@lezer/highlight";
 import { lintGutter, setDiagnostics as setLintDiagnostics } from "@codemirror/lint";
 
@@ -19,7 +20,7 @@ import {
 } from "@codemirror/commands";
 import {
     openSearchPanel, closeSearchPanel, findNext,
-    findPrevious
+    findPrevious, highlightSelectionMatches, gotoLine
 } from "@codemirror/search";
 // 
 
@@ -279,6 +280,7 @@ window.CodeMirror = {
         const wordWrapCompartment = new Compartment();
         const scrollCompartment = new Compartment();
         const readOnlyCompartment = new Compartment();
+        const colorCommentsCompartment = new Compartment();
 
         let onChange = null;
         let onSemanticDiagnostics = null;
@@ -300,6 +302,15 @@ window.CodeMirror = {
                     highlightActiveLine(),
                     highlightActiveLineGutter(),
 
+                    drawSelection(),
+                    dropCursor(),
+                    rectangularSelection(),
+                    crosshairCursor(),
+                    bracketMatching(),
+                    codeFolding(),
+                    foldGutter(),
+                    highlightSelectionMatches(),
+
                     keymap.of([
                         {
                             key: "Tab",
@@ -313,8 +324,13 @@ window.CodeMirror = {
                             key: "Escape",
                             run: escapeHandler
                         },
+                        {
+                            key: "Mod-g",
+                            run: gotoLine
+                        },
                         ...defaultKeymap,
-                        ...historyKeymap
+                        ...historyKeymap,
+                        ...foldKeymap
                     ]),
 
                     languageCompartment.of([]),
@@ -344,8 +360,7 @@ window.CodeMirror = {
 
                     commentHighlightStyle,
 
-                    colorComments,
-                    colorCommentsTheme,
+                    colorCommentsCompartment.of([colorComments, colorCommentsTheme]),
 
                     indentationMarkers({
                         colors: {
@@ -375,7 +390,12 @@ window.CodeMirror = {
                 tabSizeCompartment,
                 wordWrapCompartment,
                 scrollCompartment,
-                readOnlyCompartment
+                readOnlyCompartment,
+                colorCommentsCompartment
+            },
+
+            extensions: {
+                colorComments: [colorComments, colorCommentsTheme]
             },
 
             setDiagnostics(value) {
@@ -397,6 +417,7 @@ window.CodeMirror = {
                 redo,
                 openSearchPanel,
                 openFindReplace,
+                gotoLine,
                 toggleComment,
                 indentSelection
             },

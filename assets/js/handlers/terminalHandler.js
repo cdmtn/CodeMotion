@@ -1,6 +1,15 @@
 export class Console {
     constructor(windowClass, startPath = null) {
+        if (windowClass._console && !windowClass._console.disposed) {
+            const existing = windowClass._console
+            existing.fit()
+            existing.term?.focus()
+            return existing
+        }
+        windowClass._console = this
+
         this.console = windowClass
+        windowClass.clear()
         this.body = windowClass.winContent
 
         const fitAddon = new FitAddon.FitAddon()
@@ -17,6 +26,7 @@ export class Console {
 
         this.term.loadAddon(fitAddon)
         this.term.open(this.body)
+        this.term.focus()
         this.fitAddon = fitAddon
         this.disposed = false
         this.fitFrame = null
@@ -41,6 +51,11 @@ export class Console {
 
         this.registerEvents()
         this.setupIPC()
+
+        try {
+            this.fitAddon.fit()
+        } catch (_) { }
+
         this.initPTY()
 
         this.console.onHide(() => this.dispose())
@@ -153,6 +168,9 @@ export class Console {
         if (this.disposed) return
 
         this.disposed = true
+        if (this.console && this.console._console === this) {
+            this.console._console = null
+        }
         window.electron?.cleanupTerminal?.()
         this.resizeObserver?.disconnect()
         window.removeEventListener("resize", this.handleResize)

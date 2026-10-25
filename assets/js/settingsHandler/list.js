@@ -19,6 +19,12 @@ export const SETTINGS = [
         event: "on-setting-colored-tabs"
     },
     {
+        id: "coloredComments",
+        path: "editor.coloredComments",
+        control: "switch",
+        event: "on-setting-colored-comments"
+    },
+    {
         id: "confirmCloseTab",
         path: "editor.confirmCloseTab",
         control: "switch"

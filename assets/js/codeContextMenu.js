@@ -105,11 +105,11 @@ export async function initCodeContextMenu(currentPath, pathContext, editor) {
             editor.openReplace();
         }
     })
-    // codeContextMenu.add({
-    //     id: "goToLine", icon: "tag", content: "Go to Line...", shortcut: "Ctrl+G", func: () => {
-    //         editor.commands.byName.gotoLine.exec(editor);
-    //     }
-    // })
+    codeContextMenu.add({
+        id: "goToLine", icon: "tag", content: "Go to Line...", shortcut: "Ctrl+G", func: () => {
+            editor.gotoLine();
+        }
+    })
     codeContextMenu.add({ type: "divider" })
 
     codeContextMenu.add({

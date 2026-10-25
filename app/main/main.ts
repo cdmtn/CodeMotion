@@ -14,6 +14,14 @@ import { isUrlSafe } from "./helpers/urlValidator"
 let mainWindow: any
 let workSeconds: number = 0
 
+process.on("uncaughtException", (err: Error) => {
+    console.error("[main] Uncaught exception:", err)
+})
+
+process.on("unhandledRejection", (reason: unknown) => {
+    console.error("[main] Unhandled rejection:", reason)
+})
+
 require("../sandbox/sandbox")
 require("../../helpers/getPython")
 require("../auth")

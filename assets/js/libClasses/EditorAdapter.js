@@ -5,7 +5,7 @@ export class _EditorAdapter {
     constructor(
         {
             view, compartments, setDiagnostics, setOnChange, commands,
-            recreateState, editorView, editorState, tools,
+            recreateState, editorView, editorState, tools, extensions,
             setSemanticDiagnosticsHandler, setValueNoHistory, setUnusedRanges
         }
     ) {
@@ -17,6 +17,8 @@ export class _EditorAdapter {
         this.wordWrapCompartment = compartments.wordWrapCompartment
         this.scrollCompartment = compartments.scrollCompartment
         this.readOnlyCompartment = compartments.readOnlyCompartment
+        this.colorCommentsCompartment = compartments.colorCommentsCompartment
+        this.colorCommentsExtension = extensions?.colorComments ?? []
 
         this.setOnChangeInternal = setOnChange;
         this.commands = commands
@@ -80,6 +82,10 @@ export class _EditorAdapter {
 
     openReplace() {
         this.commands.openFindReplace(this.instance)
+    }
+
+    gotoLine() {
+        this.commands.gotoLine(this.instance)
     }
 
     resetUndoManager() {
@@ -223,6 +229,18 @@ export class _EditorAdapter {
         return this;
     }
 
+    setColorComments(enabled) {
+        if (!this.colorCommentsCompartment) return this;
+
+        this.instance.dispatch({
+            effects: this.colorCommentsCompartment.reconfigure(
+                enabled ? this.colorCommentsExtension : []
+            )
+        });
+
+        return this;
+    }
+
     setMaxLines(lines) {
         const container = this.instance.dom.parentElement;
 
@@ -353,15 +371,44 @@ export class _EditorAdapter {
     }
 
     setOption(name, value) {
-        // TODO
+        switch (name) {
+            case "wrap":
+            case "wordWrap":
+                this.wordWrap(Boolean(value));
+                break;
+            case "readOnly":
+                this.readOnly(Boolean(value));
+                break;
+            case "tabSize":
+                this.setTabSize(value);
+                break;
+            case "theme":
+                this.setTheme(value);
+                break;
+            case "language":
+            case "mode":
+                this.setLanguage(value);
+                break;
+            case "coloredComments":
+                this.setColorComments(Boolean(value));
+                break;
+        }
+
+        return this;
     }
 
     setOptions(options) {
-        // TODO
+        if (!options || typeof options !== "object") return this;
+
+        for (const [name, value] of Object.entries(options)) {
+            this.setOption(name, value);
+        }
+
+        return this;
     }
 
     useWrapMode(value) {
-        // TODO
+        return this.wordWrap(Boolean(value));
     }
 
     setScrollTop(value) {

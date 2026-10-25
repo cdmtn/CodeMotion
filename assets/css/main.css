@@ -6,6 +6,7 @@
 @import url("editor/screenshot.css");
 @import url("editor/suggest.css");
 @import url("editor/findWidget.css");
+@import url("editor/gotoLine.css");
 @import url("extensions/elementWrapper.css");
 @import url("codemirror.css");
 @import url("keyframes.css");

@@ -112,7 +112,7 @@ function ensureSettingsJson(): void {
                 "useSystemNotifications": process.platform !== "win32"
             },
             "editor": {
-                "smoothScroll": true
+                "coloredComments": true
             }
         }
 
@@ -200,11 +200,10 @@ function readFilesInFolder(folderPath: string): any[] {
     });
 }
 async function readFileContent(filePath: string, encoding: BufferEncoding | null = 'utf8'): Promise<string | Buffer> {
-    const base = path.isAbsolute(filePath)
+    const abs = path.isAbsolute(filePath)
         ? filePath
         : path.join(app.getAppPath(), filePath);
 
-    const abs = path.resolve(base, filePath);
     const data = await fsPromise.readFile(abs, { encoding: encoding === null ? undefined : encoding });
     return data;
 }

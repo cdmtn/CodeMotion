@@ -1,11 +1,19 @@
 import { dialog, ipcMain, IpcMainInvokeEvent, shell } from "electron"
 import path from "node:path"
+import os from "node:os"
 import fs from "fs"
 
 import { readDirTree, saveFile } from "../helpers/os"
 import { readFileContent } from "../helpers/requests"
 import { SaveContentPayload } from "../payloads"
 import { APP_PATH } from "../helpers/paths"
+
+function isProtectedPath(resolvedPath: string): boolean {
+    const normalized = path.resolve(resolvedPath)
+    const guarded = [path.parse(normalized).root, os.homedir(), path.resolve(APP_PATH)]
+
+    return guarded.some(guard => guard && path.resolve(guard) === normalized)
+}
 
 ipcMain.handle("create-file", async (_: IpcMainInvokeEvent, targetPath: string) => {
     try {
@@ -89,6 +97,10 @@ ipcMain.handle("remove-by-path", async (_: IpcMainInvokeEvent, targetPath: strin
         }
 
         const resolvedPath = path.resolve(targetPath)
+
+        if (isProtectedPath(resolvedPath)) {
+            return { success: false, error: "Refusing to delete a protected location" }
+        }
 
         if (!fs.existsSync(resolvedPath)) {
             return { success: false, error: "Path does not exist" }

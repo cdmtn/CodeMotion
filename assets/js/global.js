@@ -1,6 +1,13 @@
 /** @type {import("../../app/main/types/global").ElectronAPI} */
 export const electronAPI = window.electron
 
+window.addEventListener("error", event => {
+    console.error("[renderer] Uncaught error:", event.error ?? event.message)
+})
+window.addEventListener("unhandledrejection", event => {
+    console.error("[renderer] Unhandled rejection:", event.reason)
+})
+
 export async function getDirname() {
     let __dirname = await electronAPI.getDirname()
     __dirname = __dirname.replaceAll(/\\/g, "/")

@@ -1,0 +1,115 @@
+.cm-editor {
+    .cm-panels.cm-panels-top:has(.cm-dialog) {
+        position: absolute;
+        top: 0;
+        right: 18px;
+        left: auto;
+        max-width: calc(100% - 36px);
+        z-index: 20;
+        background: transparent !important;
+        border: none !important;
+        color: inherit;
+    }
+
+    .cm-dialog {
+        position: absolute;
+        top: -40px;
+        left: 5px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        width: 250px;
+        max-width: 100%;
+        box-sizing: border-box;
+        padding: 6px 8px;
+        font-family: var(--main-font);
+        font-size: 14px;
+        color: var(--text-color);
+        background: var(--body-color-transparent-solid);
+        border: 1px solid var(--block-divider-border-color);
+        border-top: none;
+        border-radius: 5px;
+
+        form {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
+            min-width: 0;
+            margin: 0;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
+            min-width: 0;
+            font-size: 13px;
+            white-space: nowrap;
+            color: var(--text-color-muted);
+        }
+
+        .cm-textfield {
+            flex: 1;
+            min-width: 0;
+            height: 24px;
+            padding: 0 6px;
+            font-family: var(--main-font);
+            font-size: 13px;
+            color: var(--text-color);
+            background: var(--code-background);
+            border: 1px solid var(--block-divider-border-color);
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .cm-textfield:focus {
+            border-color: var(--link-color);
+        }
+
+        .cm-button {
+            height: 24px;
+            padding: 0 10px;
+            font-family: var(--main-font);
+            font-size: 13px;
+            color: var(--text-color);
+            background: var(--code-background);
+            background-image: none;
+            border: 1px solid var(--block-divider-border-color);
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .cm-button:hover {
+            background: var(--topbar-menu-item-hover-bg);
+        }
+
+        .cm-button:focus-visible {
+            outline: 1px solid var(--link-color);
+        }
+
+        .cm-dialog-close {
+            position: static;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            width: 22px;
+            height: 22px;
+            padding: 0;
+            font-size: 16px;
+            line-height: 1;
+            color: var(--text-color-muted);
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .cm-dialog-close:hover {
+            color: var(--text-color);
+            background: var(--topbar-menu-item-hover-bg);
+        }
+    }
+}
