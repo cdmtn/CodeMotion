@@ -14,6 +14,11 @@
 }
 
 @font-face {
+    font-family: 'MedeoMono';
+    src: url('../fonts/MedeoMono.ttf');
+}
+
+@font-face {
     font-family: 'JetBrainsMono';
     src: url('../fonts/JetBrainsMono.ttf');
 }
