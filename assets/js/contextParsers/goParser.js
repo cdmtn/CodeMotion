@@ -27,9 +27,20 @@ export class GoParser {
             case "FunctionDeclaration": {
                 const params = this.formatParams(node.params);
                 const ret = node.returnType ? ` → ${node.returnType}` : "";
+                const typeParams = node.typeParams ? `[${node.typeParams}]` : "";
                 return {
                     icon: "function",
-                    label: `${node.id?.name || "anonymous"}(${params})${ret}`,
+                    label: `${node.id?.name || "anonymous"}${typeParams}(${params})${ret}`,
+                    class: "function",
+                };
+            }
+
+            case "FuncLiteral": {
+                const params = this.formatParams(node.params);
+                const ret = node.returnType ? ` → ${node.returnType}` : "";
+                return {
+                    icon: "function",
+                    label: `func(${params})${ret}`,
                     class: "function",
                 };
             }
@@ -58,7 +69,7 @@ export class GoParser {
                 const tag = node.tag ? ` \`${node.tag}\`` : "";
                 return {
                     icon: "data_object",
-                    label: `${names}  ${type}${tag}`,
+                    label: names ? `${names}  ${type}${tag}` : `${type}${tag}`,
                     class: "variable",
                 };
             }
@@ -107,22 +118,14 @@ export class GoParser {
                 };
             }
 
-            case "VariableDeclaration": {
-                const names = (node.names || [])
-                    .concat((node.declarations || []).flatMap(d => d.names || []));
-                if (!names.length) return null;
-                return {
-                    icon: "data_object",
-                    label: names.join(", "),
-                    class: "variable",
-                };
-            }
-
+            case "VariableDeclaration":
             case "ConstDeclaration": {
-                const names = (node.declarations || []).flatMap(d => d.names || []);
+                const declarations = node.declarations || [];
+                const current = declarations.find(d => this.containsRow(d, row));
+                const names = (current ? current.names : declarations.flatMap(d => d.names || [])) || [];
                 if (!names.length) return null;
                 return {
-                    icon: "pin",
+                    icon: node.type === "ConstDeclaration" ? "pin" : "data_object",
                     label: names.join(", "),
                     class: "variable",
                 };
@@ -136,24 +139,45 @@ export class GoParser {
                 } : null;
 
             case "IfStatement":
-                return { icon: "alt_route", label: "if", class: "object" };
+                return {
+                    icon: "alt_route",
+                    label: `${node.elseIf ? "else if" : "if"}${node.condition ? " " + node.condition : ""}`,
+                    class: "object",
+                };
+
+            case "ElseClause":
+                return { icon: "alt_route", label: "else", class: "object" };
 
             case "ForStatement":
-                return { icon: "loop", label: "for", class: "object" };
+                return { icon: "loop", label: node.header ? `for ${node.header}` : "for", class: "object" };
+
+            case "SwitchStatement":
+                return {
+                    icon: "fork_right",
+                    label: `${node.keyword || "switch"}${node.header ? " " + node.header : ""}`,
+                    class: "object",
+                };
+
+            case "CaseClause":
+                return { icon: "subdirectory_arrow_right", label: node.label, class: "object" };
 
             case "GoStatement":
-                return { icon: "rocket", label: "go " + (node.call?.calleeName || ""), class: "function" };
+                return { icon: "rocket", label: ("go " + (node.call?.calleeName || "")).trim(), class: "function" };
 
             case "DeferStatement":
-                return { icon: "hourglass_empty", label: "defer " + (node.call?.calleeName || ""), class: "function" };
+                return { icon: "hourglass_empty", label: ("defer " + (node.call?.calleeName || "")).trim(), class: "function" };
 
             default:
                 return null;
         }
     }
 
+    containsRow(node, row) {
+        return !!node?.loc && row >= node.loc.start.line && row <= node.loc.end.line;
+    }
+
     recurse(node, row, chain) {
-        for (const key of ["body", "declarations", "methods", "fields", "values", "call"]) {
+        for (const key of ["body", "methods", "fields", "values", "children", "cases", "alternate"]) {
             const val = node[key];
             if (Array.isArray(val)) {
                 val.forEach(v => this.traverse(v, row, chain));

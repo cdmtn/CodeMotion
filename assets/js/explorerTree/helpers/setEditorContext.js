@@ -182,7 +182,7 @@ export async function setEditorContext(properties = {}, { editor, language, upda
             const chain = cssParser.getContextChain(editor.getValue(), row)
             cssParser.renderContext(chain)
         },
-        golang: async () => {
+        go: async () => {
             const goParser = new GoParser()
             const ast = await window.electron.golangAST(editor.getValue())
             const row = editor.getCursorPosition().row + 1
@@ -202,7 +202,7 @@ export async function setEditorContext(properties = {}, { editor, language, upda
 
     if ("editor" in settings) {
         if ("goContextParser" in settings.editor && settings.editor.goContextParser == false) {
-            delete contextMap["golang"]
+            delete contextMap["go"]
         }
     }
 
