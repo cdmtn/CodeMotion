@@ -1,0 +1,45 @@
+@keyframes cmFadeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes cmTabFade {
+    from {
+        opacity: 0.4;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.explorer-elements .file,
+.explorer-elements .dir-title {
+    animation: cmFadeSlideIn 0.18s ease-out backwards;
+}
+
+.code.active-pane {
+    animation: cmTabFade 0.075s ease-out backwards;
+}
+
+.modal-body__sidebar-content:not(.hidden) {
+    animation: cmFadeSlideIn 0.1s ease-out;
+}
+
+.popup-content:not(.hidden) {
+    animation: cmFadeSlideIn 0.18s ease-out;
+}
+
+:root[data-reduce-motion] *,
+:root[data-reduce-motion] *::before,
+:root[data-reduce-motion] *::after {
+    animation-duration: 0.001ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+}

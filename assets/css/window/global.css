@@ -15,6 +15,7 @@
 
     &.hidden {
         opacity: 0;
+        transform: translate(-50%, -6px);
         pointer-events: none;
     }
 }

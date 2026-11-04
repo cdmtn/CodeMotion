@@ -308,6 +308,8 @@ export class Setting {
     static async reduceMotion(value, set = true) {
         settingsSelectors.reduceMotion.checked = value
 
+        document.documentElement.toggleAttribute("data-reduce-motion", Boolean(value))
+
         BottomWindow.settings = {
             ...BottomWindow.settings,
             app: {
