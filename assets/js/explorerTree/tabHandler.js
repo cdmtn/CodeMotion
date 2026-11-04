@@ -817,6 +817,11 @@ export async function openTab(path, content, extension, name, pathContext, isNew
 
     const editor = new EditorAdapter(codeMirrorView);
 
+    const scrollDOM = editor.instance.scrollDOM
+    scrollDOM.addEventListener("scroll", () => {
+        pane.classList.toggle("scrolled", scrollDOM.scrollTop > 0)
+    }, { passive: true })
+
     const ErrorsHistoryWindow = new BottomWindow("errorsHistory", { title: "Errors history" })
     clearRuntimeErrors()
 

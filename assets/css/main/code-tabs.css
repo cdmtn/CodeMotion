@@ -255,6 +255,20 @@
     display: none;
 }
 
+:root:not([data-tab-style="classic"]) .code.scrolled .cm-scroller {
+    --scroll-fade: linear-gradient(to bottom, rgb(0 0 0 / 0.15), #000 16px);
+    --scroll-solid: linear-gradient(#000, #000);
+
+    -webkit-mask-image: var(--scroll-fade), var(--scroll-solid);
+    mask-image: var(--scroll-fade), var(--scroll-solid);
+    -webkit-mask-size: calc(100% - 10px) 100%, 10px 100%;
+    mask-size: calc(100% - 10px) 100%, 10px 100%;
+    -webkit-mask-position: left top, right top;
+    mask-position: left top, right top;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+}
+
 .ace_editor {
     font-family: var(--code-font);
     font-size: var(--editor-font-size);
