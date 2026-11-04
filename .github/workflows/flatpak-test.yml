@@ -1,0 +1,74 @@
+name: Flatpak test
+
+on:
+  push:
+    branches:
+      - ci/flatpak-test
+
+jobs:
+  flatpak:
+    name: Flatpak test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder ccache xvfb
+
+      - name: Add flathub remote
+        run: flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+      - name: Install runtime, SDK and base app
+        run: |
+          flatpak install --user --noninteractive flathub \
+            org.freedesktop.Platform//24.08 \
+            org.freedesktop.Sdk//24.08 \
+            org.electronjs.Electron2.BaseApp//24.08
+
+      - name: Build Flatpak
+        shell: bash
+        run: |
+          set -o pipefail
+          flatpak-builder --user --ccache --install-deps-from=flathub --force-clean \
+            --repo=flatpak-repo \
+            build-flatpak \
+            flatpak/com.codemotion.CodeMotion.yml 2>&1 | tee flatpak-build.log
+
+      - name: Report build failure
+        if: failure()
+        shell: bash
+        run: |
+          msg=$(tail -n 45 flatpak-build.log 2>/dev/null | cut -c1-180 | sed -e 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+          echo "::error title=flatpak build log tail::$msg"
+
+      - name: Inspect package
+        shell: bash
+        run: |
+          F=build-flatpak/files
+          report=$( {
+            echo "launcher:"; cat $F/bin/codemotion
+            for p in bin/zypak-wrapper share/codemotion/codemotion-app share/codemotion/resources/app.asar; do
+              if [ -e "$F/$p" ]; then echo "OK   $p"; else echo "MISS $p"; fi
+            done
+            npx --yes @electron/asar list $F/share/codemotion/resources/app.asar > asar.txt
+            echo "asar entries: $(wc -l < asar.txt)"
+            grep -E "^/codemirror/dist/codemirror.js$|^/app/dist/main.js$|^/app/dist/ipc/fileWatcher.js$|^/app/electron/live-server.js$|^/app/notifications/notifications.js$|^/app/splash/splash.js$" asar.txt
+          } 2>&1 )
+          echo "$report"
+          msg=$(echo "$report" | cut -c1-180 | sed -e 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+          echo "::notice title=package inspection::$msg"
+
+      - name: Bundle and launch
+        shell: bash
+        run: |
+          flatpak build-bundle --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo flatpak-repo codemotion.flatpak com.codemotion.CodeMotion
+          ls -la codemotion.flatpak
+          flatpak install --user --noninteractive --bundle codemotion.flatpak
+          set +e
+          xvfb-run -a timeout 25 dbus-run-session -- flatpak run com.codemotion.CodeMotion > launch.log 2>&1
+          code=$?
+          set -e
+          msg=$( { echo "exit=$code (124 means still running when stopped)"; ls -la codemotion.flatpak; tail -n 25 launch.log; } | cut -c1-180 | sed -e 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+          echo "::notice title=launch test::$msg"
