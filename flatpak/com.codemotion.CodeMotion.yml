@@ -2,6 +2,8 @@ app-id: com.codemotion.CodeMotion
 runtime: org.freedesktop.Platform
 runtime-version: '24.08'
 sdk: org.freedesktop.Sdk
+base: org.electronjs.Electron2.BaseApp
+base-version: '24.08'
 command: codemotion
 
 finish-args:
@@ -16,8 +18,6 @@ finish-args:
   - --env=XCURSOR_PATH=/run/host/user-share/icons:/run/host/share/icons
 
 modules:
-  - flatpak/shared-modules/zypak/zypak.json
-
   - name: nodejs
     buildsystem: simple
     build-commands:
@@ -42,6 +42,7 @@ modules:
     build-commands:
       - npm install
       - cd codemirror && npm install && cd ..
+      - npm run cdbuild
       - npm run build
       - npx electron-builder --linux dir --publish never
       - mkdir -p /app/bin

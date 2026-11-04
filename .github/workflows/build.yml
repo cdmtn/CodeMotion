@@ -106,8 +106,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Install flatpak tooling
         run: |
@@ -132,7 +130,8 @@ jobs:
         run: |
           flatpak install --user --noninteractive flathub \
             org.freedesktop.Platform//24.08 \
-            org.freedesktop.Sdk//24.08
+            org.freedesktop.Sdk//24.08 \
+            org.electronjs.Electron2.BaseApp//24.08
 
       - name: Build Flatpak
         run: |
