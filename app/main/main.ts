@@ -113,7 +113,7 @@ async function createWindow() {
         height,
         show: false,
         frame: dev,
-        backgroundColor: "#0a0a0a",
+        backgroundColor: "#141414",
         webPreferences: {
             preload: path.join(APP_PATH, "dist", "preload.js"),
             contextIsolation: true
@@ -226,6 +226,13 @@ async function createWindow() {
 
 ipcMain.on("spawn-notification", (_: IpcMainEvent, data: any) => {
     spawnNotification(data)
+})
+
+const CSS_COLOR = /^(#[0-9a-f]{3,8}|rgba?\(\s*[\d.]+\s*,\s*[\d.]+\s*,\s*[\d.]+\s*(,\s*[\d.]+\s*)?\))$/i
+
+ipcMain.on("set-window-background", (event: IpcMainEvent, color: unknown) => {
+    if (typeof color !== "string" || !CSS_COLOR.test(color.trim())) return
+    BrowserWindow.fromWebContents(event.sender)?.setBackgroundColor(color.trim())
 })
 
 ipcMain.on("spawn-system-notification", async (_: IpcMainEvent, data: any) => {

@@ -299,6 +299,9 @@ export class Setting {
 
         document.body.setAttribute("theme", value)
 
+        const topbar = document.querySelector(".topbar")
+        window.electron?.setWindowBackground?.(getComputedStyle(topbar || document.body).backgroundColor)
+
         if (themeSelect.get(value) != false) {
             themeSelect.get(value).default()
         }

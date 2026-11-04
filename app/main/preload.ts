@@ -78,6 +78,7 @@ contextBridge.exposeInMainWorld('electron', {
     editOrg: (orgid: number, editData: EditOrgData) => ipcRenderer.invoke("edit-org", orgid, editData),
 
     close: () => ipcRenderer.send("close"),
+    setWindowBackground: (color: string) => ipcRenderer.send("set-window-background", color),
     minimize: () => ipcRenderer.send("minimize"),
     maximize: () => ipcRenderer.send("fullscreen"),
     getAllIcons: () => ipcRenderer.invoke("get-all-app-icons"),
