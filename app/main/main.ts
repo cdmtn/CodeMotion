@@ -35,6 +35,7 @@ require("./tools/yaml/ast")
 require("./tools/python/ast")
 
 require("./ipc/filesWork")
+require("./ipc/fileWatcher")
 require("./ipc/api")
 require("./ipc/getters")
 require("./ipc/setters")

@@ -3,6 +3,7 @@ import {buildTreeHtml, renderNodes} from "../render.js";
 import {bindFileClicks} from "./bindFileClicksHandler.js";
 import {initializeExplorerContextMenu} from "./contextMenuHandler.js";
 import {getFolderIconUrl} from "../../iconRegistry.js";
+import {initFsWatch} from "../fsWatch.js";
 
 async function setProjectDataUsedLanguages(path) {
     const usedLanguages = await window.electron.getUsedLanguagesByPath(path)
@@ -93,6 +94,8 @@ export async function openFolder({ pathRoot, filesPanel, addToHistory, pathConte
 
         initializeFolderToggle(filesPanel, { pathContext, settings });
         initializeExplorerContextMenu(filesPanel, { tabsByPath, recentlyClosed, pathContext, settings });
+
+        initFsWatch({ filesPanel, pathContext, settings, tabsByPath, recentlyClosed });
 
     } catch (error) {
         console.error("Error opening folder:", error);

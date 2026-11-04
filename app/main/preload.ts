@@ -101,6 +101,14 @@ contextBridge.exposeInMainWorld('electron', {
     setLocal: (data: any) => ipcRenderer.invoke("set-local", data),
     getLocal: () => ipcRenderer.invoke("get-app-local"),
 
+    watchFolder: (rootPath: string) => ipcRenderer.send("watch-folder", rootPath),
+    unwatchFolder: () => ipcRenderer.send("unwatch-folder"),
+    onExplorerFsChange: (callback: any) => {
+        const listener = (_event: any, data: any) => callback(data)
+        ipcRenderer.on("explorer-fs-change", listener)
+        return () => ipcRenderer.removeListener("explorer-fs-change", listener)
+    },
+
     githubOAuthStart: () => ipcRenderer.invoke("github-oauth-start"),
     githubOAuthPoll: (deviceCode: string) => ipcRenderer.invoke("github-oauth-poll", deviceCode),
     githubOAuthGetUser: () => ipcRenderer.invoke("github-oauth-get-user"),

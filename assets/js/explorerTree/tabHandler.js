@@ -38,6 +38,7 @@ import { minifyJS, minifyCSS } from "../handlers/minifyHandlers.js"
 import { initCodeContextMenu, destroyCodeContextMenu } from "../codeContextMenu.js"
 import { enableSave, disableSave, isAutoSaveEnabled, getAutoSaveValue } from "../../../app/renderer.js"
 import { bus, sendEvent } from "../bus.js"
+import { stopFsWatch } from "./fsWatch.js"
 
 import { renderPyMsgSuccess, renderPyMsgErr } from "../terminalRenderer/PyRuntimeHandler.js"
 
@@ -1550,6 +1551,8 @@ if (codeConsoleBtn) {
 
 export function closeFolder() {
     closeAllTabs();
+
+    stopFsWatch();
 
     const filesPanel = document.querySelector('.explorer-elements[data-tab="files"]');
     if (filesPanel) {
