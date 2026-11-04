@@ -1,9 +1,16 @@
 import { Languages } from "../lib.js";
 import { TopWindowList, destroyAllTopWindowLists } from "../topWindowHandler/topWindowList.js";
 
-export async function setCurrentLanguage(langName, properties = {}) {
-    if (!properties.editor) throw new Error(`properties.editor required`)
+let languageTarget = null
+let languageListReady = null
 
+function setLanguageLabel(name) {
+    document.querySelectorAll("#currentLang").forEach(e => {
+        e.textContent = name
+    })
+}
+
+async function buildLanguageList() {
     const aviableLanguageNames = []
 
     const languages = Object.entries(Languages.list())
@@ -28,17 +35,25 @@ export async function setCurrentLanguage(langName, properties = {}) {
     const changeLanguageList = new TopWindowList("changeLanguage", aviableLanguageNames)
 
     changeLanguageList.on("click", (data) => {
-        document.querySelectorAll("#currentLang").forEach(e => {
-            properties.editor.setLanguage(data.id)
-            e.textContent = data.name
-        })
+        if (!languageTarget) return
+        languageTarget.setLanguage(data.id)
+        languageTarget.languageLabel = data.name
+        setLanguageLabel(data.name)
     })
 
-    document.querySelectorAll("#currentLang").forEach(e => {
-        e.textContent = langName
-    })
+    const labelEl = document.querySelector("#currentLang")
+    if (labelEl) changeLanguageList.bind(labelEl)
+}
 
-    changeLanguageList.bind(document.querySelector("#currentLang"))
+export async function setCurrentLanguage(langName, properties = {}) {
+    if (!properties.editor) throw new Error(`properties.editor required`)
+
+    languageTarget = properties.editor
+    if (langName) properties.editor.languageLabel = langName
+    setLanguageLabel(properties.editor.languageLabel || langName || "")
+
+    languageListReady ??= buildLanguageList()
+    await languageListReady
 }
 
 export function setColumn(col) {

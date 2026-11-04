@@ -344,5 +344,9 @@ body.bottom-window-resizing {
         &.active-pane {
             z-index: 4;
         }
+
+        &:not(.active-pane):not(#main-code) {
+            visibility: hidden;
+        }
     }
 }
