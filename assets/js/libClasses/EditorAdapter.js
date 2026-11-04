@@ -508,6 +508,12 @@ export class _EditorAdapter {
         return null
     }
 
+    _isGo() {
+        const info = Languages.get(this.language)
+        const mode = info ? info.mode : this.language
+        return mode === "go" || this.language === "go"
+    }
+
     _applyFormatted(text, cursorOffset) {
         const doc = this.instance.state.doc
         if (text == null || text === doc.toString()) return
@@ -530,6 +536,12 @@ export class _EditorAdapter {
         if (!parser) {
             this.commands.selectAll(this.instance)
             this.commands.indentSelection(this.instance)
+
+            if (this._isGo() && typeof window.CodeMirror.formatGo === "function") {
+                const head = this.instance.state.selection.main.head
+                const formatted = window.CodeMirror.formatGo(this.instance)
+                this._applyFormatted(formatted, head)
+            }
             return
         }
 

@@ -49,9 +49,11 @@ import { markdown } from "@codemirror/lang-markdown";
 // extensions
 import { colorComments, colorCommentsTheme } from "./plugins/colorComments";
 import { semanticHighlight, semanticHighlightTheme, semanticDiagnosticsSink } from "./plugins/semanticHighlight";
+import { goHighlight, goHighlightTheme } from "./plugins/goHighlight";
 import { unusedMarksField, unusedMarksTheme, applyUnusedMarks } from "./plugins/unusedMarks";
 import { findWidget, openFindReplace } from "./plugins/findWidget";
 import { formatCode, parserForMode } from "./plugins/formatter";
+import { formatGo } from "./plugins/goFormat";
 import { fromVSCodeSnippets } from "./plugins/snippets";
 import { suggestionField, suggestionTheme, suggestPlugin, suggestUpdateListener, acceptSuggestion, dismissSuggestion, initSuggestListener } from "./plugins/suggest";
 import { atomoneOverride, githubDarkOverride, vscodeDarkOverride } from "./themes/overrides";
@@ -137,7 +139,7 @@ export const Languages = {
     css: cssHighlight,
     json: [jsonHighlight, ...jsonAutocomplete],
     php: php(),
-    go: go(),
+    go: [go(), goHighlight, goHighlightTheme],
     yaml: yaml(),
     python: python(),
     sass: sass(),
@@ -456,6 +458,7 @@ window.CodeMirror = {
 
     formatCode: formatCode,
     parserForMode: parserForMode,
+    formatGo: formatGo,
 
     async registerLanguage({ id, grammar, extends: inherits = {} }: any) {
         const scopeName = `source.${id}`;
