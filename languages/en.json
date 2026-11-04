@@ -483,7 +483,11 @@
             "fileWindow": {
                 "tabsCategory": "Tabs",
                 "title": "Colored tabs",
-                "description": "The bottom part of the active tab will glow in the color of the language",
+                "description": "The active tab is highlighted in the color of its language",
+                "classicTabs": {
+                    "title": "Classic tab style",
+                    "description": "Use the previous boxed tabs instead of the Chrome-style tabs"
+                },
                 "showCloseButton": {
                     "title": "Show tab close button",
                     "description": "Displays the X close button on editor tabs"

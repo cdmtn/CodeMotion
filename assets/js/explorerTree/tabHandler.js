@@ -986,6 +986,7 @@ export async function openTab(path, content, extension, name, pathContext, isNew
     const iconPath = getFileIconUrl(name);
     let tabIcon = `<img class="file-icon" src="${iconPath}" alt="icon">`;
     tab.innerHTML = `
+            <span class="tab-glow"></span>
             ${tabIcon}
             <span class="file-name">${escapeHtml(name)}</span>
             <span class="tab-info tab-info__error"></span>

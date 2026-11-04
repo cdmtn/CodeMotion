@@ -25,6 +25,12 @@ export const SETTINGS = [
         event: "on-setting-colored-comments"
     },
     {
+        id: "classicTabs",
+        path: "editor.classicTabs",
+        control: "switch",
+        apply: (v, c) => Setting.classicTabs(v, c.persist)
+    },
+    {
         id: "confirmCloseTab",
         path: "editor.confirmCloseTab",
         control: "switch"

@@ -305,6 +305,14 @@ export class Setting {
 
         if (set) window.electron.setSettings({ ui: { theme: value } })
     }
+    static classicTabs(value, set = true) {
+        if (settingsSelectors.classicTabs) settingsSelectors.classicTabs.checked = value
+
+        if (value) document.documentElement.setAttribute("data-tab-style", "classic")
+        else document.documentElement.removeAttribute("data-tab-style")
+
+        if (set) window.electron.setSettings({ editor: { classicTabs: value } })
+    }
     static async reduceMotion(value, set = true) {
         settingsSelectors.reduceMotion.checked = value
 

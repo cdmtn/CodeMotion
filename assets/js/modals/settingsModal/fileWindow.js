@@ -20,6 +20,12 @@ export function fileWindowPage({ lgls }) {
                     },
                     {
                         type: "switch",
+                        title: lgls("fileWindow.classicTabs.title"),
+                        description: lgls("fileWindow.classicTabs.description"),
+                        id: "setting_classicTabs"
+                    },
+                    {
+                        type: "switch",
                         title: lgls("fileWindow.showCloseButton.title"),
                         description: lgls("fileWindow.showCloseButton.description"),
                         id: "setting_tabShowClose",
