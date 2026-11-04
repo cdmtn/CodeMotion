@@ -1,0 +1,21 @@
+.terminal-ghost {
+    position: absolute;
+    z-index: 5;
+    pointer-events: none;
+    white-space: pre;
+    color: var(--text-color);
+    opacity: 0.4;
+}
+
+.terminal-ghost span {
+    display: inline-block;
+    text-align: left;
+}
+
+.xterm .xterm-rows .xterm-cursor {
+    transition: opacity 0.1s ease-out;
+}
+
+.xterm.terminal-suggesting .xterm-rows .xterm-cursor {
+    opacity: 0.3;
+}

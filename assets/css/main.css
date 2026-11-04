@@ -1,6 +1,7 @@
 @import url('modals.css');
 @import url("./window/topWindowList.css");
 @import url("components/codeWrapper.css");
+@import url("components/terminalGhost.css");
 @import url("auth.css");
 @import url("xterm-custom.css");
 @import url("editor/screenshot.css");
