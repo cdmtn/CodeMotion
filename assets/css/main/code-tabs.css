@@ -147,15 +147,29 @@
             color: var(--warning)!important;
         }
 
-        &.not-saved .file-name::before {
+        .file-name::before {
             content: "";
             display: inline-block;
             vertical-align: middle;
-            width: 5px;
+            width: 0;
             height: 5px;
-            margin: 0 6px 2px 0;
+            margin: 0 0 2px 0;
             border-radius: 50%;
             background: var(--text-color);
+            opacity: 0;
+            transform: scale(0.3);
+            transition:
+                width 0.2s ease-out,
+                margin 0.2s ease-out,
+                opacity 0.2s ease-out,
+                transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        &.not-saved .file-name::before {
+            width: 5px;
+            margin: 0 6px 2px 0;
+            opacity: 1;
+            transform: scale(1);
         }
 
         &.autosave-fix .file-name::before {
